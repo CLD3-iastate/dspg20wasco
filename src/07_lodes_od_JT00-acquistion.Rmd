@@ -1,0 +1,86 @@
+---
+title: "Lodes OD Accquistion"
+author: "Owen Hart"
+date: "7/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading in libraries
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+#devtools::install_git("https://github.com/hrbrmstr/lodes.git")
+library(lodes)
+```
+
+Downloading main lodes od
+```{r}
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_main_JT00_2017.csv.gz", 
+  destfile = "../data/LODES/or_od_main_JT00_2017.csv.gz")
+
+gunzip("../data/LODES/or_od_main_JT00_2017.csv.gz")
+```
+
+Downloading aux lodes od
+```{r}
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2017.csv.gz", 
+  destfile = "../data/LODES/or_od_aux_JT00_2017.csv.gz")
+
+gunzip("../data/LODES/or_od_aux_JT00_2017.csv.gz")
+```
+
+Reading in files
+```{r}
+main <- fread("../data/LODES/or_od_main_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+head(main)
+
+aux <- fread("../data/LODES/or_od_aux_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+head(aux)
+
+
+full_data <- rbind(main, aux)
+```
+
+Filtering so that it only includes Wasco County (need to address S. Wasco part)
+```{r}
+wasco <- full_data %>% 
+  filter(w_geocode %in% full_data$w_geocode[substr(full_data$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data$h_geocode[substr(full_data$h_geocode, 1, 5) == "41065"])
+
+wasco
+```
+
+```{r}
+# select tracts from geocode strings
+
+wasco$w_geocode_tract <- substr(wasco$w_geocode, start = 1, stop = 11)
+wasco$h_geocode_tract <- substr(wasco$h_geocode, start = 1, stop = 11)
+
+# aggregate by tract level
+
+jobs_all <- wasco %>% select(-w_geocode, -h_geocode) %>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+jobs_all
+```
+

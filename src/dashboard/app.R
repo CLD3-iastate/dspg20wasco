@@ -5,11 +5,13 @@ library(shinydashboardPlus)
 library(leaflet)
 library(tmaptools)
 library(sf)
+library(here)
 
+source("~/git/dspg20wasco/src/dashboard/loadbaselayers.R")
+source("~/git/dspg20wasco/src/dashboard/loadoverlays.R")
 
-#Check wds
-allfood <- read_csv("~/git/DSPG2020/wasco/data/shps/allfood.csv")
-allfood <- allfood %>% st_as_sf(coords = c("X", "Y"), crs = 4326, agr  = "constant")
+### Set leaflet palettes
+foodpal <- colorFactor("Set1", domain = allfood$type)
 
 ui <- dashboardPagePlus(
   dashboardHeaderPlus(title = "DSPG 2020 Wasco EM",
@@ -105,8 +107,8 @@ server <- function(input, output) {
       addPolylines(data = unincorporated, color = "blue", opacity = 1, weight = 1, group = "Basemap") %>%
       addPolylines(data = small_streets$osm_lines,
                    color = "gray", weight = .5, group = "Basemap") %>%
-      addPolylines(data = med_streets$osm_lines,
-                   color = "black", weight = .75, group = "Basemap") %>%
+      #addPolylines(data = med_streets$osm_lines,
+                   #color = "black", weight = .75, group = "Basemap") %>%
       addPolylines(data = big_streets$osm_lines,
                    color = "black", weight = 1, group = "Basemap") %>%
       addCircleMarkers(data = allfood,

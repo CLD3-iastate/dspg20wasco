@@ -7,8 +7,8 @@ library(tmaptools)
 library(sf)
 library(here)
 
-source("~/git/DSPG2020/wasco/src/dashboard/loadbaselayers.R")
-source("~/git/DSPG2020/wasco/src/dashboard/loadoverlays.R")
+source("~/git/dspg20wasco/src/dashboard/loadbaselayers.R")
+source("~/git/dspg20wasco/src/dashboard/loadoverlays.R")
 
 ### Set leaflet palettes
 foodpal <- colorFactor("Set1", domain = allfood$type)

@@ -17,25 +17,22 @@ schools <- st_as_sf(schools)
 swsd <- schools %>% filter(NAME == "South Wasco County School District 1")
 
 ## Pulling in OSM Street data ------
-
-big_streets <- getbb("Wasco County United States")%>%
+big_streets
+q <- getbb("Wasco County United States")%>%
   opq()%>%
   add_osm_feature(key = "highway",
-                  value = c("motorway", "primary", "motorway_link", "primary_link")) %>%
-  osmdata_sf()
+                  value = c("motorway", "primary", "motorway_link", "primary_link")) %>%  osmdata_sf()
 med_streets <- getbb("Wasco County United States")%>%
   opq()%>%
   add_osm_feature(key = "highway",
-                  value = c("secondary", "tertiary", "secondary_link", "tertiary_link")) %>%
-  osmdata_sf()
+                  value = c("secondary", "tertiary", "secondary_link", "tertiary_link")) %>% osmdata_sf()
 small_streets <- getbb("Wasco County United States")%>%
   opq()%>%
   add_osm_feature(key = "highway",
                   value = c("residential", "living_street",
                             "unclassified",
                             "service", "footway"
-                  )) %>%
-  osmdata_sf()
+                  ))  %>% osmdata_sf()
 
 ## Pulling in cities and towns -----
 url <- "https://public.co.wasco.or.us/gisserver/rest/services/CityLimits/MapServer/55"

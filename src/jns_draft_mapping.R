@@ -245,12 +245,11 @@ leaflet() %>%
 
 st_write(allfood, "~/git/DSPG2020/wasco/data/shps/food/allfood.csv", layer_options = "GEOMETRY=AS_XY")
 
-st_write(big_streets$osm_lines, "~/git/DSPG2020/wasco/data/shps/big_streets.csv", layer_options = "GEOMETRY=AS_XY")
-st_write(med_streets$osm_lines, "~/git/DSPG2020/wasco/data/shps/med_streets.csv", layer_options = "GEOMETRY=AS_XY")
-st_write(small_streets$osm_lines, "~/git/DSPG2020/wasco/data/shps/small_streets.csv", layer_options = "GEOMETRY=AS_XY")
 
-st_write(schools, "~/git/DSPG2020/wasco/data/shps/schools.csv", layer_options = "GEOMETRY=AS_XY")
+st_write(swsd, "~/git/DSPG2020/wasco/data/shps/swsd.shp")
+st_write(townships, "~/git/DSPG2020/wasco/data/shps/townships.shp")
+st_write(unincorporated, "~/git/DSPG2020/wasco/data/shps/unincorporated.shp")
+st_write(countyline, "~/git/DSPG2020/wasco/data/shps/countyline.shp")
 
-st_write(townships, "~/git/DSPG2020/wasco/data/shps/townships.csv", layer_options = "GEOMETRY=AS_XY")
-st_write(unincorporated, "~/git/DSPG2020/wasco/data/shps/unincorporated.csv", layer_options = "GEOMETRY=AS_XY")
-st_write(countyline, "~/git/DSPG2020/wasco/data/shps/countyline.csv", layer_options = "GEOMETRY=AS_XY")
+
+

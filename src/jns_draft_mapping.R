@@ -246,10 +246,10 @@ leaflet() %>%
 st_write(allfood, "~/git/DSPG2020/wasco/data/shps/food/allfood.csv", layer_options = "GEOMETRY=AS_XY")
 
 
-st_write(swsd, "~/git/DSPG2020/wasco/data/shps/swsd.shp")
-st_write(townships, "~/git/DSPG2020/wasco/data/shps/townships.shp")
-st_write(unincorporated, "~/git/DSPG2020/wasco/data/shps/unincorporated.shp")
-st_write(countyline, "~/git/DSPG2020/wasco/data/shps/countyline.shp")
+st_write(swsd, "~/git/dspg20wasco/data/shps/swsd.shp")
+st_write(townships, "~/git/dspg20wasco/data/shps/townships.shp")
+st_write(unincorporated, "~/git/dspg20wasco/data/shps/unincorporated.shp")
+st_write(countyline, "~/git/dspg20wasco/data/shps/countyline.shp")
 
 
 

@@ -243,7 +243,7 @@ leaflet() %>%
             title = "Food type",
             opacity = 1, group = "Food", na.label = "NA")
 
-st_write(allfood, "~/git/DSPG2020/wasco/data/shps/food/allfood.csv", layer_options = "GEOMETRY=AS_XY")
+st_write(allfood, "~/git/dspg20wasco/data/shps/food/allfood.csv", layer_options = "GEOMETRY=AS_XY")
 
 
 st_write(swsd, "~/git/dspg20wasco/data/shps/swsd.shp")

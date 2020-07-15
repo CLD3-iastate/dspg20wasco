@@ -10,14 +10,6 @@ library(sf)
 #Check wds
 allfood <- read_csv("~/git/DSPG2020/wasco/data/shps/allfood.csv")
 allfood <- allfood %>% st_as_sf(coords = c("X", "Y"), crs = 4326, agr  = "constant")
-schools <- read.csv("~/git/DSPG2020/wasco/data/shps/allfood.csv")
-schools <- schools %>% st_as_sf(coords = c("X", "Y"), crs = 4326, agr  = "constant")
-townships <- read.csv("~/git/DSPG2020/wasco/data/shps/allfood.csv")
-townships <- townships %>% st_as_sf(coords = c("X", "Y"), crs = 4326, agr  = "constant")
-unincorporated <- read.csv("~/git/DSPG2020/wasco/data/shps/allfood.csv")
-unincorporated <- unincorporated %>% st_as_sf(coords = c("X", "Y"), crs = 4326, agr  = "constant")
-countyline <- read.csv("~/git/DSPG2020/wasco/data/shps/allfood.csv")
-countyline <- countyline %>% st_as_sf(coords = c("X", "Y"), crs = 4326, agr  = "constant")
 
 ui <- dashboardPagePlus(
   dashboardHeaderPlus(title = "DSPG 2020 Wasco EM",

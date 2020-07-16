@@ -5,6 +5,21 @@ library(osmdata)
 
 ## Loading in baselayer data, check file names
 
+# townships
+townships <- here("/data/shps/townships/townships.shp") %>% st_read()
+# unincorporated
+unincorporated <- here("/data/shps/unincorporated/unincorporated.shp") %>% st_read()
+# schools
+swsd <- here("/data/shps/swsd/swsd.shp") %>% st_read()
+# county
+countyline <- here("/data/shps/county/countyline.shp") %>% st_read()
+# roads
+roads <- here("/data/shps/roads/roads.shp") %>% st_read()
+
+
+
+
+### OSM data DO NOT USE ----
 ## roads
 # big
 q <- getbb("Wasco County United States")%>%
@@ -29,11 +44,3 @@ q <- getbb("Wasco County United States")%>%
                   ))
 doc <- osmdata_xml(q, "~/git/dspg20wasco/data/shps/small_streets.osm")
 small_streets <- osmdata_sf(q, doc)
-# townships
-townships <- here("/data/shps/townships/townships.shp") %>% st_read()
-# unincorporated
-unincorporated <- here("/data/shps/unincorporated/unincorporated.shp") %>% st_read()
-# schools
-swsd <- here("/data/shps/swsd/swsd.shp") %>% st_read()
-# county
-countyline <- here("/data/shps/county/countyline.shp") %>% st_read()

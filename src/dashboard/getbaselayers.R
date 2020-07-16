@@ -16,6 +16,11 @@ schools <- school_districts("Oregon")
 schools <- st_as_sf(schools)
 swsd <- schools %>% filter(NAME == "South Wasco County School District 1")
 
+## Wasco roads
+url <- "https://public.co.wasco.or.us/gisserver/rest/services/Roads/MapServer/0"
+roads <- esri2sf(url)
+roads <- st_as_sf(roads)
+
 ## Pulling in OSM Street data ------
 big_streets
 q <- getbb("Wasco County United States")%>%

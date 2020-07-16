@@ -57,6 +57,12 @@ url = "https://public.co.wasco.or.us/gisserver/rest/services/CityLimits/MapServe
 unincorporated <- esri2sf(url)
 unincorporated <- st_as_sf(unincorporated)
 
+## Wasco roads
+url <- "https://public.co.wasco.or.us/gisserver/rest/services/Roads/MapServer/0"
+roads <- esri2sf(url)
+roads <- st_as_sf(roads)
+
+
 ## Pulling in food systems data ------
 ## SNAP stores
 url <- "https://services1.arcgis.com/RLQu0rK7h4kbsBq5/ArcGIS/rest/services/Store_Locations/FeatureServer/0"
@@ -250,6 +256,6 @@ st_write(swsd, "~/git/dspg20wasco/data/shps/swsd.shp")
 st_write(townships, "~/git/dspg20wasco/data/shps/townships.shp")
 st_write(unincorporated, "~/git/dspg20wasco/data/shps/unincorporated.shp")
 st_write(countyline, "~/git/dspg20wasco/data/shps/countyline.shp")
-
+st_write(roads, "~/git/dspg20wasco/data/shps/roads.shp")
 
 

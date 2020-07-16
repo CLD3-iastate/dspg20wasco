@@ -19,26 +19,33 @@ ggplot(acs18, aes(x = NAME, y = median_household_income))+
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = median_household_income - median_household_income_moe, 
                     ymax = median_household_income + median_household_income_moe), color = "dark orange") + 
-  geom_point(color = "dark orange", size = 3)
+  geom_point(color = "dark orange", size = 3)+ ggtitle("Median Household Income")
+ggsave(path="~/git/dspg20wasco/output", device = "png", filename="median_income18.png", plot=last_plot())
 
 ggplot(acs18, aes(x = NAME, y = employment_20_to_64))+
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = employment_20_to_64 - employment_20_to_64_moe, 
                     ymax = employment_20_to_64 + employment_20_to_64_moe), color = "dark orange") + 
   geom_point(color = "dark orange", size = 3) + ggtitle("% of Adults (20-64) Employed")
+ggsave(path="~/git/dspg20wasco/output", device = "png", filename="employment18.png", plot=last_plot())
 
 ggplot(acs18, aes(x = NAME, y = below_poverty))+
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = below_poverty - below_poverty_moe, 
                     ymax = below_poverty + below_poverty_moe), color = "dark orange") + 
   geom_point(color = "dark orange", size = 3) + ggtitle("% of Population Below Poverty Line")
-
+ggsave(path="~/git/dspg20wasco/output", device = "png", filename="poverty18.png", plot=last_plot())
 
 #stacked bar for racial diversity, education attainment and household income.
+race <- fread("~/git/dspg20wasco/data/acs/demographics.csv")
+race <- filter(race, NAME == "South Wasco County School District 1, Oregon")
+
+race <- melt(race,id.vars = c("GEOID", "NAME"), measure.vars = colnames(race)[-c(1,2)])
 
 
 ##### Mapping Data ########
-#pulling acs data....
+#pulling acs data....for geometry
+#IDEA: create function for creating dataframe with geometry
 acsvars <- c(
   #Employment and unemployment to population ratio for adults 20-64:
   "S2301_C03_021","S2301_C04_021",

@@ -178,17 +178,36 @@ fwrite(combined_acs,"~/git/dspg20wasco/data/acs/combined_acs.csv", sep = ",")
 # demographics <- get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5", 
 #                         table = "DP05")
 
+race_vars <- c(#Total Population Estimate
+  "DP05_0001",
+  #Racial Diversity Percentages: alone , alone or in combination 
+  "DP05_0037P", "DP05_0064P", # % Whte 
+  "DP05_0038P", "DP05_0065P", # % Black or African American
+  "DP05_0039P", "DP05_0066P", # % American Indian or Alaskan Native
+  "DP05_0044P", "DP05_0067P", # % Asian
+  "DP05_0052P", "DP05_0068P", # % Native Hawaiian or Other Pacific Islander
+  "DP05_0057P", "DP05_0069P", # % Some other race
+  "DP05_0071P", # % Hispanic or Latino of any race
+  "DP05_0035P" # % two or more races
+)
+
 pop_race <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5", 
-                          c("DP05_0001", "DP05_0037P","DP05_0038P", "DP05_0039P","DP05_0044P", "DP05_0052P", "DP05_0071P","DP05_0057P"), output = "wide", cache = TRUE) %>% 
+                          variables = race_vars, output = "wide", cache = TRUE) %>% 
                     filter(NAME == "South Wasco County School District 1, Oregon"),
                   get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5", 
-                          c("DP05_0001", "DP05_0037P","DP05_0038P", "DP05_0039P","DP05_0044P", "DP05_0052P", "DP05_0071P","DP05_0057P"), output = "wide", cache = TRUE),
+                          variables = race_vars, output = "wide", cache = TRUE),
                   get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5", 
-                    variables = c("DP05_0001", "DP05_0037P","DP05_0038P", "DP05_0039P","DP05_0044P", "DP05_0052P", "DP05_0071P","DP05_0057P"), output = "wide", cache = TRUE)) %>%
+                          variables = race_vars, output = "wide", cache = TRUE)) %>%
   rename(total_pop = DP05_0001E, total_pop_moe = DP05_0001M, white = DP05_0037PE, white_moe=DP05_0037PM, 
          black = DP05_0038PE, black_moe = DP05_0038PM, american_indian = DP05_0039PE, american_indian_moe = DP05_0039PM,
          asian = DP05_0044PE, asian_moe =DP05_0044PM, native_hawaiian = DP05_0052PE, native_hawaiian_moe = DP05_0052PM,
-         hispanic = DP05_0071PE, hispanic_moe = DP05_0071PM, other = DP05_0057PE, other_moe = DP05_0057PM)
+         hispanic = DP05_0071PE, hispanic_moe = DP05_0071PM, other = DP05_0057PE, other_moe = DP05_0057PM,
+         two_races = DP05_0035PE, two_races_moe = DP05_0035PM, 
+         
+         white2 = DP05_0064PE, white_moe2=DP05_0064PM, 
+         black2 = DP05_0065PE, black_moe2 = DP05_0065PM, american_indian2 = DP05_0066PE, american_indian_moe2 = DP05_0066PM,
+         asian2 = DP05_0067PE, asian_moe2 =DP05_0067PM, native_hawaiian2 = DP05_0068PE, native_hawaiian_moe2 = DP05_0068PM,
+         hispanic2 = DP05_0071PE, hispanic_moe2 = DP05_0071PM, other2 = DP05_0069PE, other_moe2 = DP05_0069PM)
 
 fwrite(pop_race,"~/git/dspg20wasco/data/acs/demographics.csv", sep = ",")
 

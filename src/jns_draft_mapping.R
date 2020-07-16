@@ -256,6 +256,6 @@ st_write(swsd, "~/git/dspg20wasco/data/shps/swsd.shp")
 st_write(townships, "~/git/dspg20wasco/data/shps/townships.shp")
 st_write(unincorporated, "~/git/dspg20wasco/data/shps/unincorporated.shp")
 st_write(countyline, "~/git/dspg20wasco/data/shps/countyline.shp")
-st_write(roads, "~/git/DSPG2020/wasco/data/shps/roads.shp")
+st_write(roads, "~/git/dspg20wasco/data/shps/roads.shp")
 
 

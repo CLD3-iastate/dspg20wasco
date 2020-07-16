@@ -137,25 +137,16 @@ ggplot() +
           inherit.aes = FALSE,
           color = "blue",
           size = .2) +
-  geom_sf(data = med_streets$osm_lines,
-          inherit.aes = FALSE,
-          color = "black",
-          size = .3,
-          alpha = .5) +
-  geom_sf(data = small_streets$osm_lines,
-          inherit.aes = FALSE,
-          color = "#666666",
-          size = .2,
-          alpha = .3) +
-  geom_sf(data = big_streets$osm_lines,
+  geom_sf(data = roads,
           inherit.aes = FALSE,
           color = "black",
           size = .5,
           alpha = .6) +
-  geom_sf(data = snap, color = "purple", size = .2) +
-  geom_sf(data = wic, color = "purple", size = .2) +
-  geom_sf(data = oregon_live_sf, color = "purple", position = "identity", size = .2) +
-  geom_sf(data = local_food, color = "purple", position = "identity", size = .2) +
+  geom_sf(data = countyline)
+
+
++
+  geom_sf(data = allfood, color = "purple", size = .2) +
   xlim(122, 120) +
   ylim(44.5, 45.75)
 
@@ -259,3 +250,15 @@ st_write(countyline, "~/git/dspg20wasco/data/shps/countyline.shp")
 st_write(roads, "~/git/dspg20wasco/data/shps/roads.shp")
 
 
+library(jsonlite)
+fromJSON("api.ed.gov/data/crdc_enrollment_2013-14?api_key=IKcpkyBEXGRF1mblpDUjonQiJ4ePk37YsEc2U3KDY/", flatten = TRUE)
+fromJSON("api.ed.gov/data/crdc_enrollment_2013-14?api_key=KcpkyBEXGRF1mblpDUjonQiJ4ePk37YsEc2U3KDY/_4100021_", flatten = TRUE)
+
+library(devtools)
+devtools::install_github("kpersauddavis/rCRDC")
+library(rCRDC)
+https://api.ed.gov/data/mbk-highschool-dropout?api_key=KcpkyBEXGRF1mblpDUjonQiJ4ePk37YsEc2U3KDY
+
+CRDC_data <- CRDC_Query(api_key = "KcpkyBEXGRF1mblpDUjonQiJ4ePk37YsEc2U3KDY", dataset = "suspension", per_page = 100, page = 2, preprocess = FALSE)
+
+str(CRDC_data, list.len = 10)

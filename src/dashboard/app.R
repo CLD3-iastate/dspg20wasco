@@ -5,10 +5,11 @@ library(shinydashboardPlus)
 library(leaflet)
 library(tmaptools)
 library(sf)
+library(htmltools)
 library(here)
 
-source("~/git/dspg20wasco/src/dashboard/loadbaselayers.R")
-source("~/git/dspg20wasco/src/dashboard/loadoverlays.R")
+source(here("/src/dashboard/loadbaselayers.R"))
+source(here("/src/dashboard/loadoverlays.R"))
 
 ### Set leaflet palettes
 foodpal <- colorFactor("Set1", domain = allfood$type)
@@ -103,13 +104,15 @@ server <- function(input, output) {
       setView(-121, 45.2, zoom = 8) %>%
       addPolylines(data = swsd, color = "purple", opacity = 1, group = "Basemap") %>%
       addPolylines(data = countyline, color = "grey", group = "Basemap") %>%
-      addPolylines(data = townships, color = "blue", opacity = 1, weight = 1, group = "Basemap") %>%
-      addPolylines(data = unincorporated, color = "blue", opacity = 1, weight = 1, group = "Basemap") %>%
+      addPolygons(data = townships, color = "blue", opacity = .4, weight = 1, popup = ~htmlEscape(NAME), group = "Basemap") %>%
+      addPolygons(data = unincorporated, color = "blue", opacity = .25, weight = 1, popup = ~htmlEscape(NAME), group = "Basemap") %>%
       addPolylines(data = roads,
                    color = "gray", weight = .75, group = "Basemap") %>%
       addCircleMarkers(data = allfood,
                        color = ~foodpal(type), fillOpacity = 1, radius = 3,
-                       stroke = FALSE, group = "Food") %>%
+                       stroke = FALSE,
+                       popup = ~htmlEscape(Store_Name),
+                       group = "Food") %>%
       addLayersControl(
         baseGroups = c("Basemap"),
         overlayGroups = c("Food"),

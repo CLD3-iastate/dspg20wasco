@@ -92,7 +92,7 @@ for(i in 2:length(years)){
   temp<- get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5", 
                  variables = acsvars, output = "wide", cache_table = TRUE, geometry=TRUE) %>% 
     filter(NAME == "South Wasco County School District 1, Oregon") %>% mutate(year =years[i])
-  south_wasco_acs <- rbind(south_wasco_acs, temp)
+  south_wasco_acs <- rbind(south_wasco_acs, temp) %>% mutate(NAME= "South Wasco")
 }
 
 
@@ -102,18 +102,29 @@ wasco_county_acs<- get_acs(geography = "county", state= "OR", county = "Wasco", 
 for(i in 2:length(years)){
   temp<- get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5", 
                  variables = acsvars, output = "wide", geometry=TRUE) %>% mutate(year =years[i])
-  wasco_county_acs <- rbind(wasco_county_acs, temp)
+  wasco_county_acs <- rbind(wasco_county_acs, temp) %>% mutate(NAME = "Wasco")
 }
 
+#call variables for oregon state
+oregon_acs<- get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1", 
+                           variables = acsvars, output = "wide", geometry=TRUE) %>% mutate(year = 2018)
+for(i in 2:length(years)){
+  temp<- get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1", 
+                 variables = acsvars, output = "wide", geometry=TRUE) %>% mutate(year =years[i])
+  oregon_acs <- rbind(oregon_acs, temp)
+}
+
+
+
 #bind all together
-combined_acs <- rbind(south_wasco_acs, wasco_tract_acs, wasco_county_acs) %>%
+combined_acs <- rbind(south_wasco_acs, wasco_tract_acs, wasco_county_acs, oregon_acs) %>%
   transmute(GEOID = GEOID, NAME = NAME, year = year,
           
           #employment | unemployment for adults, poverty rate for whole population
-          employment_over_16 = S2301_C03_001E, employment_over_16moe = S2301_C03_001M,
-          unemployment_over_16 = S2301_C04_001E, unemployment_over_16moe = S2301_C04_001M,
-          employment_20_to_64 = S2301_C03_021E, employment_20_to_64moe = S2301_C03_021M,
-          unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64moe = S2301_C04_021M,
+          employment_over_16 = S2301_C03_001E, employment_over_16_moe = S2301_C03_001M,
+          unemployment_over_16 = S2301_C04_001E, unemployment_over_16_moe = S2301_C04_001M,
+          employment_20_to_64 = S2301_C03_021E, employment_20_to_64_moe = S2301_C03_021M,
+          unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64_moe = S2301_C04_021M,
           below_poverty = S1701_C03_001E, below_poverty_moe = S1701_C03_001M,
           
           #Household income (in %)

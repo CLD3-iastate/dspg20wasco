@@ -1,0 +1,161 @@
+---
+title: "Lodes Plots"
+author: "Owen Hart"
+date: "7/15/2020"
+output: html_document
+---
+
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+library(readr)
+```
+
+```{r}
+lodes17 <- read_csv("../data/lodes/agg/jobs_all_2017.csv")
+
+lodes16 <- read_csv("../data/lodes/agg/jobs_all_2016.csv")
+
+lodes15 <- read_csv("../data/lodes/agg/jobs_all_2015.csv")
+
+
+
+
+lodes17$h_state <- substr(lodes17$h_geocode_tract, 1, 2)
+lodes17$h_county <- substr(lodes17$h_geocode_tract, 3, 5)
+lodes17$h_tract <- substr(lodes17$h_geocode_tract, 6, 11)
+
+
+
+lodes16$h_state <- substr(lodes16$h_geocode_tract, 1, 2)
+lodes16$h_county <- substr(lodes16$h_geocode_tract, 3, 5)
+lodes16$h_tract <- substr(lodes16$h_geocode_tract, 6, 11)
+
+
+lodes15$h_state <- substr(lodes15$h_geocode_tract, 1, 2)
+lodes15$h_county <- substr(lodes15$h_geocode_tract, 3, 5)
+lodes15$h_tract <- substr(lodes15$h_geocode_tract, 6, 11)
+
+#now work geoid
+
+
+lodes17$w_state <- substr(lodes17$w_geocode_tract, 1, 2)
+lodes17$w_county <- substr(lodes17$w_geocode_tract, 3, 5)
+lodes17$w_tract <- substr(lodes17$w_geocode_tract, 6, 11)
+
+
+
+lodes16$w_state <- substr(lodes16$w_geocode_tract, 1, 2)
+lodes16$w_county <- substr(lodes16$w_geocode_tract, 3, 5)
+lodes16$w_tract <- substr(lodes16$w_geocode_tract, 6, 11)
+
+
+lodes15$w_state <- substr(lodes15$w_geocode_tract, 1, 2)
+lodes15$w_county <- substr(lodes15$w_geocode_tract, 3, 5)
+lodes15$w_tract <- substr(lodes15$w_geocode_tract, 6, 11)
+```
+
+Must load in Oregon XWalk csv
+```{r}
+
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/or_xwalk.csv.gz", 
+  destfile = "../data/lodes/or_xwalk.csv.gz")
+gunzip("../data/lodes/or_xwalk.csv.gz")
+
+or_xw <- read_csv("../data/lodes/or_xwalk.csv", col_types = cols(cty = col_character()))
+```
+What % of jobs flow from outside of Fairfax County?
+```{r}
+bool_cond17 <-lodes17$h_county != "065" & lodes17$w_county == "065"
+
+bool_cond16 <-lodes16$h_county != "065" & lodes16$w_county == "065"
+
+bool_cond15 <-lodes15$h_county != "065" & lodes15$w_county == "065"
+
+
+flows_in_17 <-lodes17[bool_cond17, ]
+flows_in_16 <-lodes16[bool_cond16, ]
+flows_in_15 <-lodes15[bool_cond15, ]
+
+
+pie(c(mean(bool_cond17) * 100, (1 - mean(bool_cond17)) * 100), labels = c("% Jobs in Wasco County\n flowing from outside (2017)", "% Jobs in Wasco County\n flowing from within (2017)"))
+
+pie(c(mean(bool_cond16) * 100, (1 - mean(bool_cond16)) * 100), labels = c("% Jobs in Wasco County\n flowing from outside (2016)", "% Jobs in Wasco County\n flowing from within (2016)"))
+
+pie(c(mean(bool_cond15) * 100, (1 - mean(bool_cond15)) * 100), labels = c("% Jobs in Wasco County\n flowing from outside (2015)", "% Jobs in Wasco County\n flowing from within (2015)"))
+```
+
+
+Of the flows into Wasco County from outside, what percent are from other counties in Oregon?
+```{r}
+#2017
+perc_flows_othercnt_2017 <- mean(flows_in_17$h_state == "41") *100
+perc_flows_othercnt_2017
+
+agg_cnty_OR_2017 <- flows_in_17[flows_in_17$h_state == "41", ] %>%
+  group_by(h_county) %>%
+  summarise(S000 = sum(S000))
+
+#Use OR crosswalk to get county names
+or_xw$h_county <- substring(or_xw$cty, 3, 6)
+essential <- or_xw %>%
+  select(h_county, ctyname)
+
+agg_cnty_OR_with_names_2017 <- inner_join(x = agg_cnty_OR_2017, y = unique(essential), by = "h_county")
+
+trimmed_2017 <- agg_cnty_OR_with_names_2017[order(-agg_cnty_OR_with_names_2017$S000), ][1:10, ]
+ggplot(trimmed_2017, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2017)")
+
+
+
+#2016
+perc_flows_othercnt_2016 <- mean(flows_in_16$h_state == "41") *100
+perc_flows_othercnt_2016
+
+agg_cnty_OR_2016 <- flows_in_16[flows_in_16$h_state == "41", ] %>%
+  group_by(h_county) %>%
+  summarise(S000 = sum(S000))
+
+#Use OR crosswalk to get county names
+or_xw$h_county <- substring(or_xw$cty, 3, 6)
+essential <- or_xw %>%
+  select(h_county, ctyname)
+
+agg_cnty_OR_with_names_2016 <- inner_join(x = agg_cnty_OR_2016, y = unique(essential), by = "h_county")
+
+
+trimmed_2016 <- agg_cnty_OR_with_names_2016[order(-agg_cnty_OR_with_names_2016$S000), ][1:10, ]
+ggplot(trimmed_2016, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2016)")
+
+
+#2015
+perc_flows_othercnt_2015 <- mean(flows_in_15$h_state == "41") *100
+perc_flows_othercnt_2015
+
+agg_cnty_OR_2015 <- flows_in_15[flows_in_15$h_state == "41", ] %>%
+  group_by(h_county) %>%
+  summarise(S000 = sum(S000))
+
+#Use OR crosswalk to get county names
+or_xw$h_county <- substring(or_xw$cty, 3, 6)
+essential <- or_xw %>%
+  select(h_county, ctyname)
+
+agg_cnty_OR_with_names_2015 <- inner_join(x = agg_cnty_OR_2015, y = unique(essential), by = "h_county")
+
+
+trimmed_2015 <- agg_cnty_OR_with_names_2015[order(-agg_cnty_OR_with_names_2015$S000), ][1:10, ]
+ggplot(trimmed_2015, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2015)")
+```
+
+Seeing if I can plot Wasco
+```{r}
+library(stplanr)
+
+data("lodes17", package = "stplanr")
+
+```
+

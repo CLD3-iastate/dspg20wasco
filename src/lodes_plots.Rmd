@@ -60,10 +60,10 @@ lodes15$w_tract <- substr(lodes15$w_geocode_tract, 6, 11)
 Must load in Oregon XWalk csv
 ```{r}
 
-download.file(
-  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/or_xwalk.csv.gz", 
-  destfile = "../data/lodes/or_xwalk.csv.gz")
-gunzip("../data/lodes/or_xwalk.csv.gz")
+#download.file(
+#  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/or_xwalk.csv.gz", 
+#  destfile = "../data/lodes/or_xwalk.csv.gz")
+#gunzip("../data/lodes/or_xwalk.csv.gz")
 
 or_xw <- read_csv("../data/lodes/or_xwalk.csv", col_types = cols(cty = col_character()))
 ```
@@ -151,11 +151,71 @@ trimmed_2015 <- agg_cnty_OR_with_names_2015[order(-agg_cnty_OR_with_names_2015$S
 ggplot(trimmed_2015, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2015)")
 ```
 
-Seeing if I can plot Wasco
+
+
+
+
+
+
+
+
+Mapping S. Wasco
 ```{r}
-library(stplanr)
+library(tigris)
 
-data("lodes17", package = "stplanr")
+wasco_lines <- data.frame(blocks("OR", county = "Wasco"))
+```
 
+Reading in files
+```{r}
+main17 <- fread("../data/lodes/or_od_main_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+aux17 <- fread("../data/lodes/or_od_aux_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+full_data17 <- rbind(main17, aux17)
+
+
+main16 <- fread("../data/lodes/or_od_main_JT00_2016.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+aux16 <- fread("../data/lodes/or_od_aux_JT00_2016.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+full_data16 <- rbind(main16, aux16)
+
+
+main15 <- fread("../data/lodes/or_od_main_JT00_2015.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+aux15 <- fread("../data/lodes/or_od_aux_JT00_2015.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+full_data15 <- rbind(main15, aux15)
+```
+
+Filtering so that it only includes Wasco County (need to address S. Wasco part)
+```{r}
+wasco17 <- full_data17 %>% 
+  filter(w_geocode %in% full_data17$w_geocode[substr(full_data17$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data17$h_geocode[substr(full_data17$h_geocode, 1, 5) == "41065"])
+
+
+wasco16 <- full_data16 %>% 
+  filter(w_geocode %in% full_data16$w_geocode[substr(full_data16$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data16$h_geocode[substr(full_data16$h_geocode, 1, 5) == "41065"])
+
+wasco15 <- full_data15 %>% 
+  filter(w_geocode %in% full_data15$w_geocode[substr(full_data15$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data15$h_geocode[substr(full_data15$h_geocode, 1, 5) == "41065"])
+```
+
+Joining with Wasco Lines
+```{r}
+merge(wasco17, wasco_lines, by.x = c("w_geocode"), by.y = c("GEOID10"))
 ```
 

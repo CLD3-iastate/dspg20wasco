@@ -15,8 +15,6 @@ library(R.utils)
 library(data.table)
 library(tidyr)
 library(dplyr)
-#devtools::install_git("https://github.com/hrbrmstr/lodes.git")
-library(lodes)
 ```
 
 Downloading main lodes od
@@ -24,81 +22,81 @@ Downloading main lodes od
 #2017
 download.file(
   url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_main_JT00_2017.csv.gz", 
-  destfile = "../data/LODES/or_od_main_JT00_2017.csv.gz")
+  destfile = "../data/lodes/or_od_main_JT00_2017.csv.gz")
 
-gunzip("../data/LODES/or_od_main_JT00_2017.csv.gz")
+gunzip("../data/lodes/or_od_main_JT00_2017.csv.gz")
 
 #2016
 download.file(
   url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_main_JT00_2016.csv.gz", 
-  destfile = "../data/LODES/or_od_main_JT00_2016.csv.gz")
+  destfile = "../data/lodes/or_od_main_JT00_2016.csv.gz")
 
-gunzip("../data/LODES/or_od_main_JT00_2016.csv.gz")
+gunzip("../data/lodes/or_od_main_JT00_2016.csv.gz")
 
 #2015
 download.file(
   url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_main_JT00_2015.csv.gz", 
-  destfile = "../data/LODES/or_od_main_JT00_2015.csv.gz")
+  destfile = "../data/lodes/or_od_main_JT00_2015.csv.gz")
 
-gunzip("../data/LODES/or_od_main_JT00_2015.csv.gz")
+gunzip("../data/lodes/or_od_main_JT00_2015.csv.gz")
 ```
 
 Downloading aux lodes od
 ```{r}
 download.file(
   url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2017.csv.gz", 
-  destfile = "../data/LODES/or_od_aux_JT00_2017.csv.gz")
+  destfile = "../data/lodes/or_od_aux_JT00_2017.csv.gz")
 
-gunzip("../data/LODES/or_od_aux_JT00_2017.csv.gz")
-
-
-download.file(
-  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2016.csv.gz", 
-  destfile = "../data/LODES/or_od_aux_JT00_2016.csv.gz")
-
-gunzip("../data/LODES/or_od_aux_JT00_2016.csv.gz")
+gunzip("../data/lodes/or_od_aux_JT00_2017.csv.gz")
 
 
 download.file(
   url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2016.csv.gz", 
-  destfile = "../data/LODES/or_od_aux_JT00_2016.csv.gz")
+  destfile = "../data/lodes/or_od_aux_JT00_2016.csv.gz")
 
-gunzip("../data/LODES/or_od_aux_JT00_2016.csv.gz")
+gunzip("../data/lodes/or_od_aux_JT00_2016.csv.gz")
+
+
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2015.csv.gz", 
+  destfile = "../data/lodes/or_od_aux_JT00_2015.csv.gz")
+
+gunzip("../data/lodes/or_od_aux_JT00_2015.csv.gz")
 ```
 
 Reading in files
 ```{r}
-main17 <- fread("../data/LODES/or_od_main_JT00_2017.csv", 
+main17 <- fread("../data/lodes/or_od_main_JT00_2017.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
 
-aux17 <- fread("../data/LODES/or_od_aux_JT00_2017.csv", 
+aux17 <- fread("../data/lodes/or_od_aux_JT00_2017.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
 
-full_data17 <- rbind(main, aux)
+full_data17 <- rbind(main17, aux17)
 
 
-main16 <- fread("../data/LODES/or_od_main_JT00_2016.csv", 
+main16 <- fread("../data/lodes/or_od_main_JT00_2016.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
 
-aux16 <- fread("../data/LODES/or_od_aux_JT00_2016.csv", 
+aux16 <- fread("../data/lodes/or_od_aux_JT00_2016.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
 
-full_data16 <- rbind(main, aux)
+full_data16 <- rbind(main16, aux16)
 
 
-main15 <- fread("../data/LODES/or_od_main_JT00_2015.csv", 
+main15 <- fread("../data/lodes/or_od_main_JT00_2015.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
 
-aux15 <- fread("../data/LODES/or_od_aux_JT00_2015.csv", 
+aux15 <- fread("../data/lodes/or_od_aux_JT00_2015.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
 
-full_data15 <- rbind(main, aux)
+full_data15 <- rbind(main15, aux15)
 ```
 
 Filtering so that it only includes Wasco County (need to address S. Wasco part)
@@ -128,7 +126,7 @@ wasco15$h_geocode_tract <- substr(wasco15$h_geocode, start = 1, stop = 11)
 
 # aggregate by tract level
 
-jobs_all_2017 <- wasco17 %>% select(-w_geocode, -h_geocode) %>%
+jobs_all_2017 <- wasco17%>%
   group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
@@ -141,20 +139,9 @@ jobs_all_2017 <- wasco17 %>% select(-w_geocode, -h_geocode) %>%
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
 
-jobs_all_2016 <- wasco16 %>% select(-w_geocode, -h_geocode) %>%
-  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
-  summarise(S000 = sum(S000), 
-            SA01 = sum(SA01), 
-            SA02 = sum(SA02), 
-            SA03 = sum(SA03), 
-            SE01 = sum(SE01), 
-            SE02 = sum(SE02), 
-            SE03 = sum(SE03), 
-            SI01 = sum(SI01), 
-            SI02 = sum(SI02), 
-            SI03 = sum(SI03))
+write.csv(jobs_all_2017, "../data/lodes/agg/jobs_all_2017.csv")
 
-jobs_all_2015 <- wasco15 %>% select(-w_geocode, -h_geocode) %>%
+jobs_all_2016 <- wasco16 %>%
   group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
@@ -166,5 +153,22 @@ jobs_all_2015 <- wasco15 %>% select(-w_geocode, -h_geocode) %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
+write.csv(jobs_all_2016, "../data/lodes/agg/jobs_all_2016.csv")
+
+
+jobs_all_2015 <- wasco15 %>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+write.csv(jobs_all_2015, "../data/lodes/agg/jobs_all_2015.csv")
+
 ```
 

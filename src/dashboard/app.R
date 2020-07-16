@@ -105,12 +105,8 @@ server <- function(input, output) {
       addPolylines(data = countyline, color = "grey", group = "Basemap") %>%
       addPolylines(data = townships, color = "blue", opacity = 1, weight = 1, group = "Basemap") %>%
       addPolylines(data = unincorporated, color = "blue", opacity = 1, weight = 1, group = "Basemap") %>%
-      addPolylines(data = small_streets$osm_lines,
-                   color = "gray", weight = .5, group = "Basemap") %>%
-      #addPolylines(data = med_streets$osm_lines,
-                   #color = "black", weight = .75, group = "Basemap") %>%
-      addPolylines(data = big_streets$osm_lines,
-                   color = "black", weight = 1, group = "Basemap") %>%
+      addPolylines(data = roads,
+                   color = "gray", weight = .75, group = "Basemap") %>%
       addCircleMarkers(data = allfood,
                        color = ~foodpal(type), fillOpacity = 1, radius = 3,
                        stroke = FALSE, group = "Food") %>%

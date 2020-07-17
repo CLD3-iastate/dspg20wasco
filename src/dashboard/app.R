@@ -22,10 +22,22 @@ ui <- dashboardPagePlus(
     sidebarMenu(
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Widgets", icon = icon("th"), tabName = "widgets",
-               badgeLabel = "new", badgeColor = "green") #,
-      #menuItem("Controls",
-               #sliderInput("slider", "Number of observations:", 1, 100, 50)),
-      #menuItem(selectInput("city", "Cities", c("Chicago", "Boston")))
+               badgeLabel = "new", badgeColor = "green"), #,
+      menuItem(selectInput("year", "Year:",c(2015, 2016, 2017, 2018))),
+      # radioButtons(
+      #   inputId = "group",
+      #   label = "",
+      #   choices = c("Food Systems", "Infrastructure")
+      # ),
+      dropdownButton(
+        tags$h3("List of Indicators"),
+        selectInput(inputId = 'food_system',
+                    label = '',
+                    choices = c("Food Insecurity Rate", "Free and reduced-price Lunch", "Food Access")),
+        
+        circle = TRUE, status = "danger",
+        icon = icon("leaf"), width = "300px"
+      )
     )
   ),
   dashboardBody(

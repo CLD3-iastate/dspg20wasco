@@ -8,13 +8,9 @@ library(ggthemes);library(maps)
 acs_data <- fread("~/git/dspg20wasco/data/acs/combined_acs.csv")
 
 acs18 <- filter(acs_data, year == 2018, NAME == "South Wasco" | NAME == "Wasco"| NAME == "Oregon")
-ggplot(acs18, aes(x = median_household_income, y = NAME))+
-  geom_errorbarh(aes(xmin = median_household_income - median_household_income_moe, 
-                     xmax = median_household_income + median_household_income_moe)) +
-  geom_point(color = "red", size = 3)
 
 
-
+# financial domain: Household income and poverty rate
 ggplot(acs18, aes(x = NAME, y = median_household_income))+
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = median_household_income - median_household_income_moe, 
@@ -22,25 +18,54 @@ ggplot(acs18, aes(x = NAME, y = median_household_income))+
   geom_point(color = "dark orange", size = 3)+ ggtitle("Median Household Income")
 ggsave(path="~/git/dspg20wasco/output", device = "png", filename="median_income18.png", plot=last_plot())
 
-ggplot(acs18, aes(x = NAME, y = employment_20_to_64))+
-  geom_col(fill = "dark blue")+
-  geom_errorbar(aes(x = NAME, ymin = employment_20_to_64 - employment_20_to_64_moe, 
-                    ymax = employment_20_to_64 + employment_20_to_64_moe), color = "dark orange") + 
-  geom_point(color = "dark orange", size = 3) + ggtitle("% of Adults (20-64) Employed")
-ggsave(path="~/git/dspg20wasco/output", device = "png", filename="employment18.png", plot=last_plot())
-
-ggplot(acs18, aes(x = NAME, y = below_poverty))+
+ggplot(acs18, aes(x = NAME, y = below_poverty)) +
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = below_poverty - below_poverty_moe, 
                     ymax = below_poverty + below_poverty_moe), color = "dark orange") + 
   geom_point(color = "dark orange", size = 3) + ggtitle("% of Population Below Poverty Line")
 ggsave(path="~/git/dspg20wasco/output", device = "png", filename="poverty18.png", plot=last_plot())
 
-#stacked bar for racial diversity, education attainment and household income.
-race <- fread("~/git/dspg20wasco/data/acs/demographics.csv")
-race <- filter(race, NAME == "South Wasco County School District 1, Oregon")
 
-race <- melt(race,id.vars = c("GEOID", "NAME"), measure.vars = colnames(race)[-c(1,2)])
+
+
+
+ggplot(acs18, aes(x = NAME, y = employment_20_to_64)) +
+  geom_col(fill = "dark blue")+
+  geom_errorbar(aes(x = NAME, ymin = employment_20_to_64 - employment_20_to_64_moe, 
+                    ymax = employment_20_to_64 + employment_20_to_64_moe), color = "dark orange") + 
+  geom_point(color = "dark orange", size = 3) + ggtitle("% of Adults (20-64) Employed")
+ggsave(path="~/git/dspg20wasco/output", device = "png", filename="employment18.png", plot=last_plot())
+
+
+#grouped columns for racial diversity, education attainment and household income.
+race <- select(acs18, NAME, contains("race")) # select appropriate variables
+race_moe <- race %>% select(NAME,contains("moe")) #separate moe estimates
+race_moe <- race_moe %>% melt(id.vars = "NAME", measure.vars = colnames(race_moe)[-1]) %>%
+  rename(moe = value)
+race <- race %>% select(!contains("moe"))
+race <- cbind(melt(race, id.vars = "NAME", measure.vars = colnames(race)[-1]), moe = race_moe$moe)
+ggplot(race)+
+  geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge")+ 
+  #geom_errorbar(aes(x = as.factor(NAME), ymin=value-moe, ymax=value+moe), width=.2,position="dodge") +
+  scale_fill_discrete(name="Groups",labels = c("White", "Black or African American", "American Indian or Alaskan Native",
+                                 "Asian", "Native Hawaiian or Pacific Islander", "Hispanic or Latino", 
+                                 "Two or More","Other")) +
+  ylab("% of Population") + xlab("Region") +
+  ggtitle("% Racial and Ethnic Diversity")
+ggsave(path="~/git/dspg20wasco/output", device = "png", filename="diversityt18.png", plot=last_plot())
+
+#grouped columns for income, education attainment and household income.
+income <- select(acs18, NAME, contains("income"))
+income <- income %>% select(!contains("moe"), -median_household_income)
+income <- melt(income, id.vars = "NAME", measure.vars = colnames(income)[-1])
+ggplot(income)+
+  geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge")+ 
+  scale_fill_discrete(name = "Income Bracket", labels = c("Less than 10,000", "10,000-14,999", "15,000-24,999",
+                                 "25,000-34,999", "35,000-49,999", "50,000-74,999", 
+                                 "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
+  ylab("% of Population") + xlab("Region") +
+  ggtitle("Income Distribution for 2018")
+ggsave(path="~/git/dspg20wasco/output", device = "png", filename="incomedist18.png", plot=last_plot())
 
 
 ##### Mapping Data ########
@@ -111,8 +136,7 @@ acsvars <- c(
   "B25003_002", #Owner Occupied
   "B25003_003" #Renter Occupied
 )
-tract_geography<- get_acs(geography = "tract", state= "OR", county = "Wasco", year = 2018, 
-                    survey = "acs5", output = "wide", geometry=TRUE, cache_table = TRUE)
+
 wasco_tract_acs<- get_acs(geography = "tract", state= "OR", county = "Wasco", year = 2018, 
                           survey = "acs5", variables = acsvars, output = "wide", 
                           geometry=TRUE, cache_table = TRUE) %>% mutate(year = 2018) %>% 
@@ -162,21 +186,7 @@ wasco_tract_acs<- get_acs(geography = "tract", state= "OR", county = "Wasco", ye
   )
 
 # pulling block group failed after 3 attempts :(
-oregon_acs <- get_acs(geography="state", state= 41, year = 2018,
-                       survey = "acs1", variables = c(#Employment and unemployment to population ratio for adults 20-64:
-                         "S2301_C03_021","S2301_C04_021",
-                         #Employment and unemployment to population ratio for adults 16 and older:
-                         "S2301_C03_001","S2301_C04_001", "S1701_C03_001"), output = "wide",
-                       geometry=TRUE, cache_table = TRUE) %>% mutate(year = 2018) %>%
-  transmute(GEOID = GEOID, NAME = NAME, year = year,
 
-            #employment | unemployment for adults, poverty rate for whole population
-            employment_over_16 = S2301_C03_001E, employment_over_16moe = S2301_C03_001M,
-            unemployment_over_16 = S2301_C04_001E, unemployment_over_16moe = S2301_C04_001M,
-            employment_20_to_64 = S2301_C03_021E, employment_20_to_64moe = S2301_C03_021M,
-            unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64moe = S2301_C04_021M,
-            below_poverty = S1701_C03_001E, below_poverty_moe = S1701_C03_001M
-)
   
   
   
@@ -184,10 +194,11 @@ oregon_acs <- get_acs(geography="state", state= 41, year = 2018,
 #### Plot Employment Ratio ####  
 ggplot() +
   geom_sf(data = wasco_tract_acs, aes(fill = employment_20_to_64)) +
-  labs(title = "Percent of employed adults adults 20 to 64 by census track") + 
-  theme_map()
+  labs(title = "Percent of employed adults adults 20 to 64 by census track") #+ 
+  #theme_map)()
+ggsave(path="~/git/dspg20wasco/output", device = "png", filename="employment_by_tract18.png", plot=last_plot())
 
-ggplot() +
-  geom_sf(data = wasco_block, aes(fill = employment_20_to_64)) +
-  labs(title = "Percent of employed adults adults 20 to 64 by census track") + 
-  theme_map()
+# ggplot() +
+#   geom_sf(data = wasco_block, aes(fill = employment_20_to_64)) +
+#   labs(title = "Percent of employed adults adults 20 to 64 by census track") + 
+#   theme_map()

@@ -7,7 +7,7 @@ library(data.table)
 ######## CREATE COMBINED DATASET FOR YEARS 2015-2018 FROM 5 YEAR ESTIMATES #########
 #single years are 5 year weighted estimates for tract and county level,
 #school year estimates don't change over 5 year period.
-#
+#this is wide format... try long format....
 years <- c(2018, 2017, 2016, 2015)
 acsvars <- c(
   #Employment and unemployment to population ratio for adults 20-64:
@@ -37,14 +37,15 @@ acsvars <- c(
   
   #Total Population Estimate
   "DP05_0001",
-  #Racial Diversity Percentages: alone , alone or in combination 
-  "DP05_0037P", "DP05_0064P", # % Whte 
-  "DP05_0038P", "DP05_0065P", # % Black or African American
-  "DP05_0039P", "DP05_0066P", # % American Indian or Alaskan Native
-  "DP05_0044P", "DP05_0067P", # % Asian
-  "DP05_0052P", "DP05_0068P", # % Native Hawaiian or Other Pacific Islander
-  "DP05_0057P", "DP05_0069P", # % Some other race
+  #Racial Diversity Percentages: Race alone
+  "DP05_0037P", # % Whte 
+  "DP05_0038P", # % Black or African American
+  "DP05_0039P", # % American Indian or Alaskan Native
+  "DP05_0044P", # % Asian
+  "DP05_0052P", # % Native Hawaiian or Other Pacific Islander
+  "DP05_0057P", # % Some other race
   "DP05_0071P", # % Hispanic or Latino of any race
+  "DP05_0035P", # % two or more races
   
   # Total Family with own children under 18 
   "B09002_001",
@@ -140,10 +141,11 @@ combined_acs <- rbind(south_wasco_acs, wasco_tract_acs, wasco_county_acs, oregon
           income_150K_199999 = S1901_C01_010E, income_150K_199999_moe = S1901_C01_010M,
           income_200K_more = S1901_C01_011E, income_200K_more_moe = S1901_C01_011M,
           # Population demographics: race and family
-          total_pop = DP05_0001E, total_pop_moe = DP05_0001M, white = DP05_0037PE, white_moe=DP05_0037PM, 
-          black = DP05_0038PE, black_moe = DP05_0038PM, american_indian = DP05_0039PE, american_indian_moe = DP05_0039PM,
-          asian = DP05_0044PE, asian_moe =DP05_0044PM, native_hawaiian = DP05_0052PE, native_hawaiian_moe = DP05_0052PM,
-          hispanic = DP05_0071PE, hispanic_moe = DP05_0071PM, other = DP05_0057PE, other_moe = DP05_0057PM,
+          total_pop = DP05_0001E, total_pop_moe = DP05_0001M, race_white = DP05_0037PE, race_white_moe=DP05_0037PM, 
+          race_black = DP05_0038PE, race_black_moe = DP05_0038PM, race_american_indian = DP05_0039PE, race_american_indian_moe = DP05_0039PM,
+          race_asian = DP05_0044PE, race_asian_moe =DP05_0044PM, race_native_hawaiian = DP05_0052PE, race_native_hawaiian_moe = DP05_0052PM,
+          race_hispanic = DP05_0071PE, race_hispanic_moe = DP05_0071PM, race_other = DP05_0057PE, race_other_moe = DP05_0057PM,
+          race_two_more = DP05_0035PE, race_two_more_moe = DP05_0035PM,
           
           total_family = B09002_001E, total_family_moe = B09002_001M,
           married_perc = B09002_002E/B09002_001E*100, other_family_perc = B09002_008E/B09002_001E*100,

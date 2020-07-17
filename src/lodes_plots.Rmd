@@ -154,7 +154,7 @@ agg_cnty_OR_with_names_2015 <- inner_join(x = agg_cnty_OR_2015, y = unique(essen
 
 trimmed_2015 <- agg_cnty_OR_with_names_2015[order(-agg_cnty_OR_with_names_2015$S000), ][1:10, ]
 ggplot(trimmed_2015, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2015)")
-ggsave(path = "../output/lodes_maps/flows", device = "png", filename = "in_county_flows_2015", plot = last_plot())
+ggsave(path = "../output/lodes_maps/flows", device = "png", filename = "in_county_flows_2015.png", plot = last_plot())
 
 ```
 
@@ -277,13 +277,6 @@ agg_15 <- wascolines_15 %>%
             SI03 = sum(SI03))
 ```
 
-```{r}
-ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_17[agg_17$S000 < 600, ], aes(fill= S000, geometry = geometry)) + #got rid of 1 outliar of 774
-  scale_fill_gradient(low="light gray", high="green")
-```
 
 
 
@@ -297,7 +290,7 @@ alljobs_2017 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2017") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "alljobs_2017", plot = alljobs_2017)
+ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "alljobs_2017.png", plot = alljobs_2017)
 
 goodsjobs_2017 <- ggplot(wasco_county) +
   geom_sf() +
@@ -306,7 +299,7 @@ goodsjobs_2017 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in Goods Producing industry sectors\n in South Wasco County by Census Block in 2017") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "goodsjobs_2017", plot = goodsjobs_2017)
+ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "goodsjobs_2017.png", plot = goodsjobs_2017)
 
 
 
@@ -317,7 +310,7 @@ utilsjobs_2017 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in Trade, Transportation,\n and Utilities industry sectors\n in South Wasco County by Census Block in 2017") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "utilsjobs_2017", plot = utilsjobs_2017)
+ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "utilsjobs_2017.png", plot = utilsjobs_2017)
   
 servicejobs_2017 <- ggplot(wasco_county) +
   geom_sf() +
@@ -326,7 +319,7 @@ servicejobs_2017 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in All Other Services industry sectors\n in South Wasco County by Census Block in 2017") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "servicejobs_2017", plot = servicejobs_2017)
+ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "servicejobs_2017.png", plot = servicejobs_2017)
 
 ```
 
@@ -339,7 +332,7 @@ alljobs_2016 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2016") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "alljobs_2016", plot = alljobs_2016)
+ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "alljobs_2016.png", plot = alljobs_2016)
 
 goodsjobs_2016 <- ggplot(wasco_county) +
   geom_sf() +
@@ -348,7 +341,7 @@ goodsjobs_2016 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in Goods Producing industry sectors\n in South Wasco County by Census Block in 2016") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "goodsjobs_2016", plot = goodsjobs_2016)
+ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "goodsjobs_2016.png", plot = goodsjobs_2016)
 
 
 utilsjobs_2016 <- ggplot(wasco_county) +
@@ -358,7 +351,7 @@ utilsjobs_2016 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in Trade, Transportation,\n and Utilities industry sectors\n in South Wasco County by Census Block in 2016") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "utilsjobs_2016", plot = utilsjobs_2016)
+ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "utilsjobs_2016.png", plot = utilsjobs_2016)
   
 servicejobs_2016 <- ggplot(wasco_county) +
   geom_sf() +
@@ -367,7 +360,7 @@ servicejobs_2016 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in All Other Services industry sectors\n in South Wasco County by Census Block in 2016") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "servicejobs_2016", plot = servicejobs_2016)
+ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "servicejobs_2016.png", plot = servicejobs_2016)
 ```
 
 2015 maps
@@ -379,7 +372,7 @@ alljobs_2015 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2015") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "alljobs_2015", plot = alljobs_2015)
+ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "alljobs_2015.png", plot = alljobs_2015)
 
 goodsjobs_2015 <- ggplot(wasco_county) +
   geom_sf() +
@@ -388,7 +381,7 @@ goodsjobs_2015 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in Goods Producing industry sectors\n in South Wasco County by Census Block in 2015") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "goodsjobs_2015", plot = goodsjobs_2015)
+ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "goodsjobs_2015.png", plot = goodsjobs_2015)
 
 
 utilsjobs_2015 <- ggplot(wasco_county) +
@@ -398,7 +391,7 @@ utilsjobs_2015 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in Trade, Transportation,\n and Utilities industry sectors\n in South Wasco County by Census Block in 2015") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "utilsjobs_2015", plot = utilsjobs_2015)
+ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "utilsjobs_2015.png", plot = utilsjobs_2015)
   
 servicejobs_2015 <- ggplot(wasco_county) +
   geom_sf() +
@@ -407,5 +400,5 @@ servicejobs_2015 <- ggplot(wasco_county) +
   scale_fill_gradient(low="light gray", high="green") +
   ggtitle("Total number of jobs in All Other Services industry sectors\n in South Wasco County by Census Block in 2015") +
   labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "servicejobs_2015", plot = servicejobs_2015)
+ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "servicejobs_2015.png", plot = servicejobs_2015)
 ```

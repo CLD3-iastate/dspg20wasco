@@ -105,7 +105,7 @@ server <- function(input, output) {
       addPolylines(data = swsd, color = "purple", opacity = 1, group = "Basemap") %>%
       addPolylines(data = countyline, color = "grey", group = "Basemap") %>%
       addPolygons(data = townships, color = "blue", opacity = .4, weight = 1, popup = ~htmlEscape(NAME), group = "Basemap") %>%
-      addPolygons(data = unincorporated, color = "blue", opacity = .25, weight = 1, popup = ~htmlEscape(NAME), group = "Basemap") %>%
+      addPolygons(data = unincorporated, color = "blue", opacity = .4, weight = 1, popup = ~htmlEscape(NAME), group = "Basemap") %>%
       addPolylines(data = roads,
                    color = "gray", weight = .75, group = "Basemap") %>%
       addCircleMarkers(data = allfood,
@@ -120,7 +120,16 @@ server <- function(input, output) {
       ) %>%
       addLegend(data = allfood, "bottomright", pal = foodpal, values = ~type,
                 title = "Food type",
-                opacity = 1, group = "Food", na.label = "NA")
+                opacity = 1, group = "Food", na.label = "NA") %>%
+      addLegend(data = countyline, "topright",
+                colors = "grey", labels = "Wasco County", group = "Basemap") %>%
+      addLegend(data = swsd, "topright", opacity = 1,
+                colors = "purple", labels = "South Wasco County School District",
+                group = "Basemap") %>%
+      addLegend(data = unincorporated, "topright", opacity = 0.4,
+                colors = "blue", labels = "Townships and Unincorporated Areas",
+                group = "Basemap")
+
   })
 }
 

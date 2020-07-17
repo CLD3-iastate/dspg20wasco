@@ -109,9 +109,16 @@ essential <- or_xw %>%
 agg_cnty_OR_with_names_2017 <- inner_join(x = agg_cnty_OR_2017, y = unique(essential), by = "h_county")
 
 trimmed_2017 <- agg_cnty_OR_with_names_2017[order(-agg_cnty_OR_with_names_2017$S000), ][1:10, ]
-ggplot(trimmed_2017, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2017)")
+trimmed_2017 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "dark blue", alpha=.7) +
+  ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2017)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
 
-ggsave(path = "../output/lodes_maps/flows", device = "png", filename = "in_county_flows_2017", plot = last_plot())
+
+ggsave(path = "../output/lodes_maps/flows", device = "png", filename = "in_county_flows_2017.png", plot = last_plot())
 
 
 
@@ -129,11 +136,16 @@ essential <- or_xw %>%
   select(h_county, ctyname)
 
 agg_cnty_OR_with_names_2016 <- inner_join(x = agg_cnty_OR_2016, y = unique(essential), by = "h_county")
-
-
 trimmed_2016 <- agg_cnty_OR_with_names_2016[order(-agg_cnty_OR_with_names_2016$S000), ][1:10, ]
-ggplot(trimmed_2016, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2016)")
-ggsave(path = "../output/lodes_maps/flows", device = "png", filename = "in_county_flows_2016", plot = last_plot())
+trimmed_2016 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "dark blue", alpha=.7) +
+  ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2016)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+
+ggsave(path = "../output/lodes_maps/flows", device = "png", filename = "in_county_flows_2016.png", plot = last_plot())
 
 
 #2015
@@ -153,7 +165,16 @@ agg_cnty_OR_with_names_2015 <- inner_join(x = agg_cnty_OR_2015, y = unique(essen
 
 
 trimmed_2015 <- agg_cnty_OR_with_names_2015[order(-agg_cnty_OR_with_names_2015$S000), ][1:10, ]
-ggplot(trimmed_2015, aes(ctyname, S000)) + geom_col() + coord_flip() + ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2015)")
+
+trimmed_2015 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "dark blue", alpha=.7) +
+  ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2015)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+
+
 ggsave(path = "../output/lodes_maps/flows", device = "png", filename = "in_county_flows_2015.png", plot = last_plot())
 
 ```

@@ -8,6 +8,7 @@ library(sf)
 library(htmltools)
 library(here)
 library(shinyWidgets)
+library(data.table)
 
 source(here("/src/dashboard/loadbaselayers.R"))
 source(here("/src/dashboard/loadoverlays.R"))
@@ -25,7 +26,7 @@ ui <- dashboardPagePlus(
     sidebarMenu(
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Widgets", icon = icon("th"), tabName = "widgets",
-               badgeLabel = "new", badgeColor = "green"), 
+               badgeLabel = "new", badgeColor = "green"),
       #menuItem("Controls",
       #sliderInput("slider", "Number of observations:", 1, 100, 50)),
       #menuItem(selectInput("city", "Cities", c("Chicago", "Boston")))
@@ -40,7 +41,7 @@ ui <- dashboardPagePlus(
         selectInput(inputId = 'food_system',
                     label = '',
                     choices = c("Food Insecurity Rate", "Free and reduced-price Lunch", "Food Access")),
-        
+
         circle = TRUE, status = "danger",
         icon = icon("leaf"), width = "300px"
       ),
@@ -49,7 +50,7 @@ ui <- dashboardPagePlus(
         selectInput(inputId = 'financial',
                     label = '',
                     choices = c("Median Household Income", "Poverty Rate")),
-        
+
         circle = TRUE, status = "danger",
         icon = icon("dollar"), width = "300px"
       )
@@ -110,13 +111,13 @@ ui <- dashboardPagePlus(
 server <- function(input, output) {
   # set.seed(122)
   # histdata <- rnorm(500)
-  # 
-  # 
+  #
+  #
   # output$plot1 <- renderPlot({
   #   data <- histdata[seq_len(input$slider)]
   #   hist(data)
   # })
-  # 
+  #
   # output$mycity <- renderText({
   #   lonlat <- geocode_OSM(input$city)
   #   lon <- lonlat$coords[1]
@@ -161,26 +162,26 @@ server <- function(input, output) {
                 group = "Basemap")
 
   })
-  
+
   #histograms
   output$plot1 <- renderPlot({
     acs <- filter(acs_data, year == input$year, NAME == "South Wasco" | NAME == "Wasco"| NAME == "Oregon")
     if(input$financial == "Median Household Income"){
       ggplot(acs, aes(x = NAME, y = median_household_income))+
         geom_col(fill = "dark blue") +
-        geom_errorbar(aes(x = NAME, ymin = median_household_income - median_household_income_moe, 
-                          ymax = median_household_income + median_household_income_moe), color = "dark orange") + 
-        ylab("Median Household Income") + xlab("Region") + 
-        geom_point(color = "dark orange", size = 3)+ 
+        geom_errorbar(aes(x = NAME, ymin = median_household_income - median_household_income_moe,
+                          ymax = median_household_income + median_household_income_moe), color = "dark orange") +
+        ylab("Median Household Income") + xlab("Region") +
+        geom_point(color = "dark orange", size = 3)+
       ggtitle(paste("Median Household Income in", input$year, sep=" "))
     }
     else if(input$financial == "Poverty Rate"){
       ggplot(acs, aes(x = NAME, y = below_poverty)) +
         geom_col(fill = "dark blue")+
-        geom_errorbar(aes(x = NAME, ymin = below_poverty - below_poverty_moe, 
-                          ymax = below_poverty + below_poverty_moe), color = "dark orange") + 
+        geom_errorbar(aes(x = NAME, ymin = below_poverty - below_poverty_moe,
+                          ymax = below_poverty + below_poverty_moe), color = "dark orange") +
         ylab("% of Population") + xlab("Region") +
-        geom_point(color = "dark orange", size = 3) + 
+        geom_point(color = "dark orange", size = 3) +
         ggtitle(paste("% of Population Below Poverty Line in", input$year, sep=" "))
     }
     #   data <- histdata[seq_len(input$slider)]

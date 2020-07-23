@@ -332,6 +332,17 @@ agg_15 <- wascolines_15 %>%
 ```
 
 
+```{r}
+agg_17
+data.frame(south_wasco_points)
+
+ggplot(south_wasco_points) +
+  geom_sf() +
+  geom_sf(data=agg_17[agg_17$S000 < 600, ], aes(fill= S000, geometry = geometry)) + #got rid of 1 outliar of 774
+  scale_fill_gradient(low="light gray", high="green") +
+  ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2017") +
+  labs(fill = "Number of Jobs")
+```
 
 
 
@@ -456,3 +467,412 @@ servicejobs_2015 <- ggplot(wasco_county) +
   labs(fill = "Number of Jobs")
 ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "servicejobs_2015.png", plot = servicejobs_2015)
 ```
+```{r}
+mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
+          values = agg_17$SI01,
+          at = quantile(agg_17$S000),
+          label = agg_17$SI01, legend = TRUE,
+          layer.name = 'South Wasco Goods Producing Sector\n Job Density by Census Block (2017)',
+          zcol = 'SI01',
+          col.regions = uvatheme(agg_17$S000))
+```
+
+interactive maps
+```{r}
+library(leaflet)
+library(mapview)
+uvatheme <- colorRampPalette(c('#D1E0BF', '#E57200'))
+
+
+map_2017_data <- mapview(south_wasco_points, label = NULL, 
+        alpha.region = 0, legend = FALSE,
+        color = "dark green", popup = NULL,
+        layer.name = "South Wasco School District") + 
+  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
+          values = agg_17$S000,
+          at = quantile(agg_17$S000),
+          label = agg_17$S000, legend = TRUE,
+          layer.name = 'South Wasco Job Density by Census Block (2017)',
+          zcol = 'S000',
+          col.regions = uvatheme(agg_17$S000)) +
+  
+  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
+          values = agg_17$SI01,
+          at = quantile(agg_17$S000),
+          label = agg_17$SI01, legend = TRUE,
+          layer.name = 'South Wasco Goods Producing Sector\n Job Density by Census Block (2017)',
+          zcol = 'SI01',
+          col.regions = uvatheme(agg_17$S000)) +
+  
+  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
+          values = agg_17$SI02,
+          at = quantile(agg_17$S000),
+          label = agg_17$SI02, legend = TRUE,
+          layer.name = 'South Wasco Trade, Transportation,and Utilities\n Job Density by Census Block
+          (2017)',
+          zcol = 'SI02',
+          col.regions = uvatheme(agg_17$S000)) +
+  
+  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
+          values = agg_17$SI03,
+          at = quantile(agg_17$S000),
+          label = agg_17$SI03, legend = TRUE,
+          layer.name = 'South Wasco All Other Services industry\n Job Density by Census Block
+          (2017)',
+          zcol = 'SI02',
+          col.regions = uvatheme(agg_17$S000))
+
+
+
+
+
+map_2017_data
+```
+
+make it leaflet
+```{r}
+map2017leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 1,
+    opacity = 1,
+    group = "Basemap")
+
+
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+
+map2017leaf <- map2017leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "All Jobs",
+    fillColor = ~qtileS000(agg_17$S000),
+    label = agg_17$S000)
+map2017leaf <- map2017leaf %>%
+      addLegend(
+        data = agg_17,
+        "bottomright",
+        pal = qtileS000,
+        values = ~ S000,
+        title = "Wasco County Job Density",
+        opacity = 1,
+        group = "All Jobs",
+        na.label = "NA")
+
+#SI01
+map2017leaf <- map2017leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "Goods Producing Sector",
+    fillColor = ~qtileS000(agg_17$SI01),
+    label = agg_17$SI01) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI01,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "Goods Producing Sector",
+    na.label = "NA")
+
+#SI02
+map2017leaf <- map2017leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "Trade, Transportation,and Utilities Sector",
+    fillColor = ~qtileS000(agg_17$SI02),
+    label = agg_17$SI02) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI02,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "Trade, Transportation,and Utilities Sector",
+    na.label = "NA")
+
+#SI03
+map2017leaf <- map2017leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "All Other Services Sector",
+    fillColor = ~qtileS000(agg_17$SI03),
+    label = agg_17$SI03) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI03,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "All Other Services Sector",
+    na.label = "NA")
+
+map2017leaf <- map2017leaf %>%
+      addLayersControl(
+        baseGroups = c("South Wasco School District"),
+        overlayGroups = c("All Jobs", "Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"),
+        options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"))
+```
+
+
+2016
+```{r}
+map2016leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 1,
+    opacity = 1,
+    group = "Basemap")
+
+
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_16$S000, 5)
+
+map2016leaf <- map2016leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "All Jobs",
+    fillColor = ~qtileS000(agg_16$S000),
+    label = agg_16$S000)
+map2016leaf <- map2016leaf %>%
+      addLegend(
+        data = agg_16,
+        "bottomright",
+        pal = qtileS000,
+        values = ~ S000,
+        title = "Wasco County Job Density",
+        opacity = 1,
+        group = "All Jobs",
+        na.label = "NA")
+
+#SI01
+map2016leaf <- map2016leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "Goods Producing Sector",
+    fillColor = ~qtileS000(agg_16$SI01),
+    label = agg_16$SI01) %>%
+  addLegend(
+    data = agg_16,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI01,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "Goods Producing Sector",
+    na.label = "NA")
+
+#SI02
+map2016leaf <- map2016leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "Trade, Transportation,and Utilities Sector",
+    fillColor = ~qtileS000(agg_16$SI02),
+    label = agg_16$SI02) %>%
+  addLegend(
+    data = agg_16,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI02,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "Trade, Transportation,and Utilities Sector",
+    na.label = "NA")
+
+#SI03
+map2016leaf <- map2016leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "All Other Services Sector",
+    fillColor = ~qtileS000(agg_16$SI03),
+    label = agg_16$SI03) %>%
+  addLegend(
+    data = agg_16,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI03,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "All Other Services Sector",
+    na.label = "NA")
+
+map2016leaf <- map2016leaf %>%
+      addLayersControl(
+        baseGroups = c("South Wasco School District"),
+        overlayGroups = c("All Jobs", "Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"),
+        options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"))
+```
+
+2015
+```{r}
+map2015leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 1,
+    opacity = 1,
+    group = "Basemap")
+
+
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_15$S000, 5)
+
+map2015leaf <- map2015leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "All Jobs",
+    fillColor = ~qtileS000(agg_15$S000),
+    label = agg_15$S000)
+map2015leaf <- map2015leaf %>%
+      addLegend(
+        data = agg_15,
+        "bottomright",
+        pal = qtileS000,
+        values = ~ S000,
+        title = "Wasco County Job Density",
+        opacity = 1,
+        group = "All Jobs",
+        na.label = "NA")
+
+#SI01
+map2015leaf <- map2015leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "Goods Producing Sector",
+    fillColor = ~qtileS000(agg_15$SI01),
+    label = agg_15$SI01) %>%
+  addLegend(
+    data = agg_15,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI01,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "Goods Producing Sector",
+    na.label = "NA")
+
+#SI02
+map2015leaf <- map2015leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "Trade, Transportation,and Utilities Sector",
+    fillColor = ~qtileS000(agg_15$SI02),
+    label = agg_15$SI02) %>%
+  addLegend(
+    data = agg_15,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI02,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "Trade, Transportation,and Utilities Sector",
+    na.label = "NA")
+
+#SI03
+map2015leaf <- map2015leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "All Other Services Sector",
+    fillColor = ~qtileS000(agg_15$SI03),
+    label = agg_15$SI03) %>%
+  addLegend(
+    data = agg_15,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ SI03,
+    title = "Wasco County Job Density",
+    opacity = 1,
+    group = "All Other Services Sector",
+    na.label = "NA")
+
+map2015leaf <- map2015leaf %>%
+      addLayersControl(
+        baseGroups = c("South Wasco School District"),
+        overlayGroups = c("All Jobs", "Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"),
+        options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"))
+```
+
+Showing all maps
+```{r}
+map2017leaf
+map2016leaf
+map2015leaf
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+raster
+```{r}
+install.packages("tiff")
+library(raster)
+library(stars)
+library(tiff)
+
+readtif("../data/lodes/raster/CDL_2017_41065.tif")
+
+```
+
+
+
+```{r}
+```
+

@@ -83,7 +83,9 @@ ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = below_poverty)) +
 
 # poverty rate tract map for 2018
 ggplot() +
-  geom_sf(data = filter(wasco_tract_acs, year == 2018), aes(fill = below_poverty)) +
+  geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = below_poverty)) +
+  geom_sf(fill = "transparent", color = "gray20", size = 1, 
+          data = acs_tracts %>% group_by(COUNTYFP) %>% summarise()) +
   labs(title = paste("Percent of population below poverty by census track in", 2018, sep=" "))
 
 

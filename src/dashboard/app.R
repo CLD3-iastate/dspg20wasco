@@ -11,11 +11,29 @@ library(shinyWidgets)
 library(data.table)
 library(dashboardthemes)
 library(stringr)
+library(tigris)
 
 source("theme.R")
 source(here("/src/dashboard/loadbaselayers.R"))
 source(here("/src/dashboard/loadoverlays.R"))
+
+#load acs data#
 acs_data <- fread(here("/data/acs/combined_acs.csv"))
+acs_data$GEOID <- as.character(acs_data$GEOID)
+acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
+                         NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
+                         NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
+                         NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
+                         NAME == "Oregon")
+#get tract level geography
+or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "Jefferson"),
+                    cb = TRUE)
+wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
+                    cb = TRUE)
+tract_geo <- rbind(or_tracts, wa_tracts)
+acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
+acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")  
+
 
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
@@ -405,14 +423,12 @@ server <- function(input, output, session) {
       addPolygons(color = ~isochronepal(value))
   })
 
+### Quality standard of living output ----
+#### Financials -------
   #histograms
   output$plot1 <- renderPlot({
-    acs <-
-      filter(acs_data,
-             year == input$year,
-             NAME == "South Wasco" | NAME == "Wasco" | NAME == "Oregon")
     if (input$financial == "Median Household Income") {
-      ggplot(acs, aes(x = NAME, y = median_household_income)) +
+      ggplot(filter(acs_counties, year == input$year), aes(x = NAME, y = median_household_income)) +
         geom_col(fill = "dark blue") +
         geom_errorbar(
           aes(
@@ -427,7 +443,7 @@ server <- function(input, output, session) {
         ggtitle(paste("Median Household Income in", input$year, sep = " "))
     }
     else if (input$financial == "Poverty Rate") {
-      ggplot(acs, aes(x = NAME, y = below_poverty)) +
+      ggplot(filter(acs_counties, year == input$year), aes(x = NAME, y = below_poverty)) +
         geom_col(fill = "dark blue") +
         geom_errorbar(
           aes(
@@ -442,6 +458,30 @@ server <- function(input, output, session) {
         ggtitle(paste("% of Population Below Poverty Line in", input$year, sep =
                         " "))
     }
+    #### Maps### 
+    # output$plot2 <- renderPlot({
+    #   if (input$financial == "Median Household Income"){
+    #     ggplot() +
+    #       geom_sf(data = filter(acs_tracts, year == input$year), aes(fill = median_household_income)) +
+    #       geom_sf(fill = "transparent", color = "gray20", size = 1, 
+    #               data = acs_tracts %>% group_by(COUNTYFP) %>% summarise()) +
+    #       labs(title = "Median Household Income by census track") 
+    #   }
+    # })
+    
+    # output$plot2 <- renderPlot({
+    #   if (input$financial == "Poverty Rate"){
+    #     ggplot() +
+    #       geom_sf(data = filter(acs_tracts, year == input$year), aes(fill = median_household_income)) +
+    #       geom_sf(fill = "transparent", color = "gray20", size = 1, 
+    #               data = acs_tracts %>% group_by(COUNTYFP) %>% summarise()) +
+    #       labs(title = "Poverty by census track") 
+    #   }
+    # })
+    
+    
+    # Median Household Income tract map for 2018
+   
     #   data <- histdata[seq_len(input$slider)]
     #   hist(data)
   })

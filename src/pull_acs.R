@@ -1,6 +1,7 @@
 library(tidycensus)
 library(tidyverse)
 library(data.table)
+#library(dplyr)
 
 #census_api_key("adb7bddbd043e99c415c4475d151b00c8cd4971a", overwrite = TRUE, install= TRUE)
 
@@ -47,14 +48,17 @@ acsvars <- c(
   "DP05_0071P", # % Hispanic or Latino of any race
   "DP05_0035P", # % two or more races
 
-  # Total Family with own children under 18
-  "B09002_001",
-  # Family Stability for own children under 18 | totals
-  "B09002_002", # Married Couple Families
-  "B09002_008", # Other families (assumed to be single parents)
-  "B09002_009", # Male Householder no wife present
-  "B09002_015", # Female Householder no husband present
-
+  # Total children under 18 in households
+  "B09005_001",
+  # Family Stability children under 18 in households | totals
+  "B09005_003", # Married Couple Families
+  "B09005_004", # Single parents - male
+  "B09005_005", # Single parents - female
+  "B09005_006", # Nonfamily household with under 18 children
+  
+  "B09019_002", #Total Households (block group available)
+  "B09019_024",#non_family_households |living alone or with non-family
+  
   # Educational Attainment for Population 25 years and older: Total | Percent
   "S1501_C01_006", #Total population of adults 25 yrs and older
   "S1501_C01_007", "S1501_C02_007", # Less than 9th grade
@@ -73,52 +77,52 @@ acsvars <- c(
   # Homeowners in occupied housing units
   "B25003_001", #Total Occupied Housing Units
   "B25003_002", #Owner Occupied
-  "B25003_003" #Renter Occupied
+  "B25003_003", #Renter Occupied
+  
+  #Housing affordability-
+  
+  # total of owned-occupied housing units who's monthly housing costs is less than 30% 
+  # Total households in income bracket | less than 20% | 20-29% 
+  "B25106_003", "B25106_004", "B25106_005", #less than 30% for income less than $20,000 
+  "B25106_007", "B25106_008", "B25106_009", #less than 30% for income $20,000-$34999
+  "B25106_011", "B25106_012", "B25106_013", #less than 30% for income $35,000-$49999
+  "B25106_015", "B25106_016", "B25106_017", #less than 30% for income $50,000-$74999
+  "B25106_019", "B25106_020", "B25106_021", #less than 30% for income $75,000 or more
+  
+  #%all rented housing units who's monthly housing costs is less than 30% (share of entire population of rented housing units)
+  # Total households in income bracket | less than 20% | 20-29% 
+  "B25106_025", "B25106_026", "B25106_027",#less than 30% for income less than $20,000 
+  "B25106_029", "B25106_030", "B25106_031",#less than 30% for income $20,000-$34999
+  "B25106_033", "B25106_034", "B25106_035",#less than 30% for income $35,000-$49999
+  "B25106_037", "B25106_038", "B25106_039",#less than 30% for income $50,000-$74999
+  "B25106_041", "B25106_042", "B25106_043" #30% or less for income $75,000 or more
   )
 
-#call variables for tract
-wasco_tract_acs<- get_acs(geography = "tract", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-                          variables = acsvars, output = "wide", geometry=TRUE, cache_table = TRUE) %>% mutate(year = 2018)
+combined_acs <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE) %>%
+                      filter(NAME == "South Wasco County School District 1, Oregon"),
+                    get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
+                            variables = acsvars, output = "wide", cache = TRUE)) %>% mutate(year = 2018)
 for(i in 2:length(years)){
-  temp<- get_acs(geography = "tract", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
-                            variables = acsvars, output = "wide", geometry=TRUE, cache_table=TRUE) %>% mutate(year = years[i])
-  wasco_tract_acs <- rbind(wasco_tract_acs, temp)
+  temp <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE) %>%
+                  filter(NAME == "South Wasco County School District 1, Oregon"),
+                get_acs(geography = "tract", state= "OR", county="Wasco", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
+                        variables = acsvars, output = "wide", cache = TRUE)) %>% mutate(year =years[i]) 
+  combined_acs <- rbind(combined_acs, temp)
 }
-
-#Download data by school district
-south_wasco_acs <- get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
-        variables = acsvars, output = "wide", cache_table = TRUE, geometry = TRUE) %>%
-  filter(NAME == "South Wasco County School District 1, Oregon") %>% mutate(year = 2018)
-for(i in 2:length(years)){
-  temp<- get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
-                 variables = acsvars, output = "wide", cache_table = TRUE, geometry=TRUE) %>%
-    filter(NAME == "South Wasco County School District 1, Oregon") %>% mutate(year =years[i])
-  south_wasco_acs <- rbind(south_wasco_acs, temp) %>% mutate(NAME= "South Wasco")
-}
-
-
-#call variables for county: Can't collect 2017 for some reason???
-wasco_county_acs<- get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-                          variables = acsvars, output = "wide", geometry=TRUE) %>% mutate(year = 2018)
-for(i in 2:length(years)){
-  temp<- get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
-                 variables = acsvars, output = "wide", geometry=TRUE) %>% mutate(year =years[i])
-  wasco_county_acs <- rbind(wasco_county_acs, temp) %>% mutate(NAME = "Wasco")
-}
-
-#call variables for oregon state
-oregon_acs<- get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
-                           variables = acsvars, output = "wide", geometry=TRUE) %>% mutate(year = 2018)
-for(i in 2:length(years)){
-  temp<- get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
-                 variables = acsvars, output = "wide", geometry=TRUE) %>% mutate(year =years[i])
-  oregon_acs <- rbind(oregon_acs, temp)
-}
-
 
 
 #bind all together
-combined_acs <- rbind(south_wasco_acs, wasco_tract_acs, wasco_county_acs, oregon_acs) %>%
+combined_acs <- combined_acs %>%
   transmute(GEOID = GEOID, NAME = NAME, year = year,
 
           #employment | unemployment for adults, poverty rate for whole population
@@ -147,26 +151,46 @@ combined_acs <- rbind(south_wasco_acs, wasco_tract_acs, wasco_county_acs, oregon
           race_hispanic = DP05_0071PE, race_hispanic_moe = DP05_0071PM, race_other = DP05_0057PE, race_other_moe = DP05_0057PM,
           race_two_more = DP05_0035PE, race_two_more_moe = DP05_0035PM,
 
-          total_family = B09002_001E, total_family_moe = B09002_001M,
-          married_perc = B09002_002E/B09002_001E*100, other_family_perc = B09002_008E/B09002_001E*100,
-          male_no_spouse_perc = B09002_009E/B09002_001E*100, female_no_spouse_perc = B09002_015E/B09002_001E*100,
-
-          #Education Attainment
-          less_hs = (S1501_C01_007E + S1501_C01_008E) / S1501_C01_006E * 100,
-          hs_grad = S1501_C01_009E/ S1501_C01_006E * 100,
-          assoc_some_college = (S1501_C01_010E + S1501_C01_011E) / S1501_C01_006E * 100,
-          bachelors_or_higher = (S1501_C01_012E + S1501_C01_013E) / S1501_C01_006E * 100,
+          family_children_total = B09005_001E, family_children_total_moe = B09005_001M,
+          family_married_parent_perc = B09005_003E/B09005_001E*100, 
+          family_single_parent_perc = (B09005_004E + B09005_005E)/B09005_001E*100, 
+          family_children_nonfamily_perc = B09005_006E/B09005_001E*100,
+          family_nonfamily_household_perc = B09019_024E/B09019_002E*100,
+          
+          #Education Attainment (for population over 25)
+          education_less_hs = (S1501_C01_007E + S1501_C01_008E) / S1501_C01_006E * 100,
+          education_hs_grad = S1501_C01_009E/ S1501_C01_006E * 100,
+          education_assoc_some_college = (S1501_C01_010E + S1501_C01_011E) / S1501_C01_006E * 100,
+          education_bachelors_or_higher = (S1501_C01_012E + S1501_C01_013E) / S1501_C01_006E * 100,
 
           # Percent with a disability
           disability = S1810_C03_001E, disability_moe = S1810_C03_001M,
 
           # Homeowners
-          owner_occupied = B25003_002E/B25003_001E,
-          renter_occupied = B25003_003E/B25003_001E
-)
+          housing_occupied_total = B25003_001E,
+          owner_occupied_housing_total = B25003_002E,
+          renter_occupied_housing_total = B25003_003E, ### B25074 for renters: HOUSEHOLD INCOME BY GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
+          
+          owner_occupied_housing_perc = B25003_002E/B25003_001E *100 ,
+          renter_occupied_housing_perc = B25003_003E/B25003_001E *100 ,
+          
+          # Percent of households who have affordable housing costs
+          affordable_housing_own_total = B25106_004E + B25106_005E + B25106_008E + B25106_009E + B25106_012E + 
+            B25106_013E + B25106_016E + B25106_017E + B25106_020E + B25106_021E,
+          affordable_housing_own_perc = affordable_housing_own_total / B25003_002E * 100,
+          affordable_housing_rent_total = B25106_026E + B25106_027E + B25106_030E + B25106_031E + B25106_034E + 
+            B25106_035E + B25106_038E + B25106_039E +  B25106_042E + B25106_043E,
+          affordable_housing_rent_perc = affordable_housing_rent_total / B25003_003E * 100,
+          affordable_housing_all_perc = (affordable_housing_own_total + affordable_housing_rent_total) / B25003_001E *100,
+          
+          affordable_housing_less_20k = (B25106_004E + B25106_005E + B25106_026E + B25106_027E) / (B25106_003E + B25106_025E) * 100,
+          affordable_housing_20k_34k = (B25106_008E + B25106_009E + B25106_030E + B25106_031E)/ (B25106_007E + B25106_029E) * 100,
+          affordable_housing_35k_49k = (B25106_012E + B25106_013E + B25106_034E + B25106_035E)/ (B25106_011E + B25106_033E)* 100,
+          affordable_housing_50k_74k = (B25106_016E + B25106_017E + B25106_038E + B25106_039E)/ (B25106_015E + B25106_037E) * 100,
+          affordable_housing_more_75k = (B25106_020E + B25106_021E + B25106_042E + B25106_043E)/ (B25106_019E + B25106_041E) * 100
+  )
 
 #remove geometry variable since list cannot be exported
-combined_acs <- data.table(combined_acs)[,!"geometry"]
 
 fwrite(combined_acs,"~/git/dspg20wasco/data/acs/combined_acs.csv", sep = ",")
 
@@ -174,99 +198,357 @@ fwrite(combined_acs,"~/git/dspg20wasco/data/acs/combined_acs.csv", sep = ",")
 
 
 
-#### Total Population and Racial Diversity | Percentages ###########
-# racial_diversity <- get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-#                             variables = c("B02001_001", "B02001_002","B02001_003", "B02001_004"), output = "wide")
-# demographics <- get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-#                         table = "DP05")
-
-race_vars <- c(#Total Population Estimate
+#### Social Data ###########
+social_vars <- c(  #Total Population Estimate
   "DP05_0001",
-  #Racial Diversity Percentages: alone , alone or in combination
-  "DP05_0037P", "DP05_0064P", # % Whte
-  "DP05_0038P", "DP05_0065P", # % Black or African American
-  "DP05_0039P", "DP05_0066P", # % American Indian or Alaskan Native
-  "DP05_0044P", "DP05_0067P", # % Asian
-  "DP05_0052P", "DP05_0068P", # % Native Hawaiian or Other Pacific Islander
-  "DP05_0057P", "DP05_0069P", # % Some other race
+  #Racial Diversity Percentages: Race alone
+  "DP05_0037P", # % Whte
+  "DP05_0038P", # % Black or African American
+  "DP05_0039P", # % American Indian or Alaskan Native
+  "DP05_0044P", # % Asian
+  "DP05_0052P", # % Native Hawaiian or Other Pacific Islander
+  "DP05_0057P", # % Some other race
   "DP05_0071P", # % Hispanic or Latino of any race
-  "DP05_0035P" # % two or more races
-)
+  "DP05_0035P", # % two or more races
+  
+  # Total children under 18 in households
+  "B09005_001",
+  # Family Stability children under 18 in households | totals
+  "B09005_003", # Married Couple Families
+  "B09005_004", # Single parents - male
+  "B09005_005", # Single parents - female
+  "B09005_006", # Nonfamily household with under 18 children
 
-pop_race <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
-                          variables = race_vars, output = "wide", cache = TRUE) %>%
+  "B09019_002", #Total Households (block group available)
+  "B09019_024",#non_family_households |living alone or with non-family
+  
+  # Educational Attainment for Population 25 years and older: Total | Percent
+  "S1501_C01_006", #Total population of adults 25 yrs and older
+  "S1501_C01_007", "S1501_C02_007", # Less than 9th grade
+  "S1501_C01_008", "S1501_C02_008", # 9-12th no diploma
+  "S1501_C01_009", "S1501_C02_009", # High School diploma or equivalent
+  "S1501_C01_010", "S1501_C02_010", # Some college, no degree
+  "S1501_C01_011", "S1501_C02_011", # Associates degree
+  "S1501_C01_012", "S1501_C02_012", # Bachelor's degree
+  "S1501_C01_013", "S1501_C02_013", # Graduate or Professional degree
+  "S1501_C02_014", "S1501_C02_014", # High School or Higher
+  "S1501_C02_015", "S1501_C02_015", # Bachelor's or higher
+  
+  # % of civilian noninstitutionalized population with disability
+  "S1810_C03_001"
+) 
+
+social_acs <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
+                          variables = social_vars, output = "wide", cache = TRUE) %>%
                     filter(NAME == "South Wasco County School District 1, Oregon"),
                   get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
-                          variables = race_vars, output = "wide", cache = TRUE),
+                          variables = social_vars, output = "wide", cache = TRUE),
                   get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-                          variables = race_vars, output = "wide", cache = TRUE)) %>%
-  rename(total_pop = DP05_0001E, total_pop_moe = DP05_0001M, white = DP05_0037PE, white_moe=DP05_0037PM,
-         black = DP05_0038PE, black_moe = DP05_0038PM, american_indian = DP05_0039PE, american_indian_moe = DP05_0039PM,
-         asian = DP05_0044PE, asian_moe =DP05_0044PM, native_hawaiian = DP05_0052PE, native_hawaiian_moe = DP05_0052PM,
-         hispanic = DP05_0071PE, hispanic_moe = DP05_0071PM, other = DP05_0057PE, other_moe = DP05_0057PM,
-         two_races = DP05_0035PE, two_races_moe = DP05_0035PM,
+                          variables = social_vars, output = "wide", cache = TRUE),
+                  get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
+                          variables = social_vars, output = "wide", cache = TRUE)) %>% mutate(year = 2018)
+for(i in 2:length(years)){
+  temp <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = years[i], survey = "acs5",
+                        variables = social_vars, output = "wide", cache = TRUE) %>%
+                  filter(NAME == "South Wasco County School District 1, Oregon"),
+                get_acs(geography = "tract", state= "OR", county="Wasco", year = years[i], survey = "acs5",
+                        variables = social_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
+                        variables = social_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
+                        variables = social_vars, output = "wide", cache = TRUE)) %>% mutate(year =years[i]) 
+  social_acs <- rbind(social_acs, temp)
+}
+social_acs <- social_acs %>% transmute(GEOID = GEOID, NAME = NAME, year = year,
+    total_pop = DP05_0001E, total_pop_moe = DP05_0001M, race_white = DP05_0037PE, race_white_moe=DP05_0037PM,
+    race_black = DP05_0038PE, race_black_moe = DP05_0038PM, race_american_indian = DP05_0039PE, race_american_indian_moe = DP05_0039PM,
+    race_asian = DP05_0044PE, race_asian_moe =DP05_0044PM, race_native_hawaiian = DP05_0052PE, race_native_hawaiian_moe = DP05_0052PM,
+    race_hispanic = DP05_0071PE, race_hispanic_moe = DP05_0071PM, race_other = DP05_0057PE, race_other_moe = DP05_0057PM,
+    race_two_more = DP05_0035PE, race_two_more_moe = DP05_0035PM,
+    
+    family_children_total = B09005_001E, family_children_total_moe = B09005_001M,
+    family_married_parent_perc = B09005_003E/B09005_001E*100, 
+    family_single_parent_perc = (B09005_004E + B09005_005E)/B09005_001E*100, 
+    family_children_nonfamily_perc = B09005_006E/B09005_001E*100,
+    
+    #Education Attainment (for population over 25)
+    education_less_hs = (S1501_C01_007E + S1501_C01_008E) / S1501_C01_006E * 100,
+    education_hs_grad = S1501_C01_009E/ S1501_C01_006E * 100,
+    education_assoc_some_college = (S1501_C01_010E + S1501_C01_011E) / S1501_C01_006E * 100,
+    education_bachelors_or_higher = (S1501_C01_012E + S1501_C01_013E) / S1501_C01_006E * 100,
+    
+    # Percent with a disability
+    disability = S1810_C03_001E, disability_moe = S1810_C03_001M
+  )
 
-         white2 = DP05_0064PE, white_moe2=DP05_0064PM,
-         black2 = DP05_0065PE, black_moe2 = DP05_0065PM, american_indian2 = DP05_0066PE, american_indian_moe2 = DP05_0066PM,
-         asian2 = DP05_0067PE, asian_moe2 =DP05_0067PM, native_hawaiian2 = DP05_0068PE, native_hawaiian_moe2 = DP05_0068PM,
-         hispanic2 = DP05_0071PE, hispanic_moe2 = DP05_0071PM, other2 = DP05_0069PE, other_moe2 = DP05_0069PM)
+fwrite(social_acs,"~/git/dspg20wasco/data/acs/social.csv", sep = ",")
 
-fwrite(pop_race,"~/git/dspg20wasco/data/acs/demographics.csv", sep = ",")
+##### Housing ##########
+housing_vars <- c(
+  # Homeowners in occupied housing units
+  "B25003_001", #Total Occupied Housing Units
+  "B25003_002", #Owner Occupied
+  "B25003_003", #Renter Occupied
+  
+  #Housing affordability-
+  
+  # total of owned-occupied housing units who's monthly housing costs is less than 30% 
+  # Total households in income bracket | less than 20% | 20-29% 
+  "B25106_003", "B25106_004", "B25106_005", #less than 30% for income less than $20,000 
+  "B25106_007", "B25106_008", "B25106_009", #less than 30% for income $20,000-$34999
+  "B25106_011", "B25106_012", "B25106_013", #less than 30% for income $35,000-$49999
+  "B25106_015", "B25106_016", "B25106_017", #less than 30% for income $50,000-$74999
+  "B25106_019", "B25106_020", "B25106_021", #less than 30% for income $75,000 or more
+  
+  #%all rented housing units who's monthly housing costs is less than 30% (share of entire population of rented housing units)
+  # Total households in income bracket | less than 20% | 20-29% 
+  "B25106_025", "B25106_026", "B25106_027",#less than 30% for income less than $20,000 
+  "B25106_029", "B25106_030", "B25106_031",#less than 30% for income $20,000-$34999
+  "B25106_033", "B25106_034", "B25106_035",#less than 30% for income $35,000-$49999
+  "B25106_037", "B25106_038", "B25106_039",#less than 30% for income $50,000-$74999
+  "B25106_041", "B25106_042", "B25106_043" #30% or less for income $75,000 or more
+)
 
-#### family stability for households with children under 18 | counts ########
+housing_acs2 <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
+                 variables = housing_vars, output = "wide", cache = TRUE) %>%
+           filter(NAME == "South Wasco County School District 1, Oregon"),
+         get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
+                 variables = housing_vars, output = "wide", cache = TRUE),
+         get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
+                 variables = housing_vars, output = "wide", cache = TRUE),
+         get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
+                 variables = housing_vars, output = "wide", cache = TRUE)) %>% mutate(year = 2018)
+for(i in 2:length(years)){
+  temp <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = years[i], survey = "acs5",
+                        variables = housing_vars, output = "wide", cache = TRUE) %>%
+                  filter(NAME == "South Wasco County School District 1, Oregon"),
+                get_acs(geography = "tract", state= "OR", county="Wasco", year = years[i], survey = "acs5",
+                        variables = housing_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
+                        variables = housing_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
+                        variables = housing_vars, output = "wide", cache = TRUE)) %>% mutate(year =years[i]) 
+  housing_acs2 <- rbind(housing_acs2, temp)
+}
+housing_acs2 <- housing_acs2 %>% transmute(GEOID = GEOID, NAME = NAME, year = year, 
+                                         # Homeowners
+                                         housing_occupied_total = B25003_001E,
+                                         owner_occupied_housing_total = B25003_002E,
+                                         renter_occupied_housing_total = B25003_003E, ### B25074 for renters: HOUSEHOLD INCOME BY GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
+                                         
+                                         owner_occupied_housing_perc = B25003_002E/B25003_001E *100 ,
+                                         renter_occupied_housing_perc = B25003_003E/B25003_001E *100 ,
+                                         
+                                         # Percent of households who have affordable housing costs
+                                         affordable_housing_own_total = B25106_004E + B25106_005E + B25106_008E + B25106_009E + B25106_012E + 
+                                           B25106_013E + B25106_016E + B25106_017E + B25106_020E + B25106_021E,
+                                         affordable_housing_own_perc = affordable_housing_own_total / B25003_002E * 100,
+                                         affordable_housing_rent_total = B25106_026E + B25106_027E + B25106_030E + B25106_031E + B25106_034E + 
+                                           B25106_035E + B25106_038E + B25106_039E +  B25106_042E + B25106_043E,
+                                         affordable_housing_rent_perc = affordable_housing_rent_total / B25003_003E * 100,
+                                         affordable_housing_all_perc = (affordable_housing_own_total + affordable_housing_rent_total) / B25003_001E *100,
+                                         
+                                         affordable_housing_less_20k = (B25106_004E + B25106_005E + B25106_026E + B25106_027E) / (B25106_003E + B25106_025E) * 100,
+                                         affordable_housing_20k_34k = (B25106_008E + B25106_009E + B25106_030E + B25106_031E)/ (B25106_007E + B25106_029E) * 100,
+                                         affordable_housing_35k_49k = (B25106_012E + B25106_013E + B25106_034E + B25106_035E)/ (B25106_011E + B25106_033E)* 100,
+                                         affordable_housing_50k_74k = (B25106_016E + B25106_017E + B25106_038E + B25106_039E)/ (B25106_015E + B25106_037E) * 100,
+                                         affordable_housing_more_75k = (B25106_020E + B25106_021E + B25106_042E + B25106_043E)/ (B25106_019E + B25106_041E) * 100
+)
 
-#gathered from own children under 18 household...
-family_stability <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
-                                  c("B09002_001", "B09002_002","B09002_008", "B09002_009","B09002_015"), output = "wide") %>%
-                            filter(NAME == "South Wasco County School District 1, Oregon"),
-                          get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
-                                  c("B09002_001", "B09002_002","B09002_008", "B09002_009","B09002_015"), output = "wide", cache = TRUE),
-                          get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-                                  variables = c("B09002_001", "B09002_002","B09002_008", "B09002_009","B09002_015"), output = "wide", cache = TRUE)) %>%
-  rename(total_family = B09002_001E, total_family_moe = B09002_001M,
-         married = B09002_002E, married_moe=B09002_002M,
-         other_family = B09002_008E, other_family_moe = B09002_008M,
-         male_no_spouse = B09002_009E, male_no_spouse_moe = B09002_009M,
-         female_no_spouse = B09002_015E, female_no_spouse_moe =B09002_015M)%>%
-  mutate(married_perc = married/total_family*100,other_family_perc = other_family/total_family*100,
-         male_no_spouse_perc = male_no_spouse/total_family*100, female_no_spouse_perc = female_no_spouse/total_family*100)
-
-
-#### Household characteristics of childre under 18: only available from 2016 as the latest ##########
-# family_stability2 <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
-#                                   c("B09005_001", "B09005_002","B09005_003", "B09005_004","B09005_005","B09005_006"), output = "wide") %>%
-#                             filter(NAME == "South Wasco County School District 1, Oregon"),
-#                           get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
-#                                   c("B09005_001", "B09005_002","B09005_003", "B09005_004","B09005_005","B09005_006"), output = "wide", cache = TRUE),
-#                           get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-#                                   variables = c("B09005_001", "B09005_002","B09005_003", "B09005_004","B09005_005","B09005_006"), output = "wide", cache = TRUE)) %>%
-#   rename(total_household_children= B09005_001E, total_household_children_moe= B09005_001M,
-#          total_family_children = B09005_002E, total_family_children_moe = B09005_002M,
-#          married = B09005_003E, married_moe=B09005_003M,
-#          male_no_spouse = B09005_004E, male_no_spouse_moe = B09005_004M,
-#          female_no_spouse = B09005_005E, female_no_spouse_moe =B09005_005M,
-#          non_family = B09005_006E, non_family_moe = B09005_006E) %>%
-#   mutate(with_family_perc = total_family_children/total_household_children *100 ,married_perc = married/total_household_children*100,
-#          single_parent_family_perc = (male_no_spouse+female_no_spouse)/total_household_children*100,
-#          male_no_spouse_perc = male_no_spouse/total_household_children*100, female_no_spouse_perc = female_no_spouse/total_household_children*100,
-#          non_family_perc = non_family / total_household_children *100)
-
-fwrite(family_stability,"~/git/dspg20wasco/data/acs/family_stability.csv", sep = ",")
-
-######### Economic and financial info ########################
-econ_fin <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
-                          variables = c("S2301_C03_001","S2301_C04_001","S2301_C03_021","S2301_C04_021","S1701_C03_001"), output = "wide")%>%
-                    filter(NAME == "South Wasco County School District 1, Oregon"),
-                  get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-                    variables = c("S2301_C03_001","S2301_C04_001","S2301_C03_021","S2301_C04_021","S1701_C03_001"), output = "wide"),
-                  get_acs(geography = "tract", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
-                          variables = c("S2301_C03_001","S2301_C04_001","S2301_C03_021","S2301_C04_021","S1701_C03_001"), output = "wide"))%>%
-  rename(employment_over_16 = S2301_C03_001E, employment_over_16moe = S2301_C03_001M,
-         unemployment_over_16 = S2301_C04_001E, unemployment_over_16moe = S2301_C04_001M,
-         employment_20_to_64 = S2301_C03_021E, employment_20_to_64moe = S2301_C03_021M,
-         unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64moe = S2301_C04_021M,
-         below_poverty = S1701_C03_001E, below_poverty_moe = S1701_C03_001M)
+fwrite(housing_acs2,"~/git/dspg20wasco/data/acs/housing.csv", sep = ",")
 
 
+##### Housing First try! (DOESNT go earlier than 2016) ##########
+# housing_vars <- c(
+#   # Homeowners in occupied housing units
+#   "B25003_001", #Total Occupied Housing Units
+#   "B25003_002", #Owner Occupied
+#   "B25003_003", #Renter Occupied
+#   
+#   #Housing affordability-
+#   #counts: Total houses | total with less than 20% | total 20%-29%
+#   "S2503_C01_025","S2503_C01_026", "S2503_C01_027", #30% or less for income less than $20,000 
+#   "S2503_C01_029","S2503_C01_030", "S2503_C01_031", #30% or less for income $20,000-$34999
+#   "S2503_C01_033", "S2503_C01_034", "S2503_C01_035", #30% or less for income $35,000-$49999
+#   "S2503_C01_037", "S2503_C01_038", "S2503_C01_039", #30% or less for income $50,000-$74999
+#   "S2503_C01_041", "S2503_C01_042", "S2503_C01_043", #30% or less for income $75,000 or more
+#   
+#   #%all occupied housing units who's monthly housing costs is less than 30% (share of entire population of occupied housing units)
+#   "S2503_C02_026", "S2503_C02_027", #30% or less for income less than $20,000 
+#   "S2503_C02_030", "S2503_C02_031", #30% or less for income $20,000-$34999
+#   "S2503_C02_034", "S2503_C02_035", #30% or less for income $35,000-$49999
+#   "S2503_C02_038", "S2503_C02_039", #30% or less for income $50,000-$74999
+#   "S2503_C02_042", "S2503_C02_043", #30% or less for income $75,000 or more
+#   
+#   #%all owned housing units who's monthly housing costs is less than 30% (share of entire population of owned housing units)
+#   "S2503_C04_026", "S2503_C04_027", #30% or less for income less than $20,000 
+#   "S2503_C04_030", "S2503_C04_031", #30% or less for income $20,000-$34999
+#   "S2503_C04_034", "S2503_C04_035", #30% or less for income $35,000-$49999
+#   "S2503_C04_038", "S2503_C04_039", #30% or less for income $50,000-$74999
+#   "S2503_C04_042", "S2503_C04_043", #30% or less for income $75,000 or more
+#   
+#   #%all rented housing units who's monthly housing costs is less than 30% (share of entire population of rented housing units)
+#   "S2503_C06_026", "S2503_C06_027", #30% or less for income less than $20,000 
+#   "S2503_C06_030", "S2503_C06_031", #30% or less for income $20,000-$34999
+#   "S2503_C06_034", "S2503_C06_035", #30% or less for income $35,000-$49999
+#   "S2503_C06_038", "S2503_C06_039", #30% or less for income $50,000-$74999
+#   "S2503_C06_042", "S2503_C06_043" #30% or less for income $75,000 or more
+# )
+# 
+# housing_acs <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
+#                              variables = housing_vars, output = "wide", cache = TRUE) %>%
+#                        filter(NAME == "South Wasco County School District 1, Oregon"),
+#                      get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
+#                              variables = housing_vars, output = "wide", cache = TRUE),
+#                      get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
+#                              variables = housing_vars, output = "wide", cache = TRUE),
+#                      get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
+#                              variables = housing_vars, output = "wide", cache = TRUE)) %>% mutate(year = 2018)
+# for(i in 2:length(years)){
+#   temp <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = years[i], survey = "acs5",
+#                         variables = housing_vars, output = "wide", cache = TRUE) %>%
+#                   filter(NAME == "South Wasco County School District 1, Oregon"),
+#                 get_acs(geography = "tract", state= "OR", county="Wasco", year = years[i], survey = "acs5",
+#                         variables = housing_vars, output = "wide", cache = TRUE),
+#                 get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
+#                         variables = housing_vars, output = "wide", cache = TRUE),
+#                 get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
+#                         variables = housing_vars, output = "wide", cache = TRUE)) %>% mutate(year =years[i]) 
+#   housing_acs <- rbind(housing_acs, temp)
+# }
+# housing_acs <- housing_acs %>% transmute(GEOID = GEOID, NAME = NAME, year = year, 
+#                                          # Homeowners
+#                                          housing_occupied_total = B25003_001E,
+#                                          owner_occupied_housing_total = B25003_002E,
+#                                          renter_occupied_housing_total = B25003_003E, ### B25074 for renters: HOUSEHOLD INCOME BY GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
+#                                          
+#                                          owner_occupied_housing_perc = B25003_002E/B25003_001E *100 ,
+#                                          renter_occupied_housing_perc = B25003_003E/B25003_001E *100 ,
+#                                          
+#                                          # Percent of households who have affordable housing costs
+#                                          affordable_housing_all = S2503_C02_026E+S2503_C02_027E+S2503_C02_030E+S2503_C02_031E+S2503_C02_034E+S2503_C02_035E+S2503_C02_038E+S2503_C02_039E+S2503_C02_042E+S2503_C02_043E,
+#                                          affordable_housing_own = S2503_C04_026E+S2503_C04_027E+S2503_C04_030E+S2503_C02_031E+S2503_C04_034E+S2503_C04_035E+S2503_C04_038E+S2503_C04_039E+S2503_C04_042E+S2503_C04_043E,
+#                                          affordable_housing_rent = S2503_C06_026E+S2503_C02_027E+S2503_C06_030E+S2503_C06_031E+S2503_C06_034E+S2503_C06_035E+S2503_C06_038E+S2503_C06_039E+S2503_C06_042E+S2503_C06_043E,
+#                                          
+#                                          affordable_housing_less_20k = (S2503_C01_026E + S2503_C01_027E) / S2503_C01_025E * 100,
+#                                          affordable_housing_20k_34k = (S2503_C01_030E + S2503_C01_031E)/S2503_C01_029E * 100,
+#                                          affordable_housing_35k_49k = (S2503_C01_034E + S2503_C01_035E)/S2503_C01_033E * 100,
+#                                          affordable_housing_50k_74k = (S2503_C01_038E + S2503_C01_039E)/S2503_C01_037E * 100,
+#                                          affordable_housing_more_75k = (S2503_C01_042E+S2503_C01_043E)/S2503_C01_041E * 100
+# )
 
-fwrite(econ_fin,"~/git/dspg20wasco/data/acs/employment.csv", sep = ",")
+
+
+
+
+######### Financial ########################
+financial_vars <-  c( # Total Households
+  "S1901_C01_001",
+# Median Household income in the past 12 months ($$):
+"S1901_C01_012",
+#Household income brackets (in %):
+"S1901_C01_002", # % less than 10,000
+"S1901_C01_003", # % between 10,000-14,999
+"S1901_C01_004", # % between 15,000-24,999
+"S1901_C01_005", # % between 25,000-34,999
+"S1901_C01_006", # % between 35,000-49,999
+"S1901_C01_007", # % between 50,000-74,999
+"S1901_C01_008", # % between 75,000-99,999
+"S1901_C01_009", # % between 100,000-149,999
+"S1901_C01_010", # % between 150,000-199,999
+"S1901_C01_011", # % above 200,000
+
+# % percent of entire population for whom poverty status is determined in the past 12 months
+"S1701_C03_001"
+)
+
+financial_acs <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
+                              variables = financial_vars, output = "wide", cache = TRUE) %>%
+                        filter(NAME == "South Wasco County School District 1, Oregon"),
+                      get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
+                              variables = financial_vars, output = "wide", cache = TRUE),
+                      get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
+                              variables = financial_vars, output = "wide", cache = TRUE),
+                      get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
+                              variables = financial_vars, output = "wide", cache = TRUE)) %>% mutate(year = 2018)
+for(i in 2:length(years)){
+  temp <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = years[i], survey = "acs5",
+                        variables = financial_vars, output = "wide", cache = TRUE) %>%
+                  filter(NAME == "South Wasco County School District 1, Oregon"),
+                get_acs(geography = "tract", state= "OR", county="Wasco", year = years[i], survey = "acs5",
+                        variables = financial_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
+                        variables = financial_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
+                        variables = financial_vars, output = "wide", cache = TRUE)) %>% mutate(year =years[i]) 
+  financial_acs <- rbind(financial_acs, temp)
+}
+
+financial_acs <- financial_acs %>% transmute(GEOID = GEOID, NAME = NAME, year = year,
+          
+          #poverty rate for whole population
+          below_poverty = S1701_C03_001E, below_poverty_moe = S1701_C03_001M,
+          
+          #Household income (in %)
+          median_household_income = S1901_C01_012E, median_household_income_moe =  S1901_C01_012M,
+          income_less_than_10k = S1901_C01_002E, income_less_than_10k_moe = S1901_C01_002M,
+          income_10k_14999 = S1901_C01_003E, income_10k_14999_moe = S1901_C01_003M,
+          income_15k_24999 = S1901_C01_004E, income_15k_24999_moe = S1901_C01_004M,
+          income_25k_34999 = S1901_C01_005E, income_25k_34999_moe = S1901_C01_005M,
+          income_35K_49999 = S1901_C01_006E, income_35K_49999_moe = S1901_C01_006M,
+          income_50K_74999 = S1901_C01_007E, income_50K_74999_moe = S1901_C01_007M,
+          income_75K_99999 = S1901_C01_008E, income_75K_99999_moe = S1901_C01_008M,
+          income_100K_149999 = S1901_C01_009E, income_100K_149999_moe = S1901_C01_009M,
+          income_150K_199999 = S1901_C01_010E, income_150K_199999_moe = S1901_C01_010M,
+          income_200K_more = S1901_C01_011E, income_200K_more_moe = S1901_C01_011M
+)
+
+
+fwrite(financial_acs,"~/git/dspg20wasco/data/acs/financial.csv", sep = ",")
+######### Employment ########################
+employment_vars <- c(#Employment and unemployment to population ratio for adults 20-64:
+  "S2301_C03_021","S2301_C04_021",
+  #Employment and unemployment to population ratio for adults 16 and older:
+  "S2301_C03_001","S2301_C04_001"
+
+  )
+
+employment_acs <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
+                               variables = employment_vars, output = "wide", cache = TRUE) %>%
+                         filter(NAME == "South Wasco County School District 1, Oregon"),
+                       get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
+                               variables = employment_vars, output = "wide", cache = TRUE),
+                       get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
+                               variables = employment_vars, output = "wide", cache = TRUE),
+                       get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
+                               variables = employment_vars, output = "wide", cache = TRUE)) %>% mutate(year = 2018)
+for(i in 2:length(years)){
+  temp <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = years[i], survey = "acs5",
+                        variables = employment_vars, output = "wide", cache = TRUE) %>%
+                  filter(NAME == "South Wasco County School District 1, Oregon"),
+                get_acs(geography = "tract", state= "OR", county="Wasco", year = years[i], survey = "acs5",
+                        variables = employment_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
+                        variables = employment_vars, output = "wide", cache = TRUE),
+                get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
+                        variables = employment_vars, output = "wide", cache = TRUE)) %>% mutate(year =years[i]) 
+  employment_acs <- rbind(employment_acs, temp)
+}
+
+employment_acs  <- employment_acs  %>% transmute(GEOID = GEOID, NAME = NAME, year = year,
+                                             
+                                             #employment | unemployment for adults, poverty rate for whole population
+                                             employment_over_16 = S2301_C03_001E, employment_over_16_moe = S2301_C03_001M,
+                                             unemployment_over_16 = S2301_C04_001E, unemployment_over_16_moe = S2301_C04_001M,
+                                             employment_20_to_64 = S2301_C03_021E, employment_20_to_64_moe = S2301_C03_021M,
+                                             unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64_moe = S2301_C04_021M
+                                             )
+
+fwrite(employment_acs,"~/git/dspg20wasco/data/acs/employment.csv", sep = ",")
+
+#### Cannot retrieve block groups from subject tables.
+block_test <- get_acs(geography = "block group", state= "OR", county = "Wasco", year = 2017, survey = "acs5",
+        variables = c("S2301_C03_001","S2301_C04_001","S2301_C03_021","S2301_C04_021","S1701_C03_001"), output = "wide")
+
+
+#fwrite(econ_fin,"~/git/dspg20wasco/data/acs/employment.csv", sep = ",")

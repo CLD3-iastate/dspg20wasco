@@ -7,15 +7,23 @@ library(ggthemes);library(maps);library(tigris)
 library(here)
 
 #read in combined dataset
-acs_data <- fread(here("/data/acs/combined_acs.csv"))
-acs18 <- filter(acs_data, year == 2018, NAME == "South Wasco County School District 1, Oregon" | NAME == "Wasco County, Oregon"| NAME == "Oregon")
+acs_data <- fread(here("/data/acs/combined_acs.csv")) 
+acs_data$GEOID <- as.character(acs_data$GEOID)
+acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
+                         NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
+                         NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
+                         NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
+                         NAME == "Oregon")
 
 
 #get tract level geography
-wasco_tracts <- tracts(state = "OR", county = "Wasco", 
+or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "Jefferson"),
                        cb = TRUE)
-wasco_tract_acs <- acs_data %>% filter(grepl("Tract",NAME)) %>% mutate(GEOID = as.character(GEOID))
-wasco_tract_acs <- geo_join(wasco_tracts, wasco_tract_acs, by = "GEOID")  
+wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
+                    cb = TRUE)
+tract_geo <- rbind(or_tracts, wa_tracts)
+acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
+acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")  
 
 
 
@@ -24,7 +32,7 @@ wasco_tract_acs <- geo_join(wasco_tracts, wasco_tract_acs, by = "GEOID")
 #   filter(acs_data, year == 2018, NAME == "South Wasco" | NAME == "Wasco"| NAME == "Oregon")
 
 # Median Household Income Bar chart for 2018
-ggplot(acs18, aes(x = NAME, y = median_household_income))+
+ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = median_household_income))+
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = median_household_income - median_household_income_moe, 
                     ymax = median_household_income + median_household_income_moe), color = "dark orange") + 
@@ -33,8 +41,7 @@ ggplot(acs18, aes(x = NAME, y = median_household_income))+
 
 
 # Median Household Income grouped line chart for all years
-ggplot(filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | NAME == "Wasco County, Oregon"| NAME == "Oregon"),
-       aes(x=year, y=median_household_income, group = NAME, color = NAME)) +
+ggplot(acs_counties, aes(x=year, y=median_household_income, group = NAME, color = NAME)) +
   geom_line() + 
   geom_point() +
   geom_pointrange(aes(ymin=median_household_income - median_household_income_moe, ymax=median_household_income + median_household_income_moe)) +
@@ -44,13 +51,15 @@ ggplot(filter(acs_data, NAME == "South Wasco County School District 1, Oregon" |
 
 # Median Household Income tract map for 2018
 ggplot() +
-  geom_sf(data = filter(wasco_tract_acs, year == 2018), aes(fill = median_household_income)) +
-  labs(title = "Median Household Income by census track")
+  geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = median_household_income)) +
+  geom_sf(fill = "transparent", color = "gray20", size = 1, 
+          data = acs_tracts %>% group_by(COUNTYFP) %>% summarise()) +
+  labs(title = "Median Household Income by census track") 
 
 
 
 #grouped columns for household income brackets.
-income <- select(acs18, NAME, contains("income"))
+income <- select(filter(acs_counties, year == 2018), NAME, contains("income"))
 income <- income %>% select(!contains("moe"), -median_household_income)
 income <- melt(income, id.vars = "NAME", measure.vars = colnames(income)[-1])
 ggplot(income)+
@@ -65,7 +74,7 @@ ggplot(income)+
 
 
 # poverty rate
-ggplot(acs18, aes(x = NAME, y = below_poverty)) +
+ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = below_poverty)) +
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = below_poverty - below_poverty_moe, 
                     ymax = below_poverty + below_poverty_moe), color = "dark orange") + 
@@ -81,7 +90,7 @@ ggplot() +
 
 ##### Employment ########
 
-ggplot(acs18, aes(x = NAME, y = employment_20_to_64)) +
+ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = employment_20_to_64)) +
   geom_col(fill = "dark blue")+
   geom_errorbar(aes(x = NAME, ymin = employment_20_to_64 - employment_20_to_64_moe, 
                     ymax = employment_20_to_64 + employment_20_to_64_moe), color = "dark orange") + 
@@ -91,7 +100,7 @@ ggplot(acs18, aes(x = NAME, y = employment_20_to_64)) +
 
 
 ggplot() +
-  geom_sf(data = filter(wasco_tract_acs, year == 2018), aes(fill = employment_20_to_64)) +
+  geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = employment_20_to_64)) +
   labs(title = "Percent of employed adults adults 20 to 64 by census track") #+ 
 #theme_map)()
 #ggsave(path="~/git/dspg20wasco/output", device = "png", filename="employment_by_tract18.png", plot=last_plot())

@@ -6,9 +6,10 @@ library(data.table)
 #census_api_key("adb7bddbd043e99c415c4475d151b00c8cd4971a", overwrite = TRUE, install= TRUE)
 
 ######## CREATE COMBINED DATASET FOR YEARS 2015-2018 FROM 5 YEAR ESTIMATES #########
+#Oregon state level collected from ACS 1 year estimates
 #single years are 5 year weighted estimates for tract and county level,
 #school year estimates don't change over 5 year period.
-#this is wide format... try long format?
+#this is wide format
 years <- c(2018, 2017, 2016, 2015)
 acsvars <- c(
   #Employment and unemployment to population ratio for adults 20-64:
@@ -16,6 +17,20 @@ acsvars <- c(
   #Employment and unemployment to population ratio for adults 16 and older:
   "S2301_C03_001","S2301_C04_001",
 
+  ### median earnings
+  # population 16 years and older with earnings
+  # Total | Median Earning $$
+  "S2001_C01_001", "S2001_C01_002", 
+  
+  # Median by education attainment | population 25 years and older with earnings
+  "S2001_C01_015", #total 
+  "S2001_C01_016", # less than HS
+  "S2001_C01_017", #high school grad
+  "S2001_C01_018", #Some college or associates
+  "S2001_C01_019", #Bachelor's degree
+  "S2001_C01_020", #graduate or professional
+  
+  
 
   # Total Households
   "S1901_C01_001",
@@ -101,20 +116,74 @@ acsvars <- c(
 combined_acs <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = 2018, survey = "acs5",
                             variables = acsvars, output = "wide", cache = TRUE) %>%
                       filter(NAME == "South Wasco County School District 1, Oregon"),
+                    #wasco county
                     get_acs(geography = "tract", state= "OR", county="Wasco", year = 2018, survey = "acs5",
                             variables = acsvars, output = "wide", cache = TRUE),
                     get_acs(geography = "county", state= "OR", county = "Wasco", year = 2018, survey = "acs5",
                             variables = acsvars, output = "wide", cache = TRUE),
+                    #hood river county
+                    get_acs(geography = "tract", state= "OR", county="Hood River", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Hood River", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #sherman county
+                    get_acs(geography = "tract", state= "OR", county="Sherman", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Sherman", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #jefferson county
+                    get_acs(geography = "tract", state= "OR", county="Jefferson", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Jefferson", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #skamania county
+                    get_acs(geography = "tract", state= "WA", county="Skamania", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "WA", county = "Skamania", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #klickitat county
+                    get_acs(geography = "tract", state= "WA", county="Klickitat", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "WA", county = "Klickitat", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #state
                     get_acs(geography = "state", state= "OR", year = 2018, survey = "acs1",
                             variables = acsvars, output = "wide", cache = TRUE)) %>% mutate(year = 2018)
 for(i in 2:length(years)){
   temp <- rbind(get_acs(geography = "school district (unified)", state= "OR", year = years[i], survey = "acs5",
                         variables = acsvars, output = "wide", cache = TRUE) %>%
                   filter(NAME == "South Wasco County School District 1, Oregon"),
+                #wasco county
                 get_acs(geography = "tract", state= "OR", county="Wasco", year = years[i], survey = "acs5",
                         variables = acsvars, output = "wide", cache = TRUE),
                 get_acs(geography = "county", state= "OR", county = "Wasco", year = years[i], survey = "acs5",
                         variables = acsvars, output = "wide", cache = TRUE),
+                #hood river county
+                get_acs(geography = "tract", state= "OR", county="Hood River", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Hood River", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                #sherman county
+                get_acs(geography = "tract", state= "OR", county="Sherman", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Sherman", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                #jefferson county
+                get_acs(geography = "tract", state= "OR", county="Jefferson", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Jefferson", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                #skamania county
+                get_acs(geography = "tract", state= "WA", county="Skamania", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "WA", county = "Skamania", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                #klickitat county
+                get_acs(geography = "tract", state= "WA", county="Klickitat", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "WA", county = "Klickitat", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                #oregon state
                 get_acs(geography = "state", state= "OR", year = years[i], survey = "acs1",
                         variables = acsvars, output = "wide", cache = TRUE)) %>% mutate(year =years[i]) 
   combined_acs <- rbind(combined_acs, temp)
@@ -132,6 +201,17 @@ combined_acs <- combined_acs %>%
           unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64_moe = S2301_C04_021M,
           below_poverty = S1701_C03_001E, below_poverty_moe = S1701_C03_001M,
 
+          earnings_16_older_total = S2001_C01_001E, earnings_16_older_total_moe = S2001_C01_001M,
+          earnings_16_older_median = S2001_C01_002E, earnings_16_older_median_moe = S2001_C01_002M,
+          earnings_25_older_total = S2001_C01_015E, earnings_25_older_total_moe = S2001_C01_015M,
+          earnings_25_older_less_hs = S2001_C01_016E,earnings_25_older_less_hs_moe = S2001_C01_016M,
+          earnings_25_older_hs_grad = S2001_C01_017E,earnings_25_older_hs_grad_moe = S2001_C01_017M,
+          earnings_25_older_some_college = S2001_C01_018E,earnings_25_older_some_college_moe = S2001_C01_018M,
+          earnings_25_older_bachelors = S2001_C01_019E,earnings_25_older_bachelors_moe = S2001_C01_019M,
+          earnings_25_older_graduate = S2001_C01_020E,earnings_25_older_graduate_moe = S2001_C01_020M,
+          
+          
+          
           #Household income (in %)
           median_household_income = S1901_C01_012E, median_household_income_moe =  S1901_C01_012M,
           income_less_than_10k = S1901_C01_002E, income_less_than_10k_moe = S1901_C01_002M,
@@ -192,7 +272,7 @@ combined_acs <- combined_acs %>%
 
 #remove geometry variable since list cannot be exported
 
-fwrite(combined_acs,"~/git/dspg20wasco/data/acs/combined_acs.csv", sep = ",")
+#fwrite(combined_acs,"~/git/dspg20wasco/data/acs/combined_acs.csv", sep = ",")
 
 
 
@@ -281,7 +361,9 @@ social_acs <- social_acs %>% transmute(GEOID = GEOID, NAME = NAME, year = year,
     disability = S1810_C03_001E, disability_moe = S1810_C03_001M
   )
 
-fwrite(social_acs,"~/git/dspg20wasco/data/acs/social.csv", sep = ",")
+#fwrite(social_acs,"~/git/dspg20wasco/data/acs/social.csv", sep = ",")
+
+
 
 ##### Housing ##########
 housing_vars <- c(
@@ -355,7 +437,7 @@ housing_acs2 <- housing_acs2 %>% transmute(GEOID = GEOID, NAME = NAME, year = ye
                                          affordable_housing_more_75k = (B25106_020E + B25106_021E + B25106_042E + B25106_043E)/ (B25106_019E + B25106_041E) * 100
 )
 
-fwrite(housing_acs2,"~/git/dspg20wasco/data/acs/housing.csv", sep = ",")
+#fwrite(housing_acs2,"~/git/dspg20wasco/data/acs/housing.csv", sep = ",")
 
 
 ##### Housing First try! (DOESNT go earlier than 2016) ##########
@@ -504,12 +586,27 @@ financial_acs <- financial_acs %>% transmute(GEOID = GEOID, NAME = NAME, year = 
 )
 
 
-fwrite(financial_acs,"~/git/dspg20wasco/data/acs/financial.csv", sep = ",")
+#fwrite(financial_acs,"~/git/dspg20wasco/data/acs/financial.csv", sep = ",")
+
+
 ######### Employment ########################
 employment_vars <- c(#Employment and unemployment to population ratio for adults 20-64:
   "S2301_C03_021","S2301_C04_021",
   #Employment and unemployment to population ratio for adults 16 and older:
-  "S2301_C03_001","S2301_C04_001"
+  "S2301_C03_001","S2301_C04_001",
+  
+  ### median earnings
+  # population 16 years and older with earnings
+  # Total | Median Earning $$
+  "S2001_C01_001", "S2001_C01_002", 
+  
+  # Median by education attainment | population 25 years and older with earnings
+  "S2001_C01_015", #total 
+  "S2001_C01_016", # less than HS
+  "S2001_C01_017", #high school grad
+  "S2001_C01_018", #Some college or associates
+  "S2001_C01_019", #Bachelor's degree
+  "S2001_C01_020" #graduate or professional
 
   )
 
@@ -541,10 +638,19 @@ employment_acs  <- employment_acs  %>% transmute(GEOID = GEOID, NAME = NAME, yea
                                              employment_over_16 = S2301_C03_001E, employment_over_16_moe = S2301_C03_001M,
                                              unemployment_over_16 = S2301_C04_001E, unemployment_over_16_moe = S2301_C04_001M,
                                              employment_20_to_64 = S2301_C03_021E, employment_20_to_64_moe = S2301_C03_021M,
-                                             unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64_moe = S2301_C04_021M
+                                             unemployment_20_to_64 = S2301_C04_021E, unemployment_20_to_64_moe = S2301_C04_021M,
+                                             
+                                             earnings_16_older_total = S2001_C01_001E, earnings_16_older_total_moe = S2001_C01_001M,
+                                             earnings_16_older_median = S2001_C01_002E, earnings_16_older_median_moe = S2001_C01_002M,
+                                             earnings_25_older_total = S2001_C01_015E, earnings_25_older_total_moe = S2001_C01_015M,
+                                             earnings_25_older_less_hs = S2001_C01_016E,earnings_25_older_less_hs_moe = S2001_C01_016M,
+                                             earnings_25_older_hs_grad = S2001_C01_017E,earnings_25_older_hs_grad_moe = S2001_C01_017M,
+                                             earnings_25_older_some_college = S2001_C01_018E,earnings_25_older_some_college_moe = S2001_C01_018M,
+                                             earnings_25_older_bachelors = S2001_C01_019E,earnings_25_older_bachelors_moe = S2001_C01_019M,
+                                             earnings_25_older_graduate = S2001_C01_020E,earnings_25_older_graduate_moe = S2001_C01_020M
                                              )
 
-fwrite(employment_acs,"~/git/dspg20wasco/data/acs/employment.csv", sep = ",")
+#fwrite(employment_acs,"~/git/dspg20wasco/data/acs/employment.csv", sep = ",")
 
 #### Cannot retrieve block groups from subject tables.
 block_test <- get_acs(geography = "block group", state= "OR", county = "Wasco", year = 2017, survey = "acs5",

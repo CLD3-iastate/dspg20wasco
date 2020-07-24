@@ -482,54 +482,9 @@ interactive maps
 library(leaflet)
 library(mapview)
 uvatheme <- colorRampPalette(c('#D1E0BF', '#E57200'))
-
-
-map_2017_data <- mapview(south_wasco_points, label = NULL, 
-        alpha.region = 0, legend = FALSE,
-        color = "dark green", popup = NULL,
-        layer.name = "South Wasco School District") + 
-  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
-          values = agg_17$S000,
-          at = quantile(agg_17$S000),
-          label = agg_17$S000, legend = TRUE,
-          layer.name = 'South Wasco Job Density by Census Block (2017)',
-          zcol = 'S000',
-          col.regions = uvatheme(agg_17$S000)) +
-  
-  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
-          values = agg_17$SI01,
-          at = quantile(agg_17$S000),
-          label = agg_17$SI01, legend = TRUE,
-          layer.name = 'South Wasco Goods Producing Sector\n Job Density by Census Block (2017)',
-          zcol = 'SI01',
-          col.regions = uvatheme(agg_17$S000)) +
-  
-  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
-          values = agg_17$SI02,
-          at = quantile(agg_17$S000),
-          label = agg_17$SI02, legend = TRUE,
-          layer.name = 'South Wasco Trade, Transportation,and Utilities\n Job Density by Census Block
-          (2017)',
-          zcol = 'SI02',
-          col.regions = uvatheme(agg_17$S000)) +
-  
-  mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
-          values = agg_17$SI03,
-          at = quantile(agg_17$S000),
-          label = agg_17$SI03, legend = TRUE,
-          layer.name = 'South Wasco All Other Services industry\n Job Density by Census Block
-          (2017)',
-          zcol = 'SI02',
-          col.regions = uvatheme(agg_17$S000))
-
-
-
-
-
-map_2017_data
 ```
 
-make it leaflet
+
 ```{r}
 map2017leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
@@ -873,11 +828,17 @@ raster::raster("../data/lodes/raster/CDL_2017_41065.tif")
 
 ```{r}
 #raster: install.packages("raster")
-rgdal: install.packages("rgdal")
+#install.packages("rgdal", dependencies = TRUE)
+#install.packages('raster', repos = 'http://r-forge.r-project.org/', type = 'source')
 library(raster)
+#library(rgdal)
 
 r <- raster("../data/lodes/raster/CDL_2017_41065.tif")
-#map2017leaf %>%
-#  addRasterImage()
+
+```
+
+
+```{r}
+r
 ```
 

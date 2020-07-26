@@ -14,6 +14,32 @@ library(esri2sf)
 library(osmdata)
 library(sf)
 library(tidygeocoder)
+library(dplyr)
+library(stringr)
+
+## OSM grocery code -------
+
+bb <- c(-121.8521, 44.6139, -120.2673, 45.7215)
+
+#building the query
+q <- bb %>%
+  opq(timeout = 25*100) %>%
+  add_osm_feature("shop")
+
+#query
+shops <- osmdata_sf(q)
+
+grocery <- shops$osm_polygons %>%
+  filter(str_detect(shop, "convenience|supermarket|farm")) %>%
+  select(name, shop, payment.snap, payment.wic)
+
+cntrd = st_centroid(grocery)
+
+coords <- do.call(rbind, st_geometry(cntrd)) %>%
+  as_tibble() %>% setNames(c("lon","lat"))
+
+cntrd %>% filter(str_detect(payment.snap, "yes"))
+
 
 ## Pulling in SWSD ------
 # 41 is FIPS code for Oregon, or use "Oregon"
@@ -249,6 +275,7 @@ st_write(unincorporated, "~/git/dspg20wasco/data/shps/unincorporated.shp")
 st_write(countyline, "~/git/dspg20wasco/data/shps/countyline.shp")
 st_write(roads, "~/git/dspg20wasco/data/shps/roads.shp")
 
+st_write(cntrd, "~/git/DSPG2020/wasco/data/cntrd.shp")
 
 library(jsonlite)
 fromJSON("api.ed.gov/data/crdc_enrollment_2013-14?api_key=IKcpkyBEXGRF1mblpDUjonQiJ4ePk37YsEc2U3KDY/", flatten = TRUE)
@@ -262,3 +289,28 @@ https://api.ed.gov/data/mbk-highschool-dropout?api_key=KcpkyBEXGRF1mblpDUjonQiJ4
 CRDC_data <- CRDC_Query(api_key = "KcpkyBEXGRF1mblpDUjonQiJ4ePk37YsEc2U3KDY", dataset = "suspension", per_page = 100, page = 2, preprocess = FALSE)
 
 str(CRDC_data, list.len = 10)
+
+
+devtools::install_github('UrbanInstitute/education-data-package-r')
+library(educationdata)
+
+education <-  get_education_data(level = 'schools',
+                                source = 'crdc',
+                                topic = 'chronic-absenteeism',
+                                by = list('disability', 'sex'),
+                                filters = list(year = 2015,
+                                               #grade = 9:12,
+                                               ncessch = '410002101167'),
+                                add_labels = TRUE)
+
+## extra shop code --------
+shops <- getbb("Wasco County United States") %>%
+  opq() %>%
+  add_osm_feature("shop", ) %>%
+  osmdata_sf()
+
+
+q <- bb %>%
+  opq (timeout = 25*100) %>%
+  add_osm_feature("shop", "supermarket") %>%
+  osmdata_sf()

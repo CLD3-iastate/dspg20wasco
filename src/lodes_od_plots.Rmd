@@ -1,5 +1,5 @@
 ---
-title: "Lodes Plots"
+title: "Lodes OD Plots"
 author: "Owen Hart"
 date: "7/15/2020"
 output: html_document
@@ -16,6 +16,7 @@ library(sf)
 library(leaflet)
 library(mapview)
 library(reshape2)
+library(raster)
 ```
 
 ```{r}
@@ -72,7 +73,6 @@ Must load in Oregon XWalk csv
 
 or_xw <- read_csv("../data/lodes/or_xwalk.csv", col_types = cols(cty = col_character()))
 or_xw <- or_xw %>% filter(st == 41)
-or_xw
 ```
 What % of jobs flow from outside of Fairfax County?
 ```{r}
@@ -403,156 +403,9 @@ agg_15 <- wascolines_15 %>%
             SI03 = sum(SI03))
 ```
 
-
-```{r}
-agg_17
-data.frame(south_wasco_points)
-
-ggplot(south_wasco_points) +
-  geom_sf() +
-  geom_sf(data=agg_17[agg_17$S000 < 600, ], aes(fill= S000, geometry = geometry)) + #got rid of 1 outliar of 774
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2017") +
-  labs(fill = "Number of Jobs")
-```
-
-
-
-2017 maps
-```{r}
-alljobs_2017 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_17[agg_17$S000 < 600, ], aes(fill= S000, geometry = geometry)) + #got rid of 1 outliar of 774
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2017") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "alljobs_2017.png", plot = alljobs_2017)
-
-goodsjobs_2017 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_17, aes(fill=SI01, geometry = geometry)) + 
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in Goods Producing industry sectors\n in South Wasco County by Census Block in 2017") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "goodsjobs_2017.png", plot = goodsjobs_2017)
-
-
-
-utilsjobs_2017 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_17, aes(fill=SI02, geometry = geometry)) + 
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in Trade, Transportation,\n and Utilities industry sectors\n in South Wasco County by Census Block in 2017") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "utilsjobs_2017.png", plot = utilsjobs_2017)
-  
-servicejobs_2017 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_17[agg_17$SI03 < 600, ], aes(fill=SI03, geometry = geometry)) +  # 1 outliar
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in All Other Services industry sectors\n in South Wasco County by Census Block in 2017") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2017", device = "png", filename = "servicejobs_2017.png", plot = servicejobs_2017)
-
-```
-
-2016 maps
-```{r}
-alljobs_2016 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_16[agg_16$S000 < 600, ], aes(fill=S000, geometry = geometry)) + # 1 outliar
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2016") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "alljobs_2016.png", plot = alljobs_2016)
-
-goodsjobs_2016 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_16, aes(fill=SI01, geometry = geometry)) + 
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in Goods Producing industry sectors\n in South Wasco County by Census Block in 2016") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "goodsjobs_2016.png", plot = goodsjobs_2016)
-
-
-utilsjobs_2016 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_16, aes(fill=SI02, geometry = geometry)) + 
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in Trade, Transportation,\n and Utilities industry sectors\n in South Wasco County by Census Block in 2016") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "utilsjobs_2016.png", plot = utilsjobs_2016)
-  
-servicejobs_2016 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_16[agg_16$SI03 < 600, ], aes(fill=SI03, geometry = geometry)) +  # 1 outliar
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in All Other Services industry sectors\n in South Wasco County by Census Block in 2016") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2016", device = "png", filename = "servicejobs_2016.png", plot = servicejobs_2016)
-```
-
-2015 maps
-```{r}
-alljobs_2015 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_15[agg_15$S000 < 600, ], aes(fill=S000, geometry = geometry)) + #1 outliar
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in South Wasco County\n by Census Block in 2015") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "alljobs_2015.png", plot = alljobs_2015)
-
-goodsjobs_2015 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_15, aes(fill=SI01, geometry = geometry)) + 
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in Goods Producing industry sectors\n in South Wasco County by Census Block in 2015") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "goodsjobs_2015.png", plot = goodsjobs_2015)
-
-
-utilsjobs_2015 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_15, aes(fill=SI02, geometry = geometry)) + 
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in Trade, Transportation,\n and Utilities industry sectors\n in South Wasco County by Census Block in 2015") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "utilsjobs_2015.png", plot = utilsjobs_2015)
-  
-servicejobs_2015 <- ggplot(wasco_county) +
-  geom_sf() +
-  geom_sf(data = south_wasco_points, color = "red") +
-  geom_sf(data=agg_15[agg_15$SI03 < 600, ], aes(fill=SI03, geometry = geometry)) +  # 1 outliar
-  scale_fill_gradient(low="light gray", high="green") +
-  ggtitle("Total number of jobs in All Other Services industry sectors\n in South Wasco County by Census Block in 2015") +
-  labs(fill = "Number of Jobs")
-ggsave(path = "../output/lodes_maps/2015", device = "png", filename = "servicejobs_2015.png", plot = servicejobs_2015)
-```
-```{r}
-mapview(st_as_sf(agg_17), map.types = 'CartoDB.Positron',
-          values = agg_17$SI01,
-          at = quantile(agg_17$S000),
-          label = agg_17$SI01, legend = TRUE,
-          layer.name = 'South Wasco Goods Producing Sector\n Job Density by Census Block (2017)',
-          zcol = 'SI01',
-          col.regions = uvatheme(agg_17$S000))
-```
-
 interactive maps
 ```{r}
 library(leaflet)
-library(mapview)
 uvatheme <- colorRampPalette(c('#D1E0BF', '#E57200'))
 ```
 
@@ -874,7 +727,7 @@ map2015leaf
 
 
 Aaron's script
-
+... try using stars
 ```{r}
 crop_mask_raster_to_spatial <- function(raster_obj, sf_obj) {
   library(raster)
@@ -892,44 +745,9 @@ crop_mask_raster_to_spatial <- function(raster_obj, sf_obj) {
   }
   out_ls
 }
- 
-#** get polygons (Virginia block group spatial(sf) files) ---- >> HAVE FOR WASCO
-con <- sdalr::con_db(dbname = "sdad", host = "localhost", port = 5433, pass = "Iwnftp$2")
-sf <- sf::st_read(con, c("geospatial$census_cb", "cb_2016_51_bg_500k"))
-#** get list of county fips codes ---- >>>> ONLY ONE FOR WASCO
-countyfp <- unique(sf[sf$STATEFP=="51", "COUNTYFP"]$COUNTYFP)
-#** create and register cluster for parallel processing ----
-cl <- parallel::makeCluster(15, outfile = "")
-doParallel::registerDoParallel(cl)
-#** for each county, create file of crop acres by type by block group ----
-library(foreach)
-for (f in cdl_files) {
-  print(paste("working with file:", f))
-  r <- raster::raster(f)
-  y <- stringr::str_match(f, "_(\\d\\d\\d\\d)")[,2]
-  foreach::foreach (fp = countyfp) %dopar% {
-    print(paste("working on fips code:", fp))
-    . <- crop_mask_raster_to_spatial(r, sf[sf$STATEFP=="51" & sf$COUNTYFP==fp,])
-    . <- raster_sqm_to_acres(.)
-    filename <- paste0("bg_acres_by_class_", fp, "_", y, ".csv")
-    data.table::fwrite(., file.path("data/working/usda_cdl", filename))
-  }
-}
-#** return resources ----
-parallel::stopCluster(cl)
- 
-#* Combine all data files, add year and description columns, save new file ----
-data_files <- list.files("data/working/usda_cdl", full.names = T, pattern = ".*[0-9]\\.csv")
-if (exists("final_dt") == T) rm(final_dt)
-for (f in data_files) {
-  yr <- stringr::str_match(f, "_(\\d\\d\\d\\d)")[,2]
-  dt <- data.table::fread(f)
-  dt$year <- yr
-  if (exists("final_dt") == T) final_dt <- data.table::rbindlist(list(final_dt, dt))
-  else final_dt <- dt
-}
-final_dt$desc <- cdlTools::updateNamesCDL(final_dt$class)
-data.table::fwrite(final_dt, file.path("data/working/usda_cdl", "bg_acres_by_class_all.csv"))
+raster_2017 <- raster("../data/lodes/raster/CDL_2017_41065.tif")
+sf <- tracts("OR", "Wasco County")
+x <- crop_mask_raster_to_spatial(raster_2017, sf)
 ```
 
 
@@ -942,20 +760,14 @@ data.table::fwrite(final_dt, file.path("data/working/usda_cdl", "bg_acres_by_cla
 
 raster
 ```{r}
-library(raster)
-library(stars)
 library(rgdal)
-
-raster_2017 <- raster("../data/lodes/raster/CDL_2017_41065.tif")
-raster_2017
-#st_as_sf(read_stars("../data/lodes/raster/CDL_2017_41065.tif"), as_points = TRUE, merge = FALSE)
+crs(raster_2017) <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+leaflet() %>% 
+  addTiles() %>%
+  addRasterImage(raster_2017)
 ```
 
 takes forever to run (using 8 cores)
-```{r}
-cdl_sf_2017 <- st_as_stars(raster_2017)%>% 
-  st_as_sf(merge = TRUE)
-```
 
 ```{r}
 rasterToPolygons(raster_2017)

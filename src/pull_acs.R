@@ -232,36 +232,47 @@ combined_acs <- combined_acs %>%
           race_two_more = DP05_0035PE, race_two_more_moe = DP05_0035PM,
 
           family_children_total = B09005_001E, family_children_total_moe = B09005_001M,
-          family_married_parent_perc = B09005_003E/B09005_001E*100, 
-          family_single_parent_perc = (B09005_004E + B09005_005E)/B09005_001E*100, 
-          family_children_nonfamily_perc = B09005_006E/B09005_001E*100,
-          family_nonfamily_household_perc = B09019_024E/B09019_002E*100,
+          family_married_parent_perc = B09005_003E/B09005_001E*100, family_married_parent_perc_moe = B09005_003M/B09005_001E*100,
+          family_single_parent_perc = (B09005_004E + B09005_005E)/B09005_001E*100, family_single_parent_perc_moe = (B09005_004M + B09005_005M)/B09005_001E*100,
+          family_children_nonfamily_perc = B09005_006E/B09005_001E*100,family_children_nonfamily_perc_moe = B09005_006M/B09005_001E*100,
+          family_nonfamily_household_perc = B09019_024E/B09019_002E*100, family_nonfamily_household_perc_moe = B09019_024M/B09019_002E*100,
           
           #Education Attainment (for population over 25)
-          education_less_hs = (S1501_C01_007E + S1501_C01_008E) / S1501_C01_006E * 100,
-          education_hs_grad = S1501_C01_009E/ S1501_C01_006E * 100,
-          education_assoc_some_college = (S1501_C01_010E + S1501_C01_011E) / S1501_C01_006E * 100,
-          education_bachelors_or_higher = (S1501_C01_012E + S1501_C01_013E) / S1501_C01_006E * 100,
+          education_less_hs = (S1501_C01_007E + S1501_C01_008E) / S1501_C01_006E * 100, education_less_hs_moe = (S1501_C01_007M + S1501_C01_008M) / S1501_C01_006E * 100,
+          education_hs_grad = S1501_C01_009E/ S1501_C01_006E * 100,education_hs_grad_moe = S1501_C01_009M/ S1501_C01_006E * 100,
+          education_assoc_some_college = (S1501_C01_010E + S1501_C01_011E) / S1501_C01_006E * 100,education_assoc_some_college_moe = (S1501_C01_010M + S1501_C01_011M) / S1501_C01_006E * 100,
+          education_bachelors_or_higher = (S1501_C01_012E + S1501_C01_013E) / S1501_C01_006E * 100,education_bachelors_or_higher_moe = (S1501_C01_012M + S1501_C01_013M) / S1501_C01_006E * 100,
 
           # Percent with a disability
           disability = S1810_C03_001E, disability_moe = S1810_C03_001M,
 
           # Homeowners
-          housing_occupied_total = B25003_001E,
-          owner_occupied_housing_total = B25003_002E,
-          renter_occupied_housing_total = B25003_003E, ### B25074 for renters: HOUSEHOLD INCOME BY GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
+          housing_occupied_total = B25003_001E, housing_occupied_total_moe = B25003_001M,
+          owner_occupied_housing_total = B25003_002E, owner_occupied_housing_total_moe = B25003_002M,
+          renter_occupied_housing_total = B25003_003E, renter_occupied_housing_total_moe = B25003_003M,### B25074 for renters: HOUSEHOLD INCOME BY GROSS RENT AS A PERCENTAGE OF HOUSEHOLD INCOME IN THE PAST 12 MONTHS
           
-          owner_occupied_housing_perc = B25003_002E/B25003_001E *100 ,
-          renter_occupied_housing_perc = B25003_003E/B25003_001E *100 ,
+          owner_occupied_housing_perc = B25003_002E/B25003_001E *100, owner_occupied_housing_perc_moe = B25003_002M/B25003_001E *100,
+          renter_occupied_housing_perc = B25003_003E/B25003_001E *100, renter_occupied_housing_perc_moe = B25003_003M/B25003_001E *100,
           
           # Percent of households who have affordable housing costs
           affordable_housing_own_total = B25106_004E + B25106_005E + B25106_008E + B25106_009E + B25106_012E + 
             B25106_013E + B25106_016E + B25106_017E + B25106_020E + B25106_021E,
+          affordable_housing_own_total_moe = B25106_004M + B25106_005M + B25106_008M + B25106_009M + B25106_012M + 
+            B25106_013M + B25106_016M + B25106_017M + B25106_020M + B25106_021M,
+          
           affordable_housing_own_perc = affordable_housing_own_total / B25003_002E * 100,
+          affordable_housing_own_perc_moe = affordable_housing_own_total_moe / B25003_002E * 100,
+          
           affordable_housing_rent_total = B25106_026E + B25106_027E + B25106_030E + B25106_031E + B25106_034E + 
             B25106_035E + B25106_038E + B25106_039E +  B25106_042E + B25106_043E,
+          affordable_housing_rent_total_moe = B25106_026M + B25106_027M + B25106_030M + B25106_031M + B25106_034M + 
+            B25106_035M + B25106_038M + B25106_039M +  B25106_042M + B25106_043M,
+          
           affordable_housing_rent_perc = affordable_housing_rent_total / B25003_003E * 100,
+          affordable_housing_rent_perc_moe = affordable_housing_rent_total_moe / B25003_003E * 100,
+          
           affordable_housing_all_perc = (affordable_housing_own_total + affordable_housing_rent_total) / B25003_001E *100,
+          affordable_housing_all_perc_moe = (affordable_housing_own_total_moe + affordable_housing_rent_total_moe) / B25003_001E *100,
           
           affordable_housing_less_20k = (B25106_004E + B25106_005E + B25106_026E + B25106_027E) / (B25106_003E + B25106_025E) * 100,
           affordable_housing_20k_34k = (B25106_008E + B25106_009E + B25106_030E + B25106_031E)/ (B25106_007E + B25106_029E) * 100,

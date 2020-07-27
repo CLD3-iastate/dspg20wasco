@@ -12,6 +12,7 @@ library(data.table)
 library(dashboardthemes)
 library(stringr)
 library(tigris)
+library(plotly)
 
 source("theme.R")
 source(here("/src/dashboard/loadbaselayers.R"))
@@ -34,7 +35,9 @@ tract_geo <- rbind(or_tracts, wa_tracts)
 acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
 acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")  
 
-
+#color palettes
+dspgpal = c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF", 
+            "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
 
@@ -227,7 +230,7 @@ ui <- dashboardPagePlus(
                     #)
                   #)
                 #),
-                    plotOutput("plot1")
+                    plotlyOutput("plot1")
                   )
                 )),
 
@@ -426,37 +429,38 @@ server <- function(input, output, session) {
 ### Quality standard of living output ----
 #### Financials -------
   #histograms
-  output$plot1 <- renderPlot({
-    if (input$financial == "Median Household Income") {
-      ggplot(filter(acs_counties, year == input$year), aes(x = NAME, y = median_household_income)) +
-        geom_col(fill = "dark blue") +
-        geom_errorbar(
-          aes(
-            x = NAME,
-            ymin = median_household_income - median_household_income_moe,
-            ymax = median_household_income + median_household_income_moe
-          ),
-          color = "dark orange"
-        ) +
-        ylab("Median Household Income") + xlab("Region") +
-        geom_point(color = "dark orange", size = 3) +
-        ggtitle(paste("Median Household Income in", input$year, sep = " "))
+  output$plot1 <- renderPlotly({
+    if (input$financial == "Median Household Income") {p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), 
+                                                                                                                   other_level = "Neighboring Counties"))
+                                                                   , aes(x=year, y=median_household_income, group = NAME, color = south_wasco,
+                                                                         text = paste0("Region: ", NAME,
+                                                                                       "<br>Year: ", year,
+                                                                                       "<br>Median Household Income: $", median_household_income,
+                                                                                       "<br>Margin of Error: $", median_household_income_moe))) +
+      geom_line(size = 1.5) + 
+      geom_point(size = 2) +
+      scale_colour_manual(name = "Region", values = c(dspgpal[1], dspgpal[9], dspgpal[2], dspgpal[10])) +
+      #geom_pointrange(aes(ymin=median_household_income - median_household_income_moe, ymax=median_household_income + median_household_income_moe)) +
+      theme_minimal() + ggtitle("Median Household Income 2015-2018") + ylab("Median Household Income") + xlab("Year")
+    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
+    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
+                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
     }
     else if (input$financial == "Poverty Rate") {
-      ggplot(filter(acs_counties, year == input$year), aes(x = NAME, y = below_poverty)) +
-        geom_col(fill = "dark blue") +
-        geom_errorbar(
-          aes(
-            x = NAME,
-            ymin = below_poverty - below_poverty_moe,
-            ymax = below_poverty + below_poverty_moe
-          ),
-          color = "dark orange"
-        ) +
-        ylab("% of Population") + xlab("Region") +
-        geom_point(color = "dark orange", size = 3) +
-        ggtitle(paste("% of Population Below Poverty Line in", input$year, sep =
-                        " "))
+      ggplotly(ggplot(filter(acs_counties, year == input$year), aes(x = NAME, y = below_poverty,
+                                                              text = paste0("Region: ", NAME,
+                                                                            "<br>Year: ", year,
+                                                                            "<br>Percent Below Federal Poverty: ", below_poverty, "%",
+                                                                            "<br>Margin of Error: ", below_poverty_moe, "%"))) +
+                 geom_col(fill = "dark blue") +
+                 geom_errorbar(aes(x = NAME, ymin = below_poverty - below_poverty_moe, 
+                                   ymax = below_poverty + below_poverty_moe), color = "dark orange") + 
+                 geom_point(color = "dark orange", size = 3) + theme_minimal() + theme(axis.text.x = element_text(angle=30)) +
+                 xlab("Region") + ylab("% Below Poverty") + ggtitle("% of Population Below Federal Poverty Line"), tooltip = "text") %>% 
+        config(displayModeBar = "static", displaylogo = FALSE,
+               modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+      
     }
     #### Maps### 
     # output$plot2 <- renderPlot({

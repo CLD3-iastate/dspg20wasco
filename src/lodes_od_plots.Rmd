@@ -21,34 +21,88 @@ library(tigris)
 ```
 
 ```{r}
-lodes17 <- read_csv("../data/lodes/agg/jobs_all_2017.csv")
-lodes16 <- read_csv("../data/lodes/agg/jobs_all_2016.csv")
-lodes15 <- read_csv("../data/lodes/agg/jobs_all_2015.csv")
+wasco17_od <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+wasco16_od <- readRDS("../data/lodes/filtered/wasco16_od.Rds")
+wasco15_od <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+```
 
-lodes17$h_state <- substr(lodes17$h_geocode_tract, 1, 2)
-lodes17$h_county <- substr(lodes17$h_geocode_tract, 3, 5)
-lodes17$h_tract <- substr(lodes17$h_geocode_tract, 6, 11)
+```{r}
+# select tracts from geocode strings
+wasco17_od$w_geocode_tract <- substr(wasco17_od$w_geocode, start = 1, stop = 11)
+wasco17_od$h_geocode_tract <- substr(wasco17_od$h_geocode, start = 1, stop = 11)
 
-lodes16$h_state <- substr(lodes16$h_geocode_tract, 1, 2)
-lodes16$h_county <- substr(lodes16$h_geocode_tract, 3, 5)
-lodes16$h_tract <- substr(lodes16$h_geocode_tract, 6, 11)
+wasco16_od$w_geocode_tract <- substr(wasco16_od$w_geocode, start = 1, stop = 11)
+wasco16_od$h_geocode_tract <- substr(wasco16_od$h_geocode, start = 1, stop = 11)
 
-lodes15$h_state <- substr(lodes15$h_geocode_tract, 1, 2)
-lodes15$h_county <- substr(lodes15$h_geocode_tract, 3, 5)
-lodes15$h_tract <- substr(lodes15$h_geocode_tract, 6, 11)
+wasco15_od$w_geocode_tract <- substr(wasco15_od$w_geocode, start = 1, stop = 11)
+wasco15_od$h_geocode_tract <- substr(wasco15_od$h_geocode, start = 1, stop = 11)
+```
+
+aggregate by tract level
+```{r}
+jobs_all_2017 <- wasco17_od%>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+jobs_all_2016 <- wasco16_od %>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+jobs_all_2015 <- wasco15_od %>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+```
+
+```{r}
+jobs_all_2017$h_state <- substr(jobs_all_2017$h_geocode_tract, 1, 2)
+jobs_all_2017$h_county <- substr(jobs_all_2017$h_geocode_tract, 3, 5)
+jobs_all_2017$h_tract <- substr(jobs_all_2017$h_geocode_tract, 6, 11)
+
+jobs_all_2016$h_state <- substr(jobs_all_2016$h_geocode_tract, 1, 2)
+jobs_all_2016$h_county <- substr(jobs_all_2016$h_geocode_tract, 3, 5)
+jobs_all_2016$h_tract <- substr(jobs_all_2016$h_geocode_tract, 6, 11)
+
+jobs_all_2015$h_state <- substr(jobs_all_2015$h_geocode_tract, 1, 2)
+jobs_all_2015$h_county <- substr(jobs_all_2015$h_geocode_tract, 3, 5)
+jobs_all_2015$h_tract <- substr(jobs_all_2015$h_geocode_tract, 6, 11)
 
 #now work geoid
-lodes17$w_state <- substr(lodes17$w_geocode_tract, 1, 2)
-lodes17$w_county <- substr(lodes17$w_geocode_tract, 3, 5)
-lodes17$w_tract <- substr(lodes17$w_geocode_tract, 6, 11)
+jobs_all_2017$w_state <- substr(jobs_all_2017$w_geocode_tract, 1, 2)
+jobs_all_2017$w_county <- substr(jobs_all_2017$w_geocode_tract, 3, 5)
+jobs_all_2017$w_tract <- substr(jobs_all_2017$w_geocode_tract, 6, 11)
 
-lodes16$w_state <- substr(lodes16$w_geocode_tract, 1, 2)
-lodes16$w_county <- substr(lodes16$w_geocode_tract, 3, 5)
-lodes16$w_tract <- substr(lodes16$w_geocode_tract, 6, 11)
+jobs_all_2016$w_state <- substr(jobs_all_2016$w_geocode_tract, 1, 2)
+jobs_all_2016$w_county <- substr(jobs_all_2016$w_geocode_tract, 3, 5)
+jobs_all_2016$w_tract <- substr(jobs_all_2016$w_geocode_tract, 6, 11)
 
-lodes15$w_state <- substr(lodes15$w_geocode_tract, 1, 2)
-lodes15$w_county <- substr(lodes15$w_geocode_tract, 3, 5)
-lodes15$w_tract <- substr(lodes15$w_geocode_tract, 6, 11)
+jobs_all_2015$w_state <- substr(jobs_all_2015$w_geocode_tract, 1, 2)
+jobs_all_2015$w_county <- substr(jobs_all_2015$w_geocode_tract, 3, 5)
+jobs_all_2015$w_tract <- substr(jobs_all_2015$w_geocode_tract, 6, 11)
 ```
 
 Must load in Oregon XWalk csv
@@ -62,12 +116,12 @@ or_xw <- or_xw %>% filter(st == 41)
 ```
 What % of jobs flow from outside of Fairfax County?
 ```{r}
-bool_cond17 <-lodes17$h_county != "065" & (lodes17$w_county == "065" & lodes17$w_state == "41")
-bool_cond16 <-lodes16$h_county != "065" & (lodes16$w_county == "065" & lodes16$w_state == "41")
-bool_cond15 <-lodes15$h_county != "065" & (lodes15$w_county == "065" & lodes15$w_state == "41")
-flows_in_17 <-lodes17[bool_cond17, ]
-flows_in_16 <-lodes16[bool_cond16, ]
-flows_in_15 <-lodes15[bool_cond15, ]
+bool_cond17 <-jobs_all_2017$h_county != "065" & (jobs_all_2017$w_county == "065" & jobs_all_2017$w_state == "41")
+bool_cond16 <-jobs_all_2016$h_county != "065" & (jobs_all_2016$w_county == "065" & jobs_all_2016$w_state == "41")
+bool_cond15 <-jobs_all_2015$h_county != "065" & (jobs_all_2015$w_county == "065" & jobs_all_2015$w_state == "41")
+flows_in_17 <-jobs_all_2017[bool_cond17, ]
+flows_in_16 <-jobs_all_2016[bool_cond16, ]
+flows_in_15 <-jobs_all_2015[bool_cond15, ]
 ```
 
 Of the flows into Wasco County from outside, what percent are from other counties in Oregon?
@@ -164,13 +218,13 @@ ggsave(path = "../output/lodes_maps/flows/in_flows", device = "png", filename = 
 
 Outflows (those who live in wasco county but do not work there, open to other states)
 ```{r}
-bool_cond17 <- lodes17$h_county == "065" & lodes17$w_county != "065"
-bool_cond16 <- lodes16$h_county == "065" & lodes16$w_county != "065"
-bool_cond15 <- lodes15$h_county == "065" & lodes15$w_county != "065"
+bool_cond17 <- jobs_all_2017$h_county == "065" & jobs_all_2017$w_county != "065"
+bool_cond16 <- jobs_all_2016$h_county == "065" & jobs_all_2016$w_county != "065"
+bool_cond15 <- jobs_all_2015$h_county == "065" & jobs_all_2015$w_county != "065"
 
-flows_out_17 <-lodes17[bool_cond17, ]
-flows_out_16 <-lodes16[bool_cond16, ]
-flows_out_15 <-lodes15[bool_cond15, ]
+flows_out_17 <-jobs_all_2017[bool_cond17, ]
+flows_out_16 <-jobs_all_2016[bool_cond16, ]
+flows_out_15 <-jobs_all_2015[bool_cond15, ]
 ```
 
 Most popular counties that those who live in Wasco County but not work in, go to work
@@ -267,50 +321,19 @@ wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("../data/shps/swsd")
 ```
 
-Reading in files
+Reading in filtered file again
 ```{r}
-main17 <- fread("../data/lodes/or_od_main_JT00_2017.csv", 
-              colClasses = c("w_geocode" = "character",
-                             "h_geocode" = "character"))
-aux17 <- fread("../data/lodes/or_od_aux_JT00_2017.csv", 
-              colClasses = c("w_geocode" = "character",
-                             "h_geocode" = "character"))
-full_data17 <- rbind(main17, aux17)
-
-main16 <- fread("../data/lodes/or_od_main_JT00_2016.csv", 
-              colClasses = c("w_geocode" = "character",
-                             "h_geocode" = "character"))
-aux16 <- fread("../data/lodes/or_od_aux_JT00_2016.csv", 
-              colClasses = c("w_geocode" = "character",
-                             "h_geocode" = "character"))
-full_data16 <- rbind(main16, aux16)
-
-main15 <- fread("../data/lodes/or_od_main_JT00_2015.csv", 
-              colClasses = c("w_geocode" = "character",
-                             "h_geocode" = "character"))
-aux15 <- fread("../data/lodes/or_od_aux_JT00_2015.csv", 
-              colClasses = c("w_geocode" = "character",
-                             "h_geocode" = "character"))
-full_data15 <- rbind(main15, aux15)
-```
-
-Filtering so that it only includes Wasco County
-```{r}
-wasco17 <- full_data17 %>% 
-  filter(w_geocode %in% full_data17$w_geocode[substr(full_data17$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data17$h_geocode[substr(full_data17$h_geocode, 1, 5) == "41065"])
-wasco16 <- full_data16 %>% 
-  filter(w_geocode %in% full_data16$w_geocode[substr(full_data16$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data16$h_geocode[substr(full_data16$h_geocode, 1, 5) == "41065"])
-wasco15 <- full_data15 %>% 
-  filter(w_geocode %in% full_data15$w_geocode[substr(full_data15$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data15$h_geocode[substr(full_data15$h_geocode, 1, 5) == "41065"])
+wasco17_od2 <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+wasco16_od2 <- readRDS("../data/lodes/filtered/wasco16_od.Rds")
+wasco15_od2 <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
 ```
 
 Joining with Wasco Lines
 ```{r}
-wascolines_17 <- inner_join(wasco17, wasco_lines, by = c("w_geocode" = "GEOID10"))
-wascolines_16 <- inner_join(wasco16, wasco_lines, by = c("w_geocode" = "GEOID10"))
-wascolines_15 <- inner_join(wasco15, wasco_lines, by = c("w_geocode" = "GEOID10"))
+wascolines_17 <- inner_join(wasco17_od2, wasco_lines, by = c("w_geocode" = "GEOID10"))
+wascolines_16 <- inner_join(wasco16_od2, wasco_lines, by = c("w_geocode" = "GEOID10"))
+wascolines_15 <- inner_join(wasco15_od2, wasco_lines, by = c("w_geocode" = "GEOID10"))
 ```
-
 
 Grouping by work geocode (because that is going to be Wasco County)
 ```{r}
@@ -326,7 +349,7 @@ agg_17 <- wascolines_17 %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-write_sf(st_as_sf(agg_17), "../data/app_lodes_od_agg_2017.shp")
+saveRDS(st_as_sf(agg_17), "../data/app_lodes_od_agg_2017.Rds")
 agg_16 <- wascolines_16 %>%
   group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
   summarise(S000 = sum(S000), 
@@ -339,7 +362,7 @@ agg_16 <- wascolines_16 %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-write_sf(st_as_sf(agg_16), "../data/app_lodes_od_agg_2016.shp")
+saveRDS(st_as_sf(agg_16), "../data/app_lodes_od_agg_2016.Rds")
 agg_15 <- wascolines_15 %>%
   group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
   summarise(S000 = sum(S000), 
@@ -352,14 +375,17 @@ agg_15 <- wascolines_15 %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-write_sf(st_as_sf(agg_15), "../data/app_lodes_od_agg_2015.shp")
+saveRDS(st_as_sf(agg_15), "../data/app_lodes_od_agg_2015.Rds")
 ```
+
+
 
 interactive maps
+
 ```{r}
+#S000 (all jobs) by year
 qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
-agg_17 <- read_sf("../data/app_lodes_od_agg_2017.shp")
-map2017leaf <- leaflet() %>%
+od_S000leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
     data = south_wasco_points,
@@ -368,297 +394,209 @@ map2017leaf <- leaflet() %>%
     opacity = 1,
     group = "Basemap")
 
-map2017leaf <- map2017leaf %>%
+od_S000leaf <- od_S000leaf %>%
   addPolygons(
     data = st_as_sf(agg_17),
     weight = 1,
     opacity = 0,
     fillOpacity = 1,
-    group = "All Jobs",
+    group = "2017",
     fillColor = ~qtileS000(agg_17$S000),
-    label = agg_17$S000)
-map2017leaf <- map2017leaf %>%
-      addLegend(
-        data = agg_17,
-        "bottomright",
-        pal = qtileS000,
-        values = ~ S000,
-        title = "Wasco County Job Density",
-        opacity = 1,
-        group = "All Jobs",
-        na.label = "NA")
+    label = agg_17$S000) %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileS000(agg_16$S000),
+    label = agg_16$S000) %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileS000(agg_15$S000),
+    label = agg_15$S000) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ S000,
+    title = "Wasco County All Job Density",
+    opacity = 1,
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("South Wasco School District"),
+    overlayGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+```
 
-#SI01
-map2017leaf <- map2017leaf %>%
+```{r}
+#SI01 (Goods Producing industry sectors) by year
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+od_SI01leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 1,
+    opacity = 1,
+    group = "Basemap")
+
+od_SI01leaf <- od_SI01leaf %>%
   addPolygons(
     data = st_as_sf(agg_17),
     weight = 1,
     opacity = 0,
     fillOpacity = 1,
-    group = "Goods Producing Sector",
+    group = "2017",
     fillColor = ~qtileS000(agg_17$SI01),
     label = agg_17$SI01) %>%
-  addLegend(
-    data = agg_17,
-    "bottomright",
-    pal = qtileS000,
-    values = ~ SI01,
-    title = "Wasco County Job Density",
-    opacity = 1,
-    group = "Goods Producing Sector",
-    na.label = "NA")
-
-#SI02
-map2017leaf <- map2017leaf %>%
-  addPolygons(
-    data = st_as_sf(agg_17),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = 1,
-    group = "Trade, Transportation,and Utilities Sector",
-    fillColor = ~qtileS000(agg_17$SI02),
-    label = agg_17$SI02) %>%
-  addLegend(
-    data = agg_17,
-    "bottomright",
-    pal = qtileS000,
-    values = ~ SI02,
-    title = "Wasco County Job Density",
-    opacity = 1,
-    group = "Trade, Transportation,and Utilities Sector",
-    na.label = "NA")
-
-#SI03
-map2017leaf <- map2017leaf %>%
-  addPolygons(
-    data = st_as_sf(agg_17),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = 1,
-    group = "All Other Services Sector",
-    fillColor = ~qtileS000(agg_17$SI03),
-    label = agg_17$SI03) %>%
-  addLegend(
-    data = agg_17,
-    "bottomright",
-    pal = qtileS000,
-    values = ~ SI03,
-    title = "Wasco County Job Density",
-    opacity = 1,
-    group = "All Other Services Sector",
-    na.label = "NA")
-
-map2017leaf <- map2017leaf %>%
-      addLayersControl(
-        baseGroups = c("South Wasco School District"),
-        overlayGroups = c("All Jobs", "Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"),
-        options = layersControlOptions(collapsed = FALSE)) %>%
-  hideGroup(c("Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"))
-```
-
-
-2016
-```{r}
-map2016leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "purple",
-    weight = 1,
-    opacity = 1,
-    group = "Basemap")
-map2016leaf <- map2016leaf %>%
   addPolygons(
     data = st_as_sf(agg_16),
     weight = 1,
     opacity = 0,
     fillOpacity = 1,
-    group = "All Jobs",
-    fillColor = ~qtileS000(agg_16$S000),
-    label = agg_16$S000)
-map2016leaf <- map2016leaf %>%
-      addLegend(
-        data = agg_16,
-        "bottomright",
-        pal = qtileS000,
-        values = ~ S000,
-        title = "Wasco County Job Density",
-        opacity = 1,
-        group = "All Jobs",
-        na.label = "NA")
-
-#SI01
-map2016leaf <- map2016leaf %>%
-  addPolygons(
-    data = st_as_sf(agg_16),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = 1,
-    group = "Goods Producing Sector",
+    group = "2016",
     fillColor = ~qtileS000(agg_16$SI01),
     label = agg_16$SI01) %>%
-  addLegend(
-    data = agg_16,
-    "bottomright",
-    pal = qtileS000,
-    values = ~ SI01,
-    title = "Wasco County Job Density",
-    opacity = 1,
-    group = "Goods Producing Sector",
-    na.label = "NA")
-
-#SI02
-map2016leaf <- map2016leaf %>%
-  addPolygons(
-    data = st_as_sf(agg_16),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = 1,
-    group = "Trade, Transportation,and Utilities Sector",
-    fillColor = ~qtileS000(agg_16$SI02),
-    label = agg_16$SI02) %>%
-  addLegend(
-    data = agg_16,
-    "bottomright",
-    pal = qtileS000,
-    values = ~ SI02,
-    title = "Wasco County Job Density",
-    opacity = 1,
-    group = "Trade, Transportation,and Utilities Sector",
-    na.label = "NA")
-
-#SI03
-map2016leaf <- map2016leaf %>%
-  addPolygons(
-    data = st_as_sf(agg_16),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = 1,
-    group = "All Other Services Sector",
-    fillColor = ~qtileS000(agg_16$SI03),
-    label = agg_16$SI03) %>%
-  addLegend(
-    data = agg_16,
-    "bottomright",
-    pal = qtileS000,
-    values = ~ SI03,
-    title = "Wasco County Job Density",
-    opacity = 1,
-    group = "All Other Services Sector",
-    na.label = "NA")
-
-map2016leaf <- map2016leaf %>%
-      addLayersControl(
-        baseGroups = c("South Wasco School District"),
-        overlayGroups = c("All Jobs", "Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"),
-        options = layersControlOptions(collapsed = FALSE)) %>%
-  hideGroup(c("Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"))
-```
-
-2015
-```{r}
-map2015leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "purple",
-    weight = 1,
-    opacity = 1,
-    group = "Basemap")
-
-map2015leaf <- map2015leaf %>%
   addPolygons(
     data = st_as_sf(agg_15),
     weight = 1,
     opacity = 0,
     fillOpacity = 1,
-    group = "All Jobs",
-    fillColor = ~qtileS000(agg_15$S000),
-    label = agg_15$S000)
-map2015leaf <- map2015leaf %>%
-      addLegend(
-        data = agg_15,
-        "bottomright",
-        pal = qtileS000,
-        values = ~ S000,
-        title = "Wasco County Job Density",
-        opacity = 1,
-        group = "All Jobs",
-        na.label = "NA")
-
-#SI01
-map2015leaf <- map2015leaf %>%
-  addPolygons(
-    data = st_as_sf(agg_15),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = 1,
-    group = "Goods Producing Sector",
+    group = "2015",
     fillColor = ~qtileS000(agg_15$SI01),
     label = agg_15$SI01) %>%
   addLegend(
-    data = agg_15,
+    data = agg_17,
     "bottomright",
     pal = qtileS000,
-    values = ~ SI01,
-    title = "Wasco County Job Density",
+    values = ~ S000,
+    title = "Goods Producing Industry\nJob Density",
     opacity = 1,
-    group = "Goods Producing Sector",
-    na.label = "NA")
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("South Wasco School District"),
+    overlayGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+```
 
-#SI02
-map2015leaf <- map2015leaf %>%
+
+```{r}
+#SI02 (Trade, Transportation, and Utilities industry sectors) by year
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+od_SI02leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 1,
+    opacity = 1,
+    group = "Basemap")
+
+od_SI02leaf <- od_SI02leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileS000(agg_17$SI02),
+    label = agg_17$SI02) %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileS000(agg_16$SI02),
+    label = agg_16$SI02) %>%
   addPolygons(
     data = st_as_sf(agg_15),
     weight = 1,
     opacity = 0,
     fillOpacity = 1,
-    group = "Trade, Transportation,and Utilities Sector",
+    group = "2015",
     fillColor = ~qtileS000(agg_15$SI02),
     label = agg_15$SI02) %>%
   addLegend(
-    data = agg_15,
+    data = agg_17,
     "bottomright",
     pal = qtileS000,
-    values = ~ SI02,
-    title = "Wasco County Job Density",
+    values = ~ S000,
+    title = "Trade, Transportation,\nand Utilities Industry\nJob Density",
     opacity = 1,
-    group = "Trade, Transportation,and Utilities Sector",
-    na.label = "NA")
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("South Wasco School District"),
+    overlayGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+```
+```{r}
+#SI03 (All Other Services industry sectors) by year
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+od_SI03leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 1,
+    opacity = 1,
+    group = "Basemap")
 
-#SI03
-map2015leaf <- map2015leaf %>%
+od_SI03leaf <- od_SI03leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileS000(agg_17$SI03),
+    label = agg_17$SI03) %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileS000(agg_16$SI03),
+    label = agg_16$SI03) %>%
   addPolygons(
     data = st_as_sf(agg_15),
     weight = 1,
     opacity = 0,
     fillOpacity = 1,
-    group = "All Other Services Sector",
+    group = "2015",
     fillColor = ~qtileS000(agg_15$SI03),
     label = agg_15$SI03) %>%
   addLegend(
-    data = agg_15,
+    data = agg_17,
     "bottomright",
     pal = qtileS000,
-    values = ~ SI03,
-    title = "Wasco County Job Density",
+    values = ~ S000,
+    title = "All Other Services Industry\nJob Density",
     opacity = 1,
-    group = "All Other Services Sector",
-    na.label = "NA")
-
-map2015leaf <- map2015leaf %>%
-      addLayersControl(
-        baseGroups = c("South Wasco School District"),
-        overlayGroups = c("All Jobs", "Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"),
-        options = layersControlOptions(collapsed = FALSE)) %>%
-  hideGroup(c("Goods Producing Sector", "Trade, Transportation,and Utilities Sector", "All Other Services Sector"))
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("South Wasco School District"),
+    overlayGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
 ```
+
 
 Showing all maps
 ```{r}
-map2017leaf
-map2016leaf
-map2015leaf
+od_S000leaf
+od_SI01leaf
+od_SI02leaf
+od_SI03leaf
 ```
 
 

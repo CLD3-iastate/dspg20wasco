@@ -9,6 +9,8 @@ library(ggplot2)
 top_10_in <- read_csv("~/git/dspg20wasco/data/app_10_inflows_wasco.csv")
 top_10_out <- read_csv("~/git/dspg20wasco/data/app_10_outflows_wasco.csv")
 
+
+#have some toggle to switch between inflows and outflows
 ggplot(top_10_in, aes(x = year)) +
   ggtitle("Number of jobs flowing into Wasco County\nfrom other counties in Oregon from\n2015-2017") +
   labs(x = "Year", y = "Number of Jobs", colour = "County") +

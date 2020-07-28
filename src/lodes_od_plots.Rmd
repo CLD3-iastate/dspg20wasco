@@ -390,9 +390,10 @@ od_S000leaf <- leaflet() %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_S000leaf <- od_S000leaf %>%
   addPolygons(
@@ -428,8 +429,8 @@ od_S000leaf <- od_S000leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 ```
@@ -442,9 +443,10 @@ od_SI01leaf <- leaflet() %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_SI01leaf <- od_SI01leaf %>%
   addPolygons(
@@ -480,8 +482,8 @@ od_SI01leaf <- od_SI01leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 ```
@@ -495,9 +497,10 @@ od_SI02leaf <- leaflet() %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_SI02leaf <- od_SI02leaf %>%
   addPolygons(
@@ -533,8 +536,8 @@ od_SI02leaf <- od_SI02leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 ```
@@ -546,9 +549,10 @@ od_SI03leaf <- leaflet() %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_SI03leaf <- od_SI03leaf %>%
   addPolygons(
@@ -584,8 +588,8 @@ od_SI03leaf <- od_SI03leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 ```
@@ -598,54 +602,3 @@ od_SI01leaf
 od_SI02leaf
 od_SI03leaf
 ```
-
-
-
-
-Aaron's script
-... try using stars
-```{r}
-crop_mask_raster_to_spatial <- function(raster_obj, sf_obj) {
-  library(raster)
-  library(sf)
-  library(data.table)
-  for (i in 1:nrow(sf_obj)) {
-    sf_row <- sf_obj[i,]
-    sp_row <- as(st_geometry(sf_row), 'Spatial')
-    sp_row <- spTransform(sp_row, crs(raster_obj))
-    crp <- crop(raster_obj, sp_row)
-    msk <- mask(crp, sp_row)
-   
-    if (exists("out_ls") == F) out_ls <- list()
-    out_ls[sf_row$GEOID] <- msk
-  }
-  out_ls
-}
-raster_2017 <- raster("../data/lodes/raster/CDL_2017_41065.tif")
-sf <- tracts("OR", "Wasco County")
-x <- crop_mask_raster_to_spatial(raster_2017, sf)
-```
-
-
-
-
-
-
-
-
-
-raster
-```{r}
-library(rgdal)
-crs(raster_2017) <- sp::CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
-leaflet() %>% 
-  addTiles() %>%
-  addRasterImage(raster_2017)
-```
-
-takes forever to run (using 8 cores)
-
-```{r}
-rasterToPolygons(raster_2017)
-```
-

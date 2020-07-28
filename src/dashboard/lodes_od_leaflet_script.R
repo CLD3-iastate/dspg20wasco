@@ -24,9 +24,10 @@ od_S000leaf <- leaflet() %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_S000leaf <- od_S000leaf %>%
   addPolygons(
@@ -62,21 +63,21 @@ od_S000leaf <- od_S000leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+    #    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 
 #SI01 (Goods Producing industry sectors) by year
-qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
 od_SI01leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_SI01leaf <- od_SI01leaf %>%
   addPolygons(
@@ -112,21 +113,21 @@ od_SI01leaf <- od_SI01leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+    #    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 
 #SI02 (Trade, Transportation, and Utilities industry sectors) by year
-qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
 od_SI02leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_SI02leaf <- od_SI02leaf %>%
   addPolygons(
@@ -162,21 +163,21 @@ od_SI02leaf <- od_SI02leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+    #    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 
 #SI03 (All Other Services industry sectors) by year
-qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
 od_SI03leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
-    weight = 1,
+    weight = 2,
     opacity = 1,
-    group = "Basemap")
+    group = "Basemap",
+    label = "South Wasco Region")
 
 od_SI03leaf <- od_SI03leaf %>%
   addPolygons(
@@ -212,7 +213,7 @@ od_SI03leaf <- od_SI03leaf %>%
     opacity = 1,
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("South Wasco School District"),
-    overlayGroups = c("2017", "2016", "2015"),
+    #    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))

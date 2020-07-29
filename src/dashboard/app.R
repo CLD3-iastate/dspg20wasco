@@ -54,7 +54,9 @@ agg_15 <- readRDS("Data/app_lodes_od_agg_2015.Rds")
 #wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("Data/shps/swsd")
 
-
+#color palettes
+dspgpal = c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF", 
+            "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
 
@@ -463,9 +465,11 @@ ui <- dashboardPagePlus(
                     #icon = icon("dollar"),
                     #width = "300px"
                     #)
+
                     #)
                     #),
                     plotOutput("plot1")
+
                   )
                 )),
 
@@ -659,6 +663,7 @@ server <- function(input, output, session) {
 
     })
 
+
   # leafletProxy("mymap") %>%
   #   addPolygons(data = filteredData, color = ~isochronepal(value),
   #              group = "Driving times") %>%
@@ -758,6 +763,7 @@ server <- function(input, output, session) {
         geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) +
         geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) +
         geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+
     }
     else if (input$flows == "Outflows"){
       ggplot(top_10_out, aes(x = year)) +

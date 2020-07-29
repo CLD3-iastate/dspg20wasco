@@ -6,18 +6,13 @@ output: html_document
 ---
 
 ```{r}
-library(R.utils)
 library(data.table)
-library(tidyr)
 library(dplyr)
 library(readr)
 library(ggplot2)
-library(sf)
-library(leaflet)
-library(mapview)
-library(reshape2)
-library(raster)
-library(tigris)
+library(plotly)
+library(tidyverse)
+library(htmlwidgets)
 ```
 
 Loading in water use data
@@ -30,7 +25,7 @@ df
 ```
 
 
-Collapsing rows
+Recoding vars to have same name to aggregate later
 ```{r}
 x <- data.frame(t(df[, -5]))
 colnames(x) <- df$year
@@ -43,7 +38,7 @@ x[(x$var %like% "Industrial") & (x$var %like% "Mgal.d"),]$var <- "Industrial Wat
 x[(x$var %like% "Mining") & (x$var %like% "Mgal.d"), ]$var <- "Mining Water Use (mGal/D)"
 x[(x$var %like% "Livestock") & (x$var %like% "Mgal.d"), ]$var <- "Livestock Water Use (mGal/D)"
 x[(x$var %like% "Aquaculture") & (x$var %like% "Mgal.d"), ]$var <- "Aquaculture Water Use (mGal/D)"
-x[(x$var %like% "Wastewater") & (x$var %like% "Mgal.d"), ]$var <- "Waster Treatment (mGal/D)"
+x[(x$var %like% "Wastewater") & (x$var %like% "Mgal.d"), ]$var <- "Wastewater Treatment (mGal/D)"
 x[(x$var %like% "Irrigation") & (x$var %like% "Mgal.d"), ]$var <- "Irrigation Water Use (mGal/D)"
 
 x$`1985`<- as.numeric(x$`1985`)
@@ -53,11 +48,10 @@ x$`2000`<- as.numeric(x$`2000`)
 x$`2005`<- as.numeric(x$`2005`)
 x$`2010`<- as.numeric(x$`2010`)
 x$`2015`<- as.numeric(x$`2015`)
-
+#Making missing data equal to 0 for plotting purposes
 x[is.na(x)] <- 0
-x
 ```
-Aggregating by type
+Aggregating by variable
 ```{r}
 water_use_by_sector <- x %>% 
   group_by(var) %>%
@@ -68,7 +62,35 @@ water_use_by_sector <- x %>%
             `2005` = sum(`2005`),
             `2010` = sum(`2010`),
             `2015` = sum(`2015`))
+
+#filtering out all the non measurement variables
 water_use_by_sector <- water_use_by_sector[water_use_by_sector$var %like% "(mGal/D)", ]
-water_use_by_sector
+
+```
+
+```{r}
+water_use_by_sector_t <- data.frame(t(water_use_by_sector[-1]))
+colnames(water_use_by_sector_t) <- water_use_by_sector$var
+water_use_by_sector_t$year <- colnames(water_use_by_sector)[-1]
+saveRDS(water_use_by_sector_t, "../data/app_usgs_water_use.Rds")
+water_use_by_sector_t
+```
+
+
+Making interactive barcharts
+```{r}
+water_use_plot <- ggplot(data = water_use_by_sector_t, aes(x = year, group = 1)) +
+  ggtitle("Water Use in Wasco County, OR by Sector (1985-2015)") +
+  labs(x = "Year", y = "Millions of Gallons per Day", color = NULL) + 
+  geom_line(aes(y = `Aquaculture Water Use (mGal/D)`, color = "Aquaculture Water Use")) +
+  geom_line(aes(y = `Commercial Water Use (mGal/D)`, color = "Commercial Water Use")) +
+  geom_line(aes(y = `Domestic Water Use (mGal/D)`, color = "Domestic Water Use")) +
+  geom_line(aes(y = `Industrial Water Use (mGal/D)`, color = "Industrial Water Use")) +
+  geom_line(aes(y = `Livestock Water Use (mGal/D)`, color = "Livestock Water Use")) +
+  geom_line(aes(y = `Mining Water Use (mGal/D)`, color = "Mining Water Use")) +
+  geom_line(aes(y = `Total Water supplied to Public (mGal/D)`, color = "Resident Water Use")) +
+  geom_line(aes(y = `Wastewater Treatment (mGal/D)`, color = "Wastewater Treatment"))
+
+ggplotly(water_use_plot)
 ```
 

@@ -6,15 +6,15 @@ library(osmdata)
 ## Loading in baselayer data, check file names
 
 # townships
-townships <- here("/data/shps/townships/townships.shp") %>% st_read()
+townships <- ("Data/shps/townships/townships.shp") %>% st_read()
 # unincorporated
-unincorporated <- here("/data/shps/unincorporated/unincorporated.shp") %>% st_read()
+unincorporated <- ("Data/shps/unincorporated/unincorporated.shp") %>% st_read()
 # schools
-swsd <- here("/data/shps/swsd/swsd.shp") %>% st_read()
+swsd <- ("Data/shps/swsd/swsd.shp") %>% st_read()
 # county
-countyline <- here("/data/shps/county/countyline.shp") %>% st_read()
+countyline <- ("Data/shps/county/countyline.shp") %>% st_read()
 # roads
-roads <- here("/data/shps/roads/roads.shp") %>% st_read()
+roads <- ("Data/shps/roads/roads.shp") %>% st_read()
 
 
 

@@ -1,0 +1,12 @@
+name: wasco
+title: wasco
+username:
+account: joanna-schroeder
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2609852
+bundleId: 3450757
+url: https://joanna-schroeder.shinyapps.io/wasco/
+when: 1596034899.31154
+asMultiple: FALSE
+asStatic: FALSE

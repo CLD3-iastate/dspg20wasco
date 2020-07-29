@@ -1,0 +1,44 @@
+---
+title: "Water Use Data"
+author: "Owen Hart"
+date: "7/29/2020"
+output: html_document
+---
+
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(sf)
+library(leaflet)
+library(mapview)
+library(reshape2)
+library(raster)
+library(tigris)
+```
+
+Loading in water use data
+```{r}
+url <- "https://waterdata.usgs.gov/or/nwis/water_use?format=rdb&rdb_compression=value&wu_area=County&wu_year=ALL&wu_county=065&wu_category=ALL&wu_county_nms=Wasco%2BCounty"
+
+df <- read.table(url, sep = '\t',header = T)
+df <- df[-1, ]
+```
+
+```{r}
+x <- data.frame(t(df[, -5]))
+colnames(x) <- df$year
+x
+```
+
+Collapsing rows
+```{r}
+#costarSample[costarSample$PropertyType %like% "Office", ]$PropertyType <- "Office"
+
+x$var <- colnames(df)[-5]
+x[x$var %like% "Public", ]$var <- "Public"
+```
+

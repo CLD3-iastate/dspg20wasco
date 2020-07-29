@@ -13,8 +13,6 @@ agg_17 <- readRDS("~/git/dspg20wasco/data/app_lodes_od_agg_2017.Rds")
 agg_16 <- readRDS("~/git/dspg20wasco/data/app_lodes_od_agg_2016.Rds")
 agg_15 <- readRDS("~/git/dspg20wasco/data/app_lodes_od_agg_2015.Rds")
 
-wasco_points <- (blocks("OR", county = "Wasco"))
-wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("../data/shps/swsd")
 
 #S000 (all jobs) by year

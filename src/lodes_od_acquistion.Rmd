@@ -1,0 +1,121 @@
+---
+title: "Lodes OD Accquistion"
+author: "Owen Hart"
+date: "7/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading in libraries
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+```
+
+Downloading main lodes od
+```{r}
+#2017
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_main_JT00_2017.csv.gz", 
+  destfile = "../data/lodes/or_od_main_JT00_2017.csv.gz")
+
+gunzip("../data/lodes/or_od_main_JT00_2017.csv.gz")
+
+#2016
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_main_JT00_2016.csv.gz", 
+  destfile = "../data/lodes/or_od_main_JT00_2016.csv.gz")
+
+gunzip("../data/lodes/or_od_main_JT00_2016.csv.gz")
+
+#2015
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_main_JT00_2015.csv.gz", 
+  destfile = "../data/lodes/or_od_main_JT00_2015.csv.gz")
+
+gunzip("../data/lodes/or_od_main_JT00_2015.csv.gz")
+```
+
+Downloading aux lodes od
+```{r}
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2017.csv.gz", 
+  destfile = "../data/lodes/or_od_aux_JT00_2017.csv.gz")
+
+gunzip("../data/lodes/or_od_aux_JT00_2017.csv.gz")
+
+
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2016.csv.gz", 
+  destfile = "../data/lodes/or_od_aux_JT00_2016.csv.gz")
+
+gunzip("../data/lodes/or_od_aux_JT00_2016.csv.gz")
+
+
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/od/or_od_aux_JT00_2015.csv.gz", 
+  destfile = "../data/lodes/or_od_aux_JT00_2015.csv.gz")
+
+gunzip("../data/lodes/or_od_aux_JT00_2015.csv.gz")
+```
+
+Reading in files
+```{r}
+main17 <- fread("../data/lodes/or_od_main_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+aux17 <- fread("../data/lodes/or_od_aux_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+full_data17 <- rbind(main17, aux17)
+
+
+main16 <- fread("../data/lodes/or_od_main_JT00_2016.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+aux16 <- fread("../data/lodes/or_od_aux_JT00_2016.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+full_data16 <- rbind(main16, aux16)
+
+
+main15 <- fread("../data/lodes/or_od_main_JT00_2015.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+aux15 <- fread("../data/lodes/or_od_aux_JT00_2015.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+
+full_data15 <- rbind(main15, aux15)
+```
+
+Filtering so that it only includes Wasco County
+```{r}
+wasco17_od <- full_data17 %>% 
+  filter(w_geocode %in% full_data17$w_geocode[substr(full_data17$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data17$h_geocode[substr(full_data17$h_geocode, 1, 5) == "41065"])
+
+
+wasco16_od <- full_data16 %>% 
+  filter(w_geocode %in% full_data16$w_geocode[substr(full_data16$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data16$h_geocode[substr(full_data16$h_geocode, 1, 5) == "41065"])
+
+wasco15_od <- full_data15 %>% 
+  filter(w_geocode %in% full_data15$w_geocode[substr(full_data15$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data15$h_geocode[substr(full_data15$h_geocode, 1, 5) == "41065"])
+```
+
+##stop here and save, then agg differently based on usecase
+
+```{r}
+saveRDS(wasco17_od, "../data/lodes/filtered/wasco17_od.Rds")
+saveRDS(wasco16_od, "../data/lodes/filtered/wasco16_od.Rds")
+saveRDS(wasco15_od, "../data/lodes/filtered/wasco15_od.Rds")
+```

@@ -1,0 +1,604 @@
+---
+title: "Lodes OD Plots"
+author: "Owen Hart"
+date: "7/15/2020"
+output: html_document
+---
+
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(sf)
+library(leaflet)
+library(mapview)
+library(reshape2)
+library(raster)
+library(tigris)
+```
+
+```{r}
+wasco17_od <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+wasco16_od <- readRDS("../data/lodes/filtered/wasco16_od.Rds")
+wasco15_od <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+```
+
+```{r}
+# select tracts from geocode strings
+wasco17_od$w_geocode_tract <- substr(wasco17_od$w_geocode, start = 1, stop = 11)
+wasco17_od$h_geocode_tract <- substr(wasco17_od$h_geocode, start = 1, stop = 11)
+
+wasco16_od$w_geocode_tract <- substr(wasco16_od$w_geocode, start = 1, stop = 11)
+wasco16_od$h_geocode_tract <- substr(wasco16_od$h_geocode, start = 1, stop = 11)
+
+wasco15_od$w_geocode_tract <- substr(wasco15_od$w_geocode, start = 1, stop = 11)
+wasco15_od$h_geocode_tract <- substr(wasco15_od$h_geocode, start = 1, stop = 11)
+```
+
+aggregate by tract level
+```{r}
+jobs_all_2017 <- wasco17_od%>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+jobs_all_2016 <- wasco16_od %>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+jobs_all_2015 <- wasco15_od %>%
+  group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+```
+
+```{r}
+jobs_all_2017$h_state <- substr(jobs_all_2017$h_geocode_tract, 1, 2)
+jobs_all_2017$h_county <- substr(jobs_all_2017$h_geocode_tract, 3, 5)
+jobs_all_2017$h_tract <- substr(jobs_all_2017$h_geocode_tract, 6, 11)
+
+jobs_all_2016$h_state <- substr(jobs_all_2016$h_geocode_tract, 1, 2)
+jobs_all_2016$h_county <- substr(jobs_all_2016$h_geocode_tract, 3, 5)
+jobs_all_2016$h_tract <- substr(jobs_all_2016$h_geocode_tract, 6, 11)
+
+jobs_all_2015$h_state <- substr(jobs_all_2015$h_geocode_tract, 1, 2)
+jobs_all_2015$h_county <- substr(jobs_all_2015$h_geocode_tract, 3, 5)
+jobs_all_2015$h_tract <- substr(jobs_all_2015$h_geocode_tract, 6, 11)
+
+#now work geoid
+jobs_all_2017$w_state <- substr(jobs_all_2017$w_geocode_tract, 1, 2)
+jobs_all_2017$w_county <- substr(jobs_all_2017$w_geocode_tract, 3, 5)
+jobs_all_2017$w_tract <- substr(jobs_all_2017$w_geocode_tract, 6, 11)
+
+jobs_all_2016$w_state <- substr(jobs_all_2016$w_geocode_tract, 1, 2)
+jobs_all_2016$w_county <- substr(jobs_all_2016$w_geocode_tract, 3, 5)
+jobs_all_2016$w_tract <- substr(jobs_all_2016$w_geocode_tract, 6, 11)
+
+jobs_all_2015$w_state <- substr(jobs_all_2015$w_geocode_tract, 1, 2)
+jobs_all_2015$w_county <- substr(jobs_all_2015$w_geocode_tract, 3, 5)
+jobs_all_2015$w_tract <- substr(jobs_all_2015$w_geocode_tract, 6, 11)
+```
+
+Must load in Oregon XWalk csv
+```{r}
+#download.file(
+#  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/or_xwalk.csv.gz", 
+#  destfile = "../data/lodes/or_xwalk.csv.gz")
+#gunzip("../data/lodes/or_xwalk.csv.gz")
+or_xw <- read_csv("../data/lodes/or_xwalk.csv", col_types = cols(cty = col_character()))
+or_xw <- or_xw %>% filter(st == 41)
+```
+What % of jobs flow from outside of Fairfax County?
+```{r}
+bool_cond17 <-jobs_all_2017$h_county != "065" & (jobs_all_2017$w_county == "065" & jobs_all_2017$w_state == "41")
+bool_cond16 <-jobs_all_2016$h_county != "065" & (jobs_all_2016$w_county == "065" & jobs_all_2016$w_state == "41")
+bool_cond15 <-jobs_all_2015$h_county != "065" & (jobs_all_2015$w_county == "065" & jobs_all_2015$w_state == "41")
+flows_in_17 <-jobs_all_2017[bool_cond17, ]
+flows_in_16 <-jobs_all_2016[bool_cond16, ]
+flows_in_15 <-jobs_all_2015[bool_cond15, ]
+```
+
+Of the flows into Wasco County from outside, what percent are from other counties in Oregon?
+```{r}
+#2017
+perc_flows_othercnt_2017 <- mean(flows_in_17$h_state == "41") *100
+agg_cnty_OR_2017 <- flows_in_17[flows_in_17$h_state == "41", ] %>%
+  group_by(h_county) %>%
+  summarise(S000 = sum(S000))
+#Use OR crosswalk to get county names
+or_xw$h_county <- substring(or_xw$cty, 3, 6)
+essential <- or_xw %>%
+  select(h_county, ctyname)
+agg_cnty_OR_with_names_2017 <- inner_join(x = agg_cnty_OR_2017, y = unique(essential), by = "h_county")
+
+trimmed_2017 <- agg_cnty_OR_with_names_2017[order(-agg_cnty_OR_with_names_2017$S000), ][1:10, ]
+trimmed_2017 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "dark blue", alpha=.7) +
+  ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2017)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+ggsave(path = "../output/lodes_maps/flows/in_flows", device = "png", filename = "in_county_flows_2017.png", plot = last_plot())
+
+#2016
+perc_flows_othercnt_2016 <- mean(flows_in_16$h_state == "41") *100
+agg_cnty_OR_2016 <- flows_in_16[flows_in_16$h_state == "41", ] %>%
+  group_by(h_county) %>%
+  summarise(S000 = sum(S000))
+agg_cnty_OR_with_names_2016 <- inner_join(x = agg_cnty_OR_2016, y = unique(essential), by = "h_county")
+trimmed_2016 <- agg_cnty_OR_with_names_2016[order(-agg_cnty_OR_with_names_2016$S000), ][1:10, ]
+trimmed_2016 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "dark blue", alpha=.7) +
+  ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2016)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+ggsave(path = "../output/lodes_maps/flows/in_flows", device = "png", filename = "in_county_flows_2016.png", plot = last_plot())
+
+
+#2015
+perc_flows_othercnt_2015 <- mean(flows_in_15$h_state == "41") *100
+agg_cnty_OR_2015 <- flows_in_15[flows_in_15$h_state == "41", ] %>%
+  group_by(h_county) %>%
+  summarise(S000 = sum(S000))
+agg_cnty_OR_with_names_2015 <- inner_join(x = agg_cnty_OR_2015, y = unique(essential), by = "h_county")
+trimmed_2015 <- agg_cnty_OR_with_names_2015[order(-agg_cnty_OR_with_names_2015$S000), ][1:10, ]
+trimmed_2015 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "dark blue", alpha=.7) +
+  ggtitle("Number of Jobs flowing into Wasco County\n from other counties in Oregon (2015)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+ggsave(path = "../output/lodes_maps/flows/in_flows", device = "png", filename = "in_county_flows_2015.png", plot = last_plot())
+
+```
+Aggregating by county over time (line plot)
+
+```{r}
+top_10_in_over_time <- inner_join(trimmed_2017, agg_cnty_OR_with_names_2016, by = "ctyname")
+top_10_in_over_time <- top_10_in_over_time %>%
+  select(h_county.x, ctyname, S000.x, S000.y)
+top_10_in_over_time$'2017' <- top_10_in_over_time$S000.x
+top_10_in_over_time$'2016' <- top_10_in_over_time$S000.y
+top_10_in_over_time <- inner_join(top_10_in_over_time, agg_cnty_OR_with_names_2015, by = "ctyname") %>%
+  select(h_county.x, ctyname, '2017', '2016', S000)
+top_10_in_over_time$'2015' <- top_10_in_over_time$S000
+top_10_in_over_time$h_county <- top_10_in_over_time$h_county.x
+top_10_in_over_time <- top_10_in_over_time %>% select(-S000, -h_county.x)
+top_10_in_over_time <- top_10_in_over_time %>% select(ctyname, '2017', '2016', '2015')
+top_10_in_trans <- data.frame(t(top_10_in_over_time[, -1]))
+colnames(top_10_in_trans) <- top_10_in_over_time$ctyname
+top_10_in_trans$year <- c(2017, 2016, 2015) #SAVE NOW
+write_csv(top_10_in_trans, "../data/app_10_inflows_wasco.csv")
+#line plot for all jobs 2015-2017 by county
+ggplot(top_10_in_trans, aes(x = year)) +
+  ggtitle("Number of jobs flowing into Wasco County\nfrom other counties in Oregon from\n2015-2017") +
+  labs(x = "Year", y = "Number of Jobs", colour = "County") + 
+  geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) + 
+  geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) + 
+  geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) + 
+  geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) + 
+  geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) + 
+  geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) + 
+  geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) + 
+  geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) + 
+  geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) + 
+  geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+ggsave(path = "../output/lodes_maps/flows/in_flows", device = "png", filename = "in_county_flows_all_years.png", plot = last_plot())
+```
+
+Outflows (those who live in wasco county but do not work there, open to other states)
+```{r}
+bool_cond17 <- jobs_all_2017$h_county == "065" & jobs_all_2017$w_county != "065"
+bool_cond16 <- jobs_all_2016$h_county == "065" & jobs_all_2016$w_county != "065"
+bool_cond15 <- jobs_all_2015$h_county == "065" & jobs_all_2015$w_county != "065"
+
+flows_out_17 <-jobs_all_2017[bool_cond17, ]
+flows_out_16 <-jobs_all_2016[bool_cond16, ]
+flows_out_15 <-jobs_all_2015[bool_cond15, ]
+```
+
+Most popular counties that those who live in Wasco County but not work in, go to work
+```{r}
+out_agg_2017 <- flows_out_17 %>%
+  group_by(w_county) %>%
+  summarise(S000 = sum(S000))
+or_xw$w_county <- substring(or_xw$cty, 3, 6)
+essential <- or_xw %>%
+  select(w_county, ctyname)
+agg_out_names_2017 <- inner_join(x = out_agg_2017, y = unique(essential), by = "w_county")
+trimmed_out_2017 <- agg_out_names_2017[order(-agg_out_names_2017$S000), ][1:10, ]
+trimmed_out_2017 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "red", alpha=.3) +
+  ggtitle("Number of Jobs flowing out of Wasco County\n to other counties in Oregon (2017)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+ggsave(path = "../output/lodes_maps/flows/out_flows", device = "png", filename = "out_county_flows_2017.png", plot = last_plot())
+
+out_agg_2016 <- flows_out_16 %>%
+  group_by(w_county) %>%
+  summarise(S000 = sum(S000))
+agg_out_names_2016 <- inner_join(x = out_agg_2016, y = unique(essential), by = "w_county")
+trimmed_out_2016 <- agg_out_names_2016[order(-agg_out_names_2016$S000), ][1:10, ]
+trimmed_out_2016 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "red", alpha=.3) +
+  ggtitle("Number of Jobs flowing out of Wasco County\n to other counties in Oregon (2016)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+ggsave(path = "../output/lodes_maps/flows/out_flows", device = "png", filename = "out_county_flows_2016.png", plot = last_plot())
+
+out_agg_2015 <- flows_out_15 %>%
+  group_by(w_county) %>%
+  summarise(S000 = sum(S000))
+agg_out_names_2015 <- inner_join(x = out_agg_2015, y = unique(essential), by = "w_county")
+trimmed_out_2015 <- agg_out_names_2015[order(-agg_out_names_2015$S000), ][1:10, ]
+trimmed_out_2015 %>%
+  mutate(ctyname = fct_reorder(ctyname, S000)) %>%
+  ggplot(aes(S000, ctyname)) +
+  geom_bar(stat="identity", fill= "red", alpha=.3) +
+  ggtitle("Number of Jobs flowing out of Wasco County\n to other counties in Oregon (2015)") +
+  xlab("Number of Jobs") + 
+  ylab("County Name")
+ggsave(path = "../output/lodes_maps/flows/out_flows", device = "png", filename = "out_county_flows_2015.png", plot = last_plot())
+```
+
+outflows over time!!
+```{r}
+top_10_out_over_time <- inner_join(trimmed_out_2017, agg_out_names_2016, by = "ctyname")
+top_10_out_over_time <- top_10_out_over_time %>%
+  select(w_county.x, ctyname, S000.x, S000.y)
+top_10_out_over_time$'2017' <- top_10_out_over_time$S000.x
+top_10_out_over_time$'2016' <- top_10_out_over_time$S000.y
+top_10_out_over_time <- inner_join(top_10_out_over_time, agg_cnty_OR_with_names_2015, by = "ctyname") %>%
+  select(w_county.x, ctyname, '2017', '2016', S000)
+top_10_out_over_time$'2015' <- top_10_out_over_time$S000
+top_10_out_over_time$h_county <- top_10_out_over_time$w_county.x
+top_10_out_over_time <- top_10_out_over_time %>% select(-S000, -w_county.x)
+top_10_out_over_time <- top_10_out_over_time %>% select(ctyname, '2017', '2016', '2015')
+top_10_out_trans <- data.frame(t(top_10_out_over_time[, -1]))
+colnames(top_10_out_trans) <- top_10_out_over_time$ctyname
+top_10_out_trans$year <- c(2017, 2016, 2015)
+write_csv(top_10_out_trans, "../data/app_10_outflows_wasco.csv")
+
+#line plot for all jobs 2015-2017 by county
+ggplot(top_10_out_trans, aes(x = year)) +
+  ggtitle("Number of jobs flowing from Wasco County\ninto other counties in Oregon from\n2015-2017") +
+  labs(x = "Year", y = "Number of Jobs", colour = "County") + 
+  geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) + 
+  geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) + 
+  geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) + 
+  geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) + 
+  geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) + 
+  geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) + 
+  geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) + 
+  geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) + 
+  geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) + 
+  geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+ggsave(path = "../output/lodes_maps/flows/out_flows", device = "png", filename = "out_county_flows_all_years.png", plot = last_plot())
+```
+
+
+
+
+
+Mapping S. Wasco
+```{r}
+wasco_points <- (blocks("OR", county = "Wasco"))
+wasco_lines <- data.frame(wasco_points)
+south_wasco_points <- st_read("../data/shps/swsd")
+```
+
+Reading in filtered file again
+```{r}
+wasco17_od2 <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+wasco16_od2 <- readRDS("../data/lodes/filtered/wasco16_od.Rds")
+wasco15_od2 <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+```
+
+Joining with Wasco Lines
+```{r}
+wascolines_17 <- inner_join(wasco17_od2, wasco_lines, by = c("w_geocode" = "GEOID10"))
+wascolines_16 <- inner_join(wasco16_od2, wasco_lines, by = c("w_geocode" = "GEOID10"))
+wascolines_15 <- inner_join(wasco15_od2, wasco_lines, by = c("w_geocode" = "GEOID10"))
+```
+
+Grouping by work geocode (because that is going to be Wasco County)
+```{r}
+agg_17 <- wascolines_17 %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+saveRDS(st_as_sf(agg_17), "../data/app_lodes_od_agg_2017.Rds")
+agg_16 <- wascolines_16 %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+saveRDS(st_as_sf(agg_16), "../data/app_lodes_od_agg_2016.Rds")
+agg_15 <- wascolines_15 %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
+  summarise(S000 = sum(S000), 
+            SA01 = sum(SA01), 
+            SA02 = sum(SA02), 
+            SA03 = sum(SA03), 
+            SE01 = sum(SE01), 
+            SE02 = sum(SE02), 
+            SE03 = sum(SE03), 
+            SI01 = sum(SI01), 
+            SI02 = sum(SI02), 
+            SI03 = sum(SI03))
+saveRDS(st_as_sf(agg_15), "../data/app_lodes_od_agg_2015.Rds")
+```
+
+
+
+interactive maps
+
+```{r}
+#S000 (all jobs) by year
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+od_S000leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 2,
+    opacity = 1,
+    group = "Basemap",
+    label = "South Wasco Region")
+
+od_S000leaf <- od_S000leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileS000(agg_17$S000),
+    label = agg_17$S000) %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileS000(agg_16$S000),
+    label = agg_16$S000) %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileS000(agg_15$S000),
+    label = agg_15$S000) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ S000,
+    title = "Wasco County All Job Density",
+    opacity = 1,
+    na.label = "NA") %>%
+  addLayersControl(
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+```
+
+```{r}
+#SI01 (Goods Producing industry sectors) by year
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+od_SI01leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 2,
+    opacity = 1,
+    group = "Basemap",
+    label = "South Wasco Region")
+
+od_SI01leaf <- od_SI01leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileS000(agg_17$SI01),
+    label = agg_17$SI01) %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileS000(agg_16$SI01),
+    label = agg_16$SI01) %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileS000(agg_15$SI01),
+    label = agg_15$SI01) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ S000,
+    title = "Goods Producing Industry\nJob Density",
+    opacity = 1,
+    na.label = "NA") %>%
+  addLayersControl(
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+```
+
+
+```{r}
+#SI02 (Trade, Transportation, and Utilities industry sectors) by year
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+od_SI02leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 2,
+    opacity = 1,
+    group = "Basemap",
+    label = "South Wasco Region")
+
+od_SI02leaf <- od_SI02leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileS000(agg_17$SI02),
+    label = agg_17$SI02) %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileS000(agg_16$SI02),
+    label = agg_16$SI02) %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileS000(agg_15$SI02),
+    label = agg_15$SI02) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ S000,
+    title = "Trade, Transportation,\nand Utilities Industry\nJob Density",
+    opacity = 1,
+    na.label = "NA") %>%
+  addLayersControl(
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+```
+```{r}
+#SI03 (All Other Services industry sectors) by year
+qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
+od_SI03leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 2,
+    opacity = 1,
+    group = "Basemap",
+    label = "South Wasco Region")
+
+od_SI03leaf <- od_SI03leaf %>%
+  addPolygons(
+    data = st_as_sf(agg_17),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileS000(agg_17$SI03),
+    label = agg_17$SI03) %>%
+  addPolygons(
+    data = st_as_sf(agg_16),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileS000(agg_16$SI03),
+    label = agg_16$SI03) %>%
+  addPolygons(
+    data = st_as_sf(agg_15),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileS000(agg_15$SI03),
+    label = agg_15$SI03) %>%
+  addLegend(
+    data = agg_17,
+    "bottomright",
+    pal = qtileS000,
+    values = ~ S000,
+    title = "All Other Services Industry\nJob Density",
+    opacity = 1,
+    na.label = "NA") %>%
+  addLayersControl(
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+```
+
+
+Showing all maps
+```{r}
+od_S000leaf
+od_SI01leaf
+od_SI02leaf
+od_SI03leaf
+```

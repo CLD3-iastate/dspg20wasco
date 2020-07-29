@@ -33,13 +33,13 @@ cdl_ww <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_17[acres_17$desc == "Winter Wheat", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Winter Wheat", ]$acres) %>%
   addLegend(
     data = acres_17[acres_17$desc == "Winter Wheat", ],
     "bottomright",
-    pal = colorBin(viridis_pal(option = "G")(5), domain =
+    pal = colorBin(viridis_pal(option = "D")(5), domain =
                      acres_17[acres_17$desc == "Winter Wheat", ]$acres),
     values = ~ acres,
     title = "Number of Acres",
@@ -50,7 +50,7 @@ cdl_ww <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2016",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_16[acres_16$desc == "Winter Wheat", ]$acres)(acres),
               label = acres_16[acres_16$desc == "Winter Wheat", ]$acres) %>%
   addPolygons(data = acres_15[acres_15$desc == "Winter Wheat", ],
@@ -58,7 +58,7 @@ cdl_ww <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_15[acres_15$desc == "Winter Wheat", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Winter Wheat", ]$acres) %>%
   addLayersControl(
@@ -80,13 +80,13 @@ cdl_barley <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_17[acres_17$desc == "Barley", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Barley", ]$acres) %>%
   addLegend(
     data = acres_17[acres_17$desc == "Barley", ],
     "bottomright",
-    pal = colorBin(viridis_pal(option = "G")(5), domain =
+    pal = colorBin(viridis_pal(option = "D")(5), domain =
                      acres_17[acres_17$desc == "Barley", ]$acres),
     values = ~ acres,
     title = "Number of Acres",
@@ -97,7 +97,7 @@ cdl_barley <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2016",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_16[acres_16$desc == "Barley", ]$acres)(acres),
               label = acres_16[acres_16$desc == "Barley", ]$acres) %>%
   addPolygons(data = acres_15[acres_15$desc == "Barley", ],
@@ -105,7 +105,7 @@ cdl_barley <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_15[acres_15$desc == "Barley", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Barley", ]$acres) %>%
   addLayersControl(
@@ -127,13 +127,13 @@ cdl_alfalfa <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_17[acres_17$desc == "Alfalfa", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Alfalfa", ]$acres) %>%
   addLegend(
     data = acres_17[acres_17$desc == "Alfalfa", ],
     "bottomright",
-    pal = colorBin(viridis_pal(option = "G")(5), domain =
+    pal = colorBin(viridis_pal(option = "D")(5), domain =
                      acres_17[acres_17$desc == "Alfalfa", ]$acres),
     values = ~ acres,
     title = "Number of Acres",
@@ -144,7 +144,7 @@ cdl_alfalfa <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2016",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_16[acres_16$desc == "Alfalfa", ]$acres)(acres),
               label = acres_16[acres_16$desc == "Alfalfa", ]$acres) %>%
   addPolygons(data = acres_15[acres_15$desc == "Alfalfa", ],
@@ -152,7 +152,7 @@ cdl_alfalfa <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_15[acres_15$desc == "Alfalfa", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Alfalfa", ]$acres) %>%
   addLayersControl(
@@ -174,13 +174,13 @@ cdl_cherries <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_17[acres_17$desc == "Cherries", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Cherries", ]$acres) %>%
   addLegend(
     data = acres_17[acres_17$desc == "Cherries", ],
     "bottomright",
-    pal = colorBin(viridis_pal(option = "G")(5), domain =
+    pal = colorBin(viridis_pal(option = "D")(5), domain =
                      acres_17[acres_17$desc == "Cherries", ]$acres),
     values = ~ acres,
     title = "Number of Acres",
@@ -191,7 +191,7 @@ cdl_cherries <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2016",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_16[acres_16$desc == "Cherries", ]$acres)(acres),
               label = acres_16[acres_16$desc == "Cherries", ]$acres) %>%
   addPolygons(data = acres_15[acres_15$desc == "Cherries", ],
@@ -199,7 +199,7 @@ cdl_cherries <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
+              fillColor = ~ colorBin(viridis_pal(option = "D")(5), domain =
                                        acres_15[acres_15$desc == "Cherries", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Cherries", ]$acres) %>%
   addLayersControl(

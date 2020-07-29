@@ -136,6 +136,41 @@ combined_acs <- rbind(get_acs(geography = "school district (unified)", state= "O
                             variables = acsvars, output = "wide", cache = TRUE),
                     get_acs(geography = "county", state= "OR", county = "Jefferson", year = 2018, survey = "acs5",
                             variables = acsvars, output = "wide", cache = TRUE),
+                    #Multnomah County
+                    # get_acs(geography = "tract", state= "OR", county="Multnomah", year = 2018, survey = "acs5",
+                    #         variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Multnomah", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #Clackamas County
+                    # get_acs(geography = "tract", state= "OR", county="Clackamas", year = 2018, survey = "acs5",
+                    #         variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Clackamas", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #Marion County
+                    # get_acs(geography = "tract", state= "OR", county="Marion", year = 2018, survey = "acs5",
+                    #         variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Marion", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #Washington County
+                    # get_acs(geography = "tract", state= "OR", county="Washington", year = 2018, survey = "acs5",
+                    #         variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Washington", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #Deschutes County
+                    # get_acs(geography = "tract", state= "OR", county="Deschutes", year = 2018, survey = "acs5",
+                    #         variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Deschutes", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #Lane County
+                    # get_acs(geography = "tract", state= "OR", county="Lane", year = 2018, survey = "acs5",
+                    #         variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Lane", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
+                    #Umatilla County
+                    # get_acs(geography = "tract", state= "OR", county="Umatilla", year = 2018, survey = "acs5",
+                    #         variables = acsvars, output = "wide", cache = TRUE),
+                    get_acs(geography = "county", state= "OR", county = "Umatilla", year = 2018, survey = "acs5",
+                            variables = acsvars, output = "wide", cache = TRUE),
                     #skamania county
                     get_acs(geography = "tract", state= "WA", county="Skamania", year = 2018, survey = "acs5",
                             variables = acsvars, output = "wide", cache = TRUE),
@@ -172,6 +207,41 @@ for(i in 2:length(years)){
                 get_acs(geography = "tract", state= "OR", county="Jefferson", year = years[i], survey = "acs5",
                         variables = acsvars, output = "wide", cache = TRUE),
                 get_acs(geography = "county", state= "OR", county = "Jefferson", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                #Multnomah County
+                # get_acs(geography = "tract", state= "OR", county="Multnomah", year = years[i], survey = "acs5",
+                #         variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Multnomah", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                # #Clackamas County
+                # get_acs(geography = "tract", state= "OR", county="Clackamas", year = years[i], survey = "acs5",
+                #         variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Clackamas", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                # #Marion County
+                # get_acs(geography = "tract", state= "OR", county="Marion", year = years[i], survey = "acs5",
+                #         variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Marion", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                # #Washington County
+                # get_acs(geography = "tract", state= "OR", county="Washington", year = years[i], survey = "acs5",
+                #         variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Washington", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                # #Deschutes County
+                # get_acs(geography = "tract", state= "OR", county="Deschutes", year = years[i], survey = "acs5",
+                #         variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Deschutes", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                # #Lane County
+                # get_acs(geography = "tract", state= "OR", county="Lane", year = years[i], survey = "acs5",
+                #         variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Lane", year = years[i], survey = "acs5",
+                        variables = acsvars, output = "wide", cache = TRUE),
+                # #Umatilla County
+                # get_acs(geography = "tract", state= "OR", county="Umatilla", year = years[i], survey = "acs5",
+                #         variables = acsvars, output = "wide", cache = TRUE),
+                get_acs(geography = "county", state= "OR", county = "Umatilla", year = years[i], survey = "acs5",
                         variables = acsvars, output = "wide", cache = TRUE),
                 #skamania county
                 get_acs(geography = "tract", state= "WA", county="Skamania", year = years[i], survey = "acs5",

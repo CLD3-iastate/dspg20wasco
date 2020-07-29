@@ -5,7 +5,7 @@ date: "7/28/2020"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning = FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidycensus)
 library(tidyverse);library(forcats)
@@ -16,15 +16,24 @@ library(ggthemes);library(maps);library(tigris)
 library(here);library(viridis)
 ```
 
-```{r warning= FALSE, message = FALSE}
+```{r echo=FALSE, results='hide', fig.keep='all', message = FALSE}
 #read in combined dataset
 acs_data <- fread(here("/data/acs/combined_acs.csv")) 
 acs_data$GEOID <- as.character(acs_data$GEOID)
 acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
                          NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
                          NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
+                         NAME == "Multnomah County, Oregon" | NAME == "Clackamas County, Oregon" |
+                         NAME == "Marion County, Oregon" | NAME == "Washington County, Oregon" |
+                         NAME == "Deschutes County, Oregon" | NAME == "Lane County, Oregon" | 
+                         NAME == "Umatilla County, Oregon" |
                          NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
-                         NAME == "Oregon") 
+                         NAME == "Oregon")  
+acs_counties_neighbors <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
+                         NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
+                         NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
+                         NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
+                         NAME == "Oregon")  
 
 #get tract level geography
 or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "Jefferson"),
@@ -45,12 +54,13 @@ dspgpal = c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
 
 ```
 
+The following plots are exploratory analysis and trial visualizations to include in the dashboard. The aesthetics and interactive capabilities are still in need of being improved. In addition, the margins of error 
 
 ## Financial
 
 ### Median Houshold Income
 barchart for 2018
-```{r}
+```{r warning=FALSE, message=FALSE}
 ggplotly(ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = median_household_income,
                                                         text = paste0("Region: ", NAME,
                                                                       "<br>Year: ", year,
@@ -65,7 +75,7 @@ ggplotly(ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = median_hou
 
 
 Try a line chart with all years present
-```{r}
+```{r warning=FALSE, message=FALSE}
 # grouped line chart for all years: each geography is its own color
 p <- ggplot(acs_counties, aes(x=year, y=median_household_income, group = NAME, color = NAME,
                               text = paste0("Region: ", NAME,
@@ -74,7 +84,7 @@ p <- ggplot(acs_counties, aes(x=year, y=median_household_income, group = NAME, c
                                             "<br>Margin of Error: $", median_household_income_moe))) +
   geom_line() + 
   geom_point() +
-  scale_colour_manual(values = dspgpal) +
+  #scale_colour_manual(values = dspgpal) +
   #geom_pointrange(aes(ymin=median_household_income - median_household_income_moe, ymax=median_household_income + median_household_income_moe)) +
   theme_minimal() + ggtitle("Median Household Income 2015-2018") + ylab("Median Household Income") + xlab("Year")
 #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
@@ -87,7 +97,7 @@ ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo 
 Easier to see trends, but lots of colors make it quite busy. Only drawback to the line graphs as opposed to the bar charts is that margin of error cannot be seen visually. But the tooltip provided by plotly is great for keeping that data.
 
 Same line chart but colors are only kept for south wasco, wasco county, and the state geography.
-```{r}
+```{r warning=FALSE, message=FALSE}
 p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), 
                                                             other_level = "Neighboring Counties"))
             , aes(x=year, y=median_household_income, group = NAME, color = south_wasco,
@@ -100,7 +110,7 @@ p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("Sout
   scale_colour_manual(name = "Region", values = c(dspgpal[1], dspgpal[9], dspgpal[2], dspgpal[10])) +
   scale_alpha_manual(values=c(1,1,1,0.3)) +
   #geom_pointrange(aes(ymin=median_household_income - median_household_income_moe, ymax=median_household_income + median_household_income_moe)) +
-  theme_minimal() + ggtitle("Median Household Income 2015-2018") + ylab("Median Household Income") + xlab("Year")
+  theme_minimal() + ggtitle("Median Household Income 2015-2018") + ylab("Median Household Income") + xlab("Year") 
 #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
 ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
                                          modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
@@ -114,7 +124,7 @@ Much cleaner looking plot! It's obvious where south wasco ranks in relation to t
 ### Household income bracket distribution 
 Rather than just looking at median income, we can see where the rest of the community is distributed in household income.
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 #grouped bar charts
 income <- select(filter(acs_counties, year == 2018), NAME, contains("income"))
 income <- income %>% select(!contains("moe"), -median_household_income)
@@ -125,16 +135,16 @@ ggplotly(ggplot(income)+
                                                           "25,000-34,999", "35,000-49,999", "50,000-74,999", 
                                                           "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
   scale_colour_manual(name = "Income Bracket", values = dspgpal) +
-  theme_minimal()+theme(axis.text.x = element_text(angle=30)) +
+  #theme_minimal()+theme(axis.text.x = element_text(angle=30)) +
   ylab("% of Population") + xlab("Region") +
-  ggtitle("Income Distribution for 2018"))
+  ggtitle("Income Distribution for 2018") + coord_flip())
 ```
 
 The plot is quite dense, but we can see how the distributions of income compare across the different counties and geographies. South Wasco has close to 50% of their population of households earning between 35,000 and 74,999 dollars. But they do have some of the highest percentages of households in the lowest income bracket along with skamania, klickitat and jefferson county.
 
 
 Trying to visualize with a stacked bar chart 
-```{r}
+```{r warning=FALSE, message=FALSE}
 #stacked bar charts
 ggplotly(ggplot(income, aes(fill=variable, y=value, x=NAME))+
            geom_bar(position = position_stack(reverse = TRUE), stat="identity")+ 
@@ -142,10 +152,11 @@ ggplotly(ggplot(income, aes(fill=variable, y=value, x=NAME))+
                                                                    "25,000-34,999", "35,000-49,999", "50,000-74,999", 
                                                                    "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
            ylab("% of Population") + xlab("Region") +
-  theme_minimal()+theme(axis.text.x = element_text(angle=30)) +
-           ggtitle("Income Distribution for 2018"))%>% config(displayModeBar = "static", displaylogo = FALSE, 
-                                                              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+  #theme_minimal()+theme(axis.text.x = element_text(angle=30)) +
+           ggtitle("Income Distribution for 2018") + coord_flip())%>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d"))
 
 ```
 
@@ -154,7 +165,7 @@ This stacked bar chart condenses the busy plot of distributions from the previou
 
 ### Poverty Rate
 Line chart for federal Poverty rates in 2018
-```{r}
+```{r warning=FALSE, message=FALSE}
 ggplotly(ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = below_poverty,
                                                         text = paste0("Region: ", NAME,
                                                                       "<br>Year: ", year,
@@ -172,7 +183,7 @@ ggplotly(ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = below_pove
 
 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 ggplot() +
   geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = below_poverty)) +
   geom_sf(fill = "transparent", color = "gray20", size = 1, 
@@ -186,7 +197,7 @@ ggplot() +
 ## Employment
 
 static bar chart
-```{r}
+```{r warning=FALSE, message=FALSE}
 # bar graphs
 ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = employment_20_to_64)) +
   geom_col(fill = "dark blue")+
@@ -213,7 +224,7 @@ ggplot() +
 
 ## Housing
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), 
                                                             other_level = "Neighboring Counties"))
             , aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
@@ -232,26 +243,31 @@ ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo 
 
 ```
 
+The line graph looks very busy, but an adjustment to the line type and transparency should help. Generally, we can see that in 2018, South Wasco has one of the highest percenteges of affordable housing amongst occupied housing units.
 
-```{r}
+
+```{r warning=FALSE, message=FALSE}
 housing <- select(filter(acs_counties, year == 2018), NAME, contains("affordable_housing"))
-housing_rent_own <- housing %>% select(NAME, contains("perc"))
+housing_rent_own <- housing %>% select(NAME, affordable_housing_own_perc, affordable_housing_rent_perc)
 housing_rent_own <- melt(housing_rent_own, id.vars = "NAME", measure.vars = colnames(housing_rent_own)[-c(1,4)])
 #grouped bar chart for own and rent occupancy
 ggplotly(ggplot(housing_rent_own, aes(x = NAME, y = value, fill = variable), 
                 text = paste0("Region: ", NAME,
                               "<br>Year: ", year,
-                              "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%")) +
+                              "<br>Affordable Housing: ", round(value, digits = 1), "%")) +
            geom_col(position = "dodge") + 
            scale_fill_discrete(name = "Housing Ownership", labels = c("Own", "Rent")) +
-           theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
-           ylab("% of Occupied housing units") + xlab("Region") +
+           #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
+           ylab("% of Occupied housing units") + xlab("Region") + coord_flip() + theme_minimal() +
            ggtitle("Affordable Housing 2015-2018", subtitle = "Occupied households where monthly costs are less than 30% of houshold income"), tooltip = "text")
 
 ```
 
+Of the occupied housing units, South Wasco's community ranks highly in being able to afford their monthly housing costs given their houshold income.
 
-```{r}
+
+
+```{r warning=FALSE, message=FALSE}
 #divergent bar chart to split up own and rent occupancy
 housing_diverge <- housing_rent_own %>% mutate(value = as.numeric(ifelse(variable == "affordable_housing_own_perc",
                                                      value, -1*value)))
@@ -272,9 +288,10 @@ ggplotly(ggplot(housing_diverge,
 
 ```
 
+An alternative way to visualize the percentage of occupied housing units whose monthly housing costs are less than 30% of household income
 
 % of affordable housing by household income bracket
-```{r}
+```{r warning=FALSE, message=FALSE}
 housing <- select(filter(acs_counties, year == 2018), NAME, contains("affordable_housing"))
 housing_by_income <- housing %>% select(NAME, !contains("perc") & !contains("total"))
 housing_by_income <- melt(housing_by_income, id.vars = "NAME", measure.vars = colnames(housing_by_income)[-c(1,4)])
@@ -285,8 +302,8 @@ ggplotly(ggplot(housing_by_income, aes(x = NAME, y = value, fill = variable),
                               "<br>Affordable Housing: ", round(value, digits = 1), "%")) +
            geom_col(position = "dodge") + 
            #scale_fill_discrete(name = "Housing Ownership", labels = c("Own", "Rent")) +
-           theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
-           ylab("% of Occupied housing units") + xlab("Region") +
+           #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
+           ylab("% of Occupied housing units") + xlab("Region") + coord_flip() +
            ggtitle("Affordable Housing 2015-2018", subtitle = "Occupied households where monthly costs are less than 30% of houshold income"), tooltip = "text")
 ```
 
@@ -296,10 +313,10 @@ ggplotly(ggplot(housing_by_income, aes(x = NAME, y = value, fill = variable),
 
 ### Racial Diversity
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 #----------Racial Diversity---------------
 #convert wide to long (split up moe and remerge....)
-race <- acs_counties %>% filter(year == 2018) %>% select(GEOID,NAME, year, contains("race")) # select appropriate variables
+race <- acs_counties_neighbors %>% filter(year == 2018) %>% select(GEOID,NAME, year, contains("race")) # select appropriate variables
 race_moe <- race %>% select(NAME,contains("moe")) #separate moe estimates
 race_moe <- race_moe %>% melt(id.vars = "NAME", measure.vars = colnames(race_moe)[-1]) %>%
   rename(moe = value)
@@ -314,15 +331,19 @@ ggplot(race)+
   scale_fill_discrete(name="Groups",labels = c("White", "Black or African American", "American Indian or Alaskan Native",
                                  "Asian", "Native Hawaiian or Pacific Islander", "Hispanic or Latino", 
                                  "Two or More","Other")) +
-  theme_minimal() + theme(axis.text.x = element_text(angle=45)) + 
-  ylab("% of Population") + xlab("Region") +
+  #theme_minimal() + theme(axis.text.x = element_text(angle=45)) + 
+  ylab("% of Population") + xlab("Region") + coord_flip() + theme_minimal()
   ggtitle("% Racial and Ethnic Diversity")
 ```
 
+This plot is not yet interactive, and needs some work on ordering of the grouped bars. But generally, south wasco, and its surrounding neighbors are majority a white puplation. The second most populus racial group are Hispanic or Latino group.
+
+
+
 ### Family Stability
-```{r}
-family <- select(filter(acs_counties, year == 2018), NAME, contains("family"))
-family_with_children <- family %>% select(NAME, !contains("total") & !contains("household"))
+```{r warning=FALSE, message=FALSE}
+family <- select(filter(acs_counties_neighbors, year == 2018), NAME, contains("family"))
+family_with_children <- family %>% select(NAME, family_married_parent_perc, family_single_parent_perc, family_children_nonfamily_perc, family_nonfamily_household_perc)
 family_with_children <- melt(family_with_children, id.vars = "NAME", measure.vars = colnames(family_with_children)[-1])
 #grouped bar chart for own and rent occupancy
 ggplotly(ggplot(family_with_children, aes(x = NAME, y = value, fill = variable), 
@@ -331,7 +352,34 @@ ggplotly(ggplot(family_with_children, aes(x = NAME, y = value, fill = variable),
                               "<br>% Children: ", round(value, digits = 1), "%")) +
            geom_col(position = "dodge") + 
            #scale_fill_discrete(name = "Housing Ownership", labels = c("Own", "Rent")) +
-           theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
-           ylab("% of children") + xlab("Region") +
-           ggtitle("Family Structure for Children under 18-2018"))
+           #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
+           ylab("% of children") + xlab("Region") + coord_flip()+ theme_minimal() +
+           ggtitle("Family Structure for Children under 18-2018"), tooltip = "text")
 ```
+
+
+
+Compared to its immediate neighbors, South Wasco has the highest percentage of children who are in a household with no family members. South Wasco also has the highest percentage of people living alone or with non family members.
+
+### Educational Attainment
+```{r warning=FALSE, message=FALSE}
+ed <- select(filter(acs_counties_neighbors, year == 2018), NAME, contains("education"))
+ed_perc <- ed %>% select(NAME, education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
+ed_perc <- melt(ed_perc, id.vars = "NAME", measure.vars = colnames(ed_perc)[-1])
+#grouped bar chart for own and rent occupancy
+ggplotly(ggplot(ed_perc, aes(x = NAME, y = value, fill = variable), 
+                text = paste0("Region: ", NAME,
+                              "<br>Year: ", year,
+                              "<br>%adults 25 or older: ", round(value, digits = 1), "%")) +
+           geom_col(position = "dodge") + 
+           #scale_fill_discrete(name = "Housing Ownership", labels = c("Own", "Rent")) +
+           #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
+           ylab("% of Adults 25 and Older") + xlab("Region") + coord_flip()+ theme_minimal() +
+           ggtitle("Educational Attainment for Adults 25 and older-2018"), tooltip = "text")
+```
+
+
+Generally, South Wasco has a large percentage of adults that are high school graduates and have some higher education. However, It has some of the lowest percentages of adults that havea bachelors degree or higher. Hood river has the highest educated population.
+
+
+ 

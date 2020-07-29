@@ -355,10 +355,23 @@ combined_acs <- combined_acs %>%
 
 #fwrite(combined_acs,"~/git/dspg20wasco/data/acs/combined_acs.csv", sep = ",")
 
+#write files into separate county and tracts .Rds files for easier shiny app handling
+# acs_data <- fread(here("/data/acs/combined_acs.csv")) 
+# acs_data$GEOID <- as.character(acs_data$GEOID)
+# acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
+#                          NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
+#                          NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
+#                          NAME == "Multnomah County, Oregon" | NAME == "Clackamas County, Oregon" |
+#                          NAME == "Marion County, Oregon" | NAME == "Washington County, Oregon" |
+#                          NAME == "Deschutes County, Oregon" | NAME == "Lane County, Oregon" | NAME == "Umatilla County, Oregon" |
+#                          NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
+#                          NAME == "Oregon") 
 
 
 
 
+####### PRACTICE CODE #######
+# The code below is to prepare for combined pull and troubleshoot issues with the api.
 #### Social Data ###########
 social_vars <- c(  #Total Population Estimate
   "DP05_0001",

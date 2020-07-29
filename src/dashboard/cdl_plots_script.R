@@ -1,11 +1,3 @@
----
-title: "Crop Data Layer S. Wasco"
-author: "Owen Hart"
-date: "7/28/2020"
-output: html_document
----
-
-```{r}
 library(R.utils)
 library(data.table)
 library(tidyr)
@@ -19,94 +11,14 @@ library(reshape2)
 library(raster)
 library(tigris)
 library(viridis)
-```
 
-```{r}
+
+acres_17 <- readRDS("../data/app_acres_17.Rds")
+acres_16 <- readRDS("../data/app_acres_16.Rds")
+acres_15 <- readRDS("../data/app_acres_15.Rds")
 south_wasco_points <- st_read("../data/shps/swsd")
-```
 
-
-Aaron's script
-```{r}
-# FUNCTION TO CREATE A SEPARATE RASTER FOR EACH SPATIAL OBJECT (e.g. Census Tract)
-crop_mask_raster_to_spatial <- function(raster_obj, sf_obj) {
-  library(raster)
-  library(sf)
-  library(data.table)
-  for (i in 1:nrow(sf_obj)) {
-    sf_row <- sf_obj[i,]
-    sp_row <- as(st_geometry(sf_row), 'Spatial')
-    sp_row <- spTransform(sp_row, crs(raster_obj))
-    crp <- crop(raster_obj, sp_row)
-    msk <- mask(crp, sp_row)
-   
-    if (exists("out_ls") == F) out_ls <- list()
-    out_ls[sf_row$GEOID] <- msk
-  }
-  out_ls
-}
- 
-# FUNCTION TO GET ACRES PER LAND COVER ITEM PER SPATIAL OBJECT
-raster_sqm_to_acres <- function(raster_list) {
-  options(scipen = 999)
-  for (i in 1:length(raster_list)) {
-    sqm <- data.table::setDT(aggregate(getValues(area(raster_list[[i]], weights=FALSE)), by=list(getValues(raster_list[[i]])), sum))
-    sqa <- sqm[,.(class = Group.1, sqm = x, acres = x*0.00024711)]
-    sqa$geoid <- names(raster_list[i])
-    if (exists("out_dt")) out_dt <- data.table::rbindlist(list(out_dt, sqa))
-    else out_dt <- sqa
-  }
-  out_dt
-}
- 
-# READ RASTER FILE
-raster_2017 <- raster::raster("~/git/dspg20wasco/data/raster/CDL_2017_41065.tif")
-raster_2016 <- raster::raster("~/git/dspg20wasco/data/raster/CDL_2016_41065.tif")
-raster_2015 <- raster::raster("~/git/dspg20wasco/data/raster/CDL_2015_41065.tif")
-# GET SPATIAL GEORGAPHIES (sf file)
-#sf <- sf::st_as_sf(tigris::tracts("OR", "Wasco County"))
-sf <- sf::st_as_sf(tigris::block_groups("OR", "Wasco County"))
-# CREATE A SEPARATE RASTER FOR EACH SPATIAL OBJECT
-list_of_geo_rasters_17 <- crop_mask_raster_to_spatial(raster_2017, sf)
-list_of_geo_rasters_16 <- crop_mask_raster_to_spatial(raster_2016, sf)
-list_of_geo_rasters_15 <- crop_mask_raster_to_spatial(raster_2015, sf)
-
-# GET ACRES PER LAND COVER ITEM PER SPATIAL OBJECT
-crop_acres_per_geo_17 <- raster_sqm_to_acres(list_of_geo_rasters_17)
-crop_acres_per_geo_16 <- raster_sqm_to_acres(list_of_geo_rasters_16)
-crop_acres_per_geo_15 <- raster_sqm_to_acres(list_of_geo_rasters_15)
-
-# ADD YEAR
-yr <- stringr::str_match(file_path, "_(\\d\\d\\d\\d)")[,2]
-crop_acres_per_geo_17$year <- yr
-crop_acres_per_geo_16$year <- yr
-crop_acres_per_geo_15$year <- yr
-# CONVERT CODES TO LAND COVER/CROP NAMES
-crop_acres_per_geo_17$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo_17$class)
-crop_acres_per_geo_16$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo_16$class)
-crop_acres_per_geo_15$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo_15$class)
-
-# MERGE SPATIAL GEOGRAPHIES WITH THE CROP ACREAGE DATA
-acres_17 <- merge(sf, crop_acres_per_geo_17, by.x = "GEOID", by.y = "geoid")
-acres_16 <- merge(sf, crop_acres_per_geo_16, by.x = "GEOID", by.y = "geoid")
-acres_15 <- merge(sf, crop_acres_per_geo_15, by.x = "GEOID", by.y = "geoid")
-# ASSIGN A CRS
-acres_17 <- sf::st_set_crs(acres_17, 4269)
-acres_16 <- sf::st_set_crs(acres_16, 4269)
-acres_15 <- sf::st_set_crs(acres_15, 4269)
-
-```
-
-saving data
-```{r}
-saveRDS(acres_17, "../data/app_acres_17.Rds")
-saveRDS(acres_16, "../data/app_acres_16.Rds")
-saveRDS(acres_15, "../data/app_acres_15.Rds")
-```
-
-
-Winter Wheat
-```{r}
+#winter wheat
 cdl_ww <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
@@ -121,7 +33,7 @@ cdl_ww <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain = 
+              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
                                        acres_17[acres_17$desc == "Winter Wheat", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Winter Wheat", ]$acres) %>%
   addLegend(
@@ -150,14 +62,10 @@ cdl_ww <- leaflet() %>%
                                        acres_15[acres_15$desc == "Winter Wheat", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Winter Wheat", ]$acres) %>%
   addLayersControl(
-#    baseGroups = c("South Wasco School District"),
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
-cdl_ww
-```
 
-
-```{r}
+#barley
 cdl_barley <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
@@ -172,7 +80,7 @@ cdl_barley <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain = 
+              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
                                        acres_17[acres_17$desc == "Barley", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Barley", ]$acres) %>%
   addLegend(
@@ -201,14 +109,10 @@ cdl_barley <- leaflet() %>%
                                        acres_15[acres_15$desc == "Barley", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Barley", ]$acres) %>%
   addLayersControl(
-#    baseGroups = c("South Wasco School District"),
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
-cdl_barley
-```
 
-
-```{r}
+#alfalfa
 cdl_alfalfa <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
@@ -223,7 +127,7 @@ cdl_alfalfa <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain = 
+              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
                                        acres_17[acres_17$desc == "Alfalfa", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Alfalfa", ]$acres) %>%
   addLegend(
@@ -252,14 +156,10 @@ cdl_alfalfa <- leaflet() %>%
                                        acres_15[acres_15$desc == "Alfalfa", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Alfalfa", ]$acres) %>%
   addLayersControl(
-#    baseGroups = c("South Wasco School District"),
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
-cdl_alfalfa
-```
 
-
-```{r}
+#cherries
 cdl_cherries <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
@@ -274,7 +174,7 @@ cdl_cherries <- leaflet() %>%
               opacity = 1,
               fillOpacity = .7,
               group = "2017",
-              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain = 
+              fillColor = ~ colorBin(viridis_pal(option = "G")(5), domain =
                                        acres_17[acres_17$desc == "Cherries", ]$acres)(acres),
               label = acres_17[acres_17$desc == "Cherries", ]$acres) %>%
   addLegend(
@@ -303,8 +203,7 @@ cdl_cherries <- leaflet() %>%
                                        acres_15[acres_15$desc == "Cherries", ]$acres)(acres),
               label = acres_15[acres_15$desc == "Cherries", ]$acres) %>%
   addLayersControl(
-#    baseGroups = c("South Wasco School District"),
+    #    baseGroups = c("South Wasco School District"),
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
 cdl_cherries
-```

@@ -52,3 +52,8 @@ unincorporated <- st_as_sf(unincorporated)
 url = "https://public.co.wasco.or.us/gisserver/rest/services/WascoCountyBoundary/MapServer/0"
 countyline <- esri2sf(url)
 countyline <- st_as_sf(countyline)
+
+# Other county lines
+schools <- counties("Oregon")
+schools <- st_as_sf(schools)
+swsd <- schools %>% filter(NAME == "South Wasco County School District 1")

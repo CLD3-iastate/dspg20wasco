@@ -69,33 +69,25 @@ Reading in files
 main17 <- fread("../data/lodes/or_od_main_JT00_2017.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
-
 aux17 <- fread("../data/lodes/or_od_aux_JT00_2017.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
-
 full_data17 <- rbind(main17, aux17)
-
 
 main16 <- fread("../data/lodes/or_od_main_JT00_2016.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
-
 aux16 <- fread("../data/lodes/or_od_aux_JT00_2016.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
-
 full_data16 <- rbind(main16, aux16)
-
 
 main15 <- fread("../data/lodes/or_od_main_JT00_2015.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
-
 aux15 <- fread("../data/lodes/or_od_aux_JT00_2015.csv", 
               colClasses = c("w_geocode" = "character",
                              "h_geocode" = "character"))
-
 full_data15 <- rbind(main15, aux15)
 ```
 
@@ -119,3 +111,99 @@ saveRDS(wasco17_od, "../data/lodes/filtered/wasco17_od.Rds")
 saveRDS(wasco16_od, "../data/lodes/filtered/wasco16_od.Rds")
 saveRDS(wasco15_od, "../data/lodes/filtered/wasco15_od.Rds")
 ```
+
+Loading in WA Data for Outflows plot (neighboring counties in WA)
+
+```{r}
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/wa/od/wa_od_main_JT00_2017.csv.gz", 
+  destfile = "../data/lodes/wa_od_main_JT00_2017.csv.gz")
+
+gunzip("../data/lodes/wa_od_main_JT00_2017.csv.gz")
+
+#2016
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/wa/od/wa_od_main_JT00_2016.csv.gz", 
+  destfile = "../data/lodes/wa_od_main_JT00_2016.csv.gz")
+
+gunzip("../data/lodes/wa_od_main_JT00_2016.csv.gz")
+
+#2015
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/wa/od/wa_od_main_JT00_2015.csv.gz", 
+  destfile = "../data/lodes/wa_od_main_JT00_2015.csv.gz")
+
+gunzip("../data/lodes/wa_od_main_JT00_2015.csv.gz")
+
+###Aux
+
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/wa/od/wa_od_aux_JT00_2017.csv.gz", 
+  destfile = "../data/lodes/wa_od_aux_JT00_2017.csv.gz")
+
+gunzip("../data/lodes/wa_od_aux_JT00_2017.csv.gz")
+
+
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/wa/od/wa_od_aux_JT00_2016.csv.gz", 
+  destfile = "../data/lodes/wa_od_aux_JT00_2016.csv.gz")
+
+gunzip("../data/lodes/wa_od_aux_JT00_2016.csv.gz")
+
+
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/wa/od/wa_od_aux_JT00_2015.csv.gz", 
+  destfile = "../data/lodes/wa_od_aux_JT00_2015.csv.gz")
+
+gunzip("../data/lodes/wa_od_aux_JT00_2015.csv.gz")
+```
+
+```{r}
+main17 <- fread("../data/lodes/wa_od_main_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+aux17 <- fread("../data/lodes/wa_od_aux_JT00_2017.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+full_data17 <- rbind(main17, aux17)
+
+main16 <- fread("../data/lodes/wa_od_main_JT00_2016.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+aux16 <- fread("../data/lodes/wa_od_aux_JT00_2016.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+full_data16 <- rbind(main16, aux16)
+
+main15 <- fread("../data/lodes/wa_od_main_JT00_2015.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+aux15 <- fread("../data/lodes/wa_od_aux_JT00_2015.csv", 
+              colClasses = c("w_geocode" = "character",
+                             "h_geocode" = "character"))
+full_data15 <- rbind(main15, aux15)
+```
+
+
+
+filtered so workplace is in wasco
+```{r}
+wa17_od <- full_data17 %>% 
+  filter(h_geocode %in% full_data17$h_geocode[substr(full_data17$h_geocode, 1, 5) == "41065"])
+
+wa16_od <- full_data16 %>% 
+  filter(h_geocode %in% full_data16$h_geocode[substr(full_data16$h_geocode, 1, 5) == "41065"])
+
+wa15_od <- full_data15 %>% 
+  filter(h_geocode %in% full_data15$h_geocode[substr(full_data15$h_geocode, 1, 5) == "41065"])
+```
+
+
+
+save to filtered to load into lodes_od_plots.Rmd when doing outflows
+```{r}
+saveRDS(wa17_od, "../data/lodes/filtered/wa17_od.Rds")
+saveRDS(wa16_od, "../data/lodes/filtered/wa16_od.Rds")
+saveRDS(wa15_od, "../data/lodes/filtered/wa15_od.Rds")
+```
+

@@ -55,7 +55,9 @@ agg_15 <- readRDS("Data/app_lodes_od_agg_2015.Rds")
 #wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("Data/shps/swsd")
 
-
+#color palettes
+dspgpal = c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
+            "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
 
@@ -195,8 +197,8 @@ ui <- dashboardPagePlus(
                         width = 12,
                         align = "center",
                         h2("Methods: Clusters of Innovation"),
-                        img(src="FoodSystems.png", align = "center", width = 600),
-                        "Data for this map is from here",
+                        #img(src="FoodSystems.png", align = "center", width = 60),
+                       # "Data for this map is from here",
                         # Remove the cluster
                         # Add indicator table snippet
                         # Add the data table for this
@@ -257,6 +259,31 @@ ui <- dashboardPagePlus(
                     )
                   ))
         ),
+
+#                        "The Food Systems Cluster of Innovation focuses on food #banks and distribution as well as agriculture. Some of the major players are #identified below.",
+#                        "Food systems map is very cool blah blah,
+#                        Sources USDA Oregon WIC Locator, Open Street Map,
+#                        Isochrones information from open street map so cool"
+#                      )))
+                  #boxPlus(
+                  #title = "Interactive Food Systems Map",
+                  #closable = FALSE,
+                  #width = NULL,
+                  #enable_label = TRUE,
+                  #label_text = 1,
+                  #label_status = "danger",
+                  #status = "warning",
+                  #solidHeader = TRUE,
+                  #collapsible = TRUE,
+                  #selectInput("iso", "Show driving time for...",
+                  #choices = isochrones$name,
+                  #selectize = TRUE,
+                  #multiple = TRUE,
+                  #width = "150px"),
+                  #leafletOutput("mymap")
+                  #)
+                   #   )),
+
         ## Infrastructure tab -----------------------------
         tabItem(tabName = "infrastructure",
                 # Just topical question (wind and solar, broadband, water, transit)
@@ -478,53 +505,9 @@ ui <- dashboardPagePlus(
                       striped = TRUE,
                       active = TRUE
                     ),
-                    back_content = tagList(
-                    )
-                  )
-        ),
-        #radioButtons(
-        #inputId = "group",
-        #   label = "",
-        #   choices = c("Food Systems", "Infrastructure")
-        # ),
-        selectInput("year", "Year:",c(2015, 2016, 2017, 2018)),
-        #dropdownButton(
-        #tags$h3("List of Indicators"),
-        selectInput(
-          inputId = 'food_system',
-          label = '',
-          choices = c(
-            "Food Insecurity Rate",
-            "Free and reduced-price Lunch",
-            "Food Access"
-          )
-        ),
+                    back_content = tagList()
+                  ))),
 
-        #circle = TRUE,
-        #status = "danger",
-        #icon = icon("leaf"),
-        #width = "300px"
-        #),
-        #dropdownButton(
-        #tags$h3("List of Indicators"),
-        selectInput(
-          inputId = 'financial',
-          label = '',
-          choices = c("Median Household Income", "Poverty Rate")
-        ),
-
-        #circle = TRUE,
-        #status = "danger",
-        #icon = icon("dollar"),
-        #width = "300px"
-        #)
-
-        #)
-        #),
-        plotOutput("plot1")
-
-      ),
-    #  )),
 
       ## Data tab ----------
       tabItem(tabName = "data",
@@ -752,12 +735,14 @@ server <- function(input, output, session) {
       addPolygons(data = unincorporated, color = "blue", opacity = .4, weight = 1, popup = ~htmlEscape(NAME), group = "Basemap") %>%
       addPolylines(data = roads,
                    color = "gray", weight = .75, group = "Basemap") %>%
+      #addMarkers(data = food_points, label = "HI", labelOptions = labelOptions(permanent = TRUE, textOnly = TRUE))
       addCircleMarkers(data = food_points,
                        color = ~foodpal(shop), fillOpacity = 1,
-                       radius = ~radius,
+                       radius = 10,
                        stroke = FALSE,
                        popup = ~htmlEscape(name),
-                       group = "Stores") %>%
+                       group = "Stores",
+                       label = ~pymnt_types, labelOptions = labelOptions(permanent = TRUE, textOnly = TRUE, textsize = "10px", offset = c(0,0), direction = "center")) %>%
       addPolygons(data = filteredData(), color = ~isochronepal(value),
                   group = "isochrones") %>%
       addLayersControl(
@@ -765,24 +750,38 @@ server <- function(input, output, session) {
         overlayGroups = c("Stores"),
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
-      addLegendCustom(colors = c("red", "blue", "green", "gray", "gray", "gray"),
-                      labels = c("convenience", "farm", "supermarket", "no acceptance",
-                                 "snap", "snap and wic"),
-                      sizes = c(10, 10, 10, 6, 10, 14)) %>%
-      addLegend(data = countyline, "topright",
-                colors = "grey", labels = "Wasco County", group = "Basemap") %>%
-      addLegend(data = swsd, "topright", opacity = 1,
-                colors = "purple", labels = "South Wasco County School District",
-                group = "Basemap") %>%
-      addLegend(data = unincorporated, "topright", opacity = 0.4,
-                colors = "blue", labels = "Townships and Unincorporated Areas",
-                group = "Basemap") %>%
+      addLegend(colors = c("white", "white"),
+                labels = c("S = SNAP", "W = WIC"),
+                position = "bottomright",
+                opacity = 1,
+                title = "Accepted Payment Types") %>%
+      addLegend(colors = paste0(c("red", "blue", "green"), "; border-radius: 50%; width: 10px; height: 10px;"),
+                labels = paste0("<div style='display: inline-block;'>", c("convenience", "farm", "supermarket"), "</div>"),
+                position = "bottomright",
+                opacity = 1,
+                title = "Food Location Types") %>%
+      # addLegendCustom(colors = c("red", "blue", "green", "gray", "gray", "gray"),
+      #                 labels = c("convenience", "farm", "supermarket", "no acceptance",
+      #                            "snap", "snap and wic"),
+      #                 sizes = c(10, 10, 10, 6, 10, 14)) %>%
+      addLegend(colors = c("grey", "purple", "blue"),
+                labels = c("Wasco County", "South Wasco County School District", "Townships and Unincorporated Areas"),
+                title = "Boundary Lines") %>%
+      # addLegend(data = countyline, "topright",
+      #           colors = "grey", labels = "Wasco County", group = "Basemap") %>%
+      # addLegend(data = swsd, "topright", opacity = 1,
+      #           colors = "purple", labels = "South Wasco County School District",
+      #           group = "Basemap") %>%
+      # addLegend(data = unincorporated, "topright", opacity = 0.4,
+      #           colors = "blue", labels = "Townships and Unincorporated Areas",
+      #           group = "Basemap") %>%
       addLegend(data = isochrones, position = "bottomleft", pal = isochronepal, values = ~value, labels = c("30 minutes", "1 hour"),
                 group = "isochrones", title = "driving time")
 
   })
 
   ## Food table
+
 
 
 
@@ -885,6 +884,7 @@ server <- function(input, output, session) {
         geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) +
         geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) +
         geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+
     }
     else if (input$flows == "Outflows"){
       ggplot(top_10_out, aes(x = year)) +

@@ -187,7 +187,7 @@ write_csv(top_12_in_trans, "../data/app_12_inflows_wasco.csv")
 
 #line plot for all jobs 2015-2017 by county
 ggplotly(ggplot(top_12_in_trans, aes(x = year)) +
-  ggtitle("Number of jobs flowing into\nWasco County from other counties\n2015-2017") +
+  ggtitle("Number of jobs flowing into Wasco County (2015-2017)") +
   labs(x = "Year", y = "Number of Jobs", colour = "County") + 
   geom_line(aes(y = `Hood River County, OR`, color = "Hood River County")) + 
   geom_line(aes(y = `Klickitat County, WA`, color = "Klickitat County, WA")) + 
@@ -267,7 +267,7 @@ write_csv(top_12_out_trans, "../data/app_12_outflows_wasco.csv")
 top_12_out_trans
 
 ggplotly(ggplot(top_12_out_trans, aes(x = year)) +
-  ggtitle("Number of jobs flowing out of\nWasco County into other counties\n2015-2017") +
+  ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") +
   labs(x = "Year", y = "Number of Jobs", colour = "County") + 
   geom_line(aes(y = `Hood River County, OR`, color = "Hood River County")) + 
   geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County")) + 
@@ -436,7 +436,7 @@ od_SI01leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of Goods Producing Sector Jobs<br>in Wasco County",
+    title = "Number of Goods Producing<br>Sector Jobs in Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),
@@ -544,7 +544,7 @@ od_SI03leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of All Other Services Sector Jobs<br>in Wasco County",
+    title = "Number of All Other Services<br>Sector Jobs in Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),

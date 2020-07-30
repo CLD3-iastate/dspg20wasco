@@ -72,6 +72,8 @@ water_use_by_sector <- water_use_by_sector[water_use_by_sector$var %like% "(mGal
 water_use_by_sector_t <- data.frame(t(water_use_by_sector[-1]))
 colnames(water_use_by_sector_t) <- water_use_by_sector$var
 water_use_by_sector_t$year <- colnames(water_use_by_sector)[-1]
+water_use_by_sector_t[water_use_by_sector_t == 0] <- NA 
+#changing all to NA so they wont appear as 0 on plot
 saveRDS(water_use_by_sector_t, "../data/app_usgs_water_use.Rds")
 water_use_by_sector_t
 ```
@@ -80,7 +82,7 @@ water_use_by_sector_t
 Making interactive barcharts
 ```{r}
 water_use_plot <- ggplot(data = water_use_by_sector_t, aes(x = year, group = 1)) +
-  ggtitle("Water Use in Wasco County, OR by Sector (1985-2015)") +
+  ggtitle("Water Use in Wasco County by Sector (1985-2015)") +
   labs(x = "Year", y = "Millions of Gallons per Day", color = NULL) + 
   geom_line(aes(y = `Aquaculture Water Use (mGal/D)`, color = "Aquaculture Water Use")) +
   geom_line(aes(y = `Commercial Water Use (mGal/D)`, color = "Commercial Water Use")) +

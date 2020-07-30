@@ -93,7 +93,7 @@ od_SI01leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of Goods Producing Sector Jobs<br>in Wasco County",
+    title = "Number of Goods Producing<br>Sector Jobs in Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),
@@ -197,7 +197,7 @@ od_SI03leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of All Other Services Sector Jobs<br>in Wasco County",
+    title = "Number of All Other Services<br>Sector Jobs in Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),

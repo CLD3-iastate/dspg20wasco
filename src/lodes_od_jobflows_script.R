@@ -13,7 +13,7 @@ top_12_out <- read_csv("~/git/dspg20wasco/data/app_12_outflows_wasco.csv")
 
 #have some toggle to switch between inflows and outflows
 ggplotly(ggplot(top_12_in, aes(x = year)) +
-           ggtitle("Number of jobs flowing into\nWasco County from other counties\n2015-2017") +
+           ggtitle("Number of jobs flowing into Wasco County (2015-2017)") +
            labs(x = "Year", y = "Number of Jobs", colour = "County") +
            geom_line(aes(y = `Hood River County, OR`, color = "Hood River County")) +
            geom_line(aes(y = `Klickitat County, WA`, color = "Klickitat County, WA")) +
@@ -29,9 +29,8 @@ ggplotly(ggplot(top_12_in, aes(x = year)) +
            geom_line(aes(y = `Skamania County, WA`, color = "Skamania County, WA")) +
            scale_x_continuous(breaks = 0:2100))
 
-
 ggplotly(ggplot(top_12_out, aes(x = year)) +
-           ggtitle("Number of jobs flowing out of\nWasco County into other counties\n2015-2017") +
+           ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") +
            labs(x = "Year", y = "Number of Jobs", colour = "County") +
            geom_line(aes(y = `Hood River County, OR`, color = "Hood River County")) +
            geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County")) +

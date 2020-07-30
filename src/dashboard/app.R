@@ -195,7 +195,7 @@ ui <- dashboardPagePlus(
                         "Food systems map is very cool blah blah,
                         Sources USDA Oregon WIC Locator, Open Street Map,
                         Isochrones information from open street map so cool"
-                      ))),
+                      )))
                   #boxPlus(
                   #title = "Interactive Food Systems Map",
                   #closable = FALSE,
@@ -633,12 +633,14 @@ server <- function(input, output, session) {
       addPolygons(data = unincorporated, color = "blue", opacity = .4, weight = 1, popup = ~htmlEscape(NAME), group = "Basemap") %>%
       addPolylines(data = roads,
                    color = "gray", weight = .75, group = "Basemap") %>%
+      #addMarkers(data = food_points, label = "HI", labelOptions = labelOptions(permanent = TRUE, textOnly = TRUE))
       addCircleMarkers(data = food_points,
                        color = ~foodpal(shop), fillOpacity = 1,
-                       radius = ~radius,
+                       radius = 10,
                        stroke = FALSE,
                        popup = ~htmlEscape(name),
-                       group = "Stores") %>%
+                       group = "Stores",
+                       label = ~pymnt_types, labelOptions = labelOptions(permanent = TRUE, textOnly = TRUE, textsize = "10px", offset = c(0,0), direction = "center")) %>%
       addPolygons(data = filteredData(), color = ~isochronepal(value),
                   group = "isochrones") %>%
       addLayersControl(
@@ -646,18 +648,31 @@ server <- function(input, output, session) {
         overlayGroups = c("Stores"),
         options = layersControlOptions(collapsed = FALSE)
       ) %>%
-      addLegendCustom(colors = c("red", "blue", "green", "gray", "gray", "gray"),
-                      labels = c("convenience", "farm", "supermarket", "no acceptance",
-                                 "snap", "snap and wic"),
-                      sizes = c(10, 10, 10, 6, 10, 14)) %>%
-      addLegend(data = countyline, "topright",
-                colors = "grey", labels = "Wasco County", group = "Basemap") %>%
-      addLegend(data = swsd, "topright", opacity = 1,
-                colors = "purple", labels = "South Wasco County School District",
-                group = "Basemap") %>%
-      addLegend(data = unincorporated, "topright", opacity = 0.4,
-                colors = "blue", labels = "Townships and Unincorporated Areas",
-                group = "Basemap") %>%
+      addLegend(colors = c("white", "white"),
+                labels = c("S = SNAP", "W = WIC"),
+                position = "bottomright",
+                opacity = 1,
+                title = "Accepted Payment Types") %>% 
+      addLegend(colors = paste0(c("red", "blue", "green"), "; border-radius: 50%; width: 10px; height: 10px;"),
+                labels = paste0("<div style='display: inline-block;'>", c("convenience", "farm", "supermarket"), "</div>"),
+                position = "bottomright",
+                opacity = 1,
+                title = "Food Location Types") %>%
+      # addLegendCustom(colors = c("red", "blue", "green", "gray", "gray", "gray"),
+      #                 labels = c("convenience", "farm", "supermarket", "no acceptance",
+      #                            "snap", "snap and wic"),
+      #                 sizes = c(10, 10, 10, 6, 10, 14)) %>%
+      addLegend(colors = c("grey", "purple", "blue"),
+                labels = c("Wasco County", "South Wasco County School District", "Townships and Unincorporated Areas"),
+                title = "Boundary Lines") %>% 
+      # addLegend(data = countyline, "topright",
+      #           colors = "grey", labels = "Wasco County", group = "Basemap") %>%
+      # addLegend(data = swsd, "topright", opacity = 1,
+      #           colors = "purple", labels = "South Wasco County School District",
+      #           group = "Basemap") %>%
+      # addLegend(data = unincorporated, "topright", opacity = 0.4,
+      #           colors = "blue", labels = "Townships and Unincorporated Areas",
+      #           group = "Basemap") %>%
       addLegend(data = isochrones, position = "bottomleft", pal = isochronepal, values = ~value, labels = c("30 minutes", "1 hour"),
                 group = "isochrones", title = "driving time")
 

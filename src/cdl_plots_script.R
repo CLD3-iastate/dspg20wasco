@@ -13,10 +13,10 @@ library(tigris)
 library(viridis)
 
 
-acres_17 <- readRDS("../data/app_acres_17.Rds")
-acres_16 <- readRDS("../data/app_acres_16.Rds")
-acres_15 <- readRDS("../data/app_acres_15.Rds")
-south_wasco_points <- st_read("../data/shps/swsd")
+acres_17 <- readRDS("~/git/dspg20wasco/data/app_acres_17.Rds")
+acres_16 <- readRDS("~/git/dspg20wasco/data/app_acres_16.Rds")
+acres_15 <- readRDS("~/git/dspg20wasco/data/app_acres_15.Rds")
+south_wasco_points <- st_read("~/git/dspg20wasco/data/shps/swsd")
 
 #winter wheat
 cdl_ww <- leaflet() %>%
@@ -206,4 +206,3 @@ cdl_cherries <- leaflet() %>%
     #    baseGroups = c("South Wasco School District"),
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
-cdl_cherries

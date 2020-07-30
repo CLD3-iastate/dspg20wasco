@@ -19,31 +19,41 @@ library(reshape2)
 library(raster)
 library(tigris)
 library(viridis)
+library(plotly)
 ```
 
 
 reading in filtered lodes data with geometries
 ```{r}
-wasco17_od <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
-wasco16_od <- readRDS("../data/lodes/filtered/wasco16_od.Rds")
-wasco15_od <- readRDS("../data/lodes/filtered/wasco17_od.Rds")
+wasco17_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wasco17_od.Rds")
+wasco16_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wasco16_od.Rds")
+wasco15_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wasco17_od.Rds")
+
+wa17_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wa17_od.Rds")
+wa16_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wa16_od.Rds")
+wa15_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wa15_od.Rds")
+
+pnw_wasco17_od <- rbind(wasco17_od, wa17_od)
+pnw_wasco16_od <- rbind(wasco16_od, wa16_od)
+pnw_wasco15_od <- rbind(wasco15_od, wa15_od)
+
 ```
 
 ```{r}
 # select tracts from geocode strings
-wasco17_od$w_geocode_tract <- substr(wasco17_od$w_geocode, start = 1, stop = 11)
-wasco17_od$h_geocode_tract <- substr(wasco17_od$h_geocode, start = 1, stop = 11)
+pnw_wasco17_od$w_geocode_tract <- substr(pnw_wasco17_od$w_geocode, start = 1, stop = 11)
+pnw_wasco17_od$h_geocode_tract <- substr(pnw_wasco17_od$h_geocode, start = 1, stop = 11)
 
-wasco16_od$w_geocode_tract <- substr(wasco16_od$w_geocode, start = 1, stop = 11)
-wasco16_od$h_geocode_tract <- substr(wasco16_od$h_geocode, start = 1, stop = 11)
+pnw_wasco16_od$w_geocode_tract <- substr(pnw_wasco16_od$w_geocode, start = 1, stop = 11)
+pnw_wasco16_od$h_geocode_tract <- substr(pnw_wasco16_od$h_geocode, start = 1, stop = 11)
 
-wasco15_od$w_geocode_tract <- substr(wasco15_od$w_geocode, start = 1, stop = 11)
-wasco15_od$h_geocode_tract <- substr(wasco15_od$h_geocode, start = 1, stop = 11)
+pnw_wasco15_od$w_geocode_tract <- substr(pnw_wasco15_od$w_geocode, start = 1, stop = 11)
+pnw_wasco15_od$h_geocode_tract <- substr(pnw_wasco15_od$h_geocode, start = 1, stop = 11)
 ```
 
 aggregate by tract level
 ```{r}
-jobs_all_2017 <- wasco17_od%>%
+jobs_all_2017 <- pnw_wasco17_od %>%
   group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
@@ -55,7 +65,7 @@ jobs_all_2017 <- wasco17_od%>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-jobs_all_2016 <- wasco16_od %>%
+jobs_all_2016 <- pnw_wasco16_od %>%
   group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
@@ -67,7 +77,7 @@ jobs_all_2016 <- wasco16_od %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-jobs_all_2015 <- wasco15_od %>%
+jobs_all_2015 <- pnw_wasco15_od %>%
   group_by(createdate, w_geocode_tract, h_geocode_tract) %>% 
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
@@ -85,27 +95,34 @@ jobs_all_2015 <- wasco15_od %>%
 jobs_all_2017$h_state <- substr(jobs_all_2017$h_geocode_tract, 1, 2)
 jobs_all_2017$h_county <- substr(jobs_all_2017$h_geocode_tract, 3, 5)
 jobs_all_2017$h_tract <- substr(jobs_all_2017$h_geocode_tract, 6, 11)
+jobs_all_2017$h_stcty <- substr(jobs_all_2017$h_geocode_tract, 1, 5)
 
 jobs_all_2016$h_state <- substr(jobs_all_2016$h_geocode_tract, 1, 2)
 jobs_all_2016$h_county <- substr(jobs_all_2016$h_geocode_tract, 3, 5)
 jobs_all_2016$h_tract <- substr(jobs_all_2016$h_geocode_tract, 6, 11)
+jobs_all_2016$h_stcty <- substr(jobs_all_2016$h_geocode_tract, 1, 5)
 
 jobs_all_2015$h_state <- substr(jobs_all_2015$h_geocode_tract, 1, 2)
 jobs_all_2015$h_county <- substr(jobs_all_2015$h_geocode_tract, 3, 5)
 jobs_all_2015$h_tract <- substr(jobs_all_2015$h_geocode_tract, 6, 11)
+jobs_all_2015$h_stcty <- substr(jobs_all_2015$h_geocode_tract, 1, 5)
 
 #now work geoid
 jobs_all_2017$w_state <- substr(jobs_all_2017$w_geocode_tract, 1, 2)
 jobs_all_2017$w_county <- substr(jobs_all_2017$w_geocode_tract, 3, 5)
 jobs_all_2017$w_tract <- substr(jobs_all_2017$w_geocode_tract, 6, 11)
+jobs_all_2017$w_stcty <- substr(jobs_all_2017$w_geocode_tract, 1, 5)
+
 
 jobs_all_2016$w_state <- substr(jobs_all_2016$w_geocode_tract, 1, 2)
 jobs_all_2016$w_county <- substr(jobs_all_2016$w_geocode_tract, 3, 5)
 jobs_all_2016$w_tract <- substr(jobs_all_2016$w_geocode_tract, 6, 11)
+jobs_all_2016$w_stcty <- substr(jobs_all_2016$w_geocode_tract, 1, 5)
 
 jobs_all_2015$w_state <- substr(jobs_all_2015$w_geocode_tract, 1, 2)
 jobs_all_2015$w_county <- substr(jobs_all_2015$w_geocode_tract, 3, 5)
 jobs_all_2015$w_tract <- substr(jobs_all_2015$w_geocode_tract, 6, 11)
+jobs_all_2015$w_stcty <- substr(jobs_all_2015$w_geocode_tract, 1, 5)
 ```
 
 Must load in Oregon XWalk csv
@@ -114,14 +131,16 @@ Must load in Oregon XWalk csv
 #  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/or_xwalk.csv.gz", 
 #  destfile = "../data/lodes/or_xwalk.csv.gz")
 #gunzip("../data/lodes/or_xwalk.csv.gz")
-or_xw <- read_csv("../data/lodes/or_xwalk.csv", col_types = cols(cty = col_character()))
-or_xw <- or_xw %>% filter(st == 41)
+or_xw <- read_csv("~/git/dspg20wasco/data/lodes/or_xwalk.csv", col_types = cols(cty = col_character()))
+wa_xw <- read_csv("~/git/dspg20wasco/data/lodes/wa_xwalk.csv", col_types = cols(cty = col_character()))
+wa_xw <- wa_xw[(wa_xw$ctyname %like% "Klickitat") | (wa_xw$ctyname %like% "Skamania"), ]
+or_wa_xw <- rbind(or_xw, wa_xw)
 ```
 What % of jobs flow from outside of Fairfax County?
 ```{r}
-bool_cond17 <-jobs_all_2017$h_county != "065" & (jobs_all_2017$w_county == "065" & jobs_all_2017$w_state == "41")
-bool_cond16 <-jobs_all_2016$h_county != "065" & (jobs_all_2016$w_county == "065" & jobs_all_2016$w_state == "41")
-bool_cond15 <-jobs_all_2015$h_county != "065" & (jobs_all_2015$w_county == "065" & jobs_all_2015$w_state == "41")
+bool_cond17 <-jobs_all_2017$h_stcty != "41065" & (jobs_all_2017$w_stcty == "41065")
+bool_cond16 <-jobs_all_2016$h_stcty != "41065" & (jobs_all_2016$w_stcty == "41065")
+bool_cond15 <-jobs_all_2015$h_stcty!= "41065" & (jobs_all_2015$w_stcty == "41065")
 flows_in_17 <-jobs_all_2017[bool_cond17, ]
 flows_in_16 <-jobs_all_2016[bool_cond16, ]
 flows_in_15 <-jobs_all_2015[bool_cond15, ]
@@ -129,73 +148,71 @@ flows_in_15 <-jobs_all_2015[bool_cond15, ]
 
 Of the flows into Wasco County from outside, what percent are from other counties in Oregon/Washington?
 ```{r}
-#2017
-agg_cnty_OR_2017 <- flows_in_17[flows_in_17$h_state == "41", ] %>%
-  group_by(h_county) %>%
+agg_cnty_2017 <- flows_in_17[flows_in_17$h_state == "41" | flows_in_17$h_state == "53", ] %>%
+  group_by(h_stcty) %>%
   summarise(S000 = sum(S000))
-#Use OR crosswalk to get county names
-or_xw$h_county <- substring(or_xw$cty, 3, 6)
-essential <- or_xw %>%
-  select(h_county, ctyname)
-agg_cnty_OR_with_names_2017 <- inner_join(x = agg_cnty_OR_2017, y = unique(essential), by = "h_county")
+agg_cnty_with_names_2017 <- inner_join(x = agg_cnty_2017, y = unique(or_wa_xw %>% dplyr::select(cty, ctyname)), by = c("h_stcty" = "cty"))
+trimmed_2017 <- agg_cnty_with_names_2017[order(-agg_cnty_with_names_2017$S000), ][1:12, ]
 
-trimmed_2017 <- agg_cnty_OR_with_names_2017[order(-agg_cnty_OR_with_names_2017$S000), ][1:10, ]
-
-#2016
-agg_cnty_OR_2016 <- flows_in_16[flows_in_16$h_state == "41", ] %>%
-  group_by(h_county) %>%
+agg_cnty_2016 <- flows_in_16[flows_in_16$h_state == "41" | flows_in_16$h_state == "53", ] %>%
+  group_by(h_stcty) %>%
   summarise(S000 = sum(S000))
-agg_cnty_OR_with_names_2016 <- inner_join(x = agg_cnty_OR_2016, y = unique(essential), by = "h_county")
-trimmed_2016 <- agg_cnty_OR_with_names_2016[order(-agg_cnty_OR_with_names_2016$S000), ][1:10, ]
+agg_cnty_with_names_2016 <- inner_join(x = agg_cnty_2016, y = unique(or_wa_xw %>% dplyr::select(cty, ctyname)), by = c("h_stcty" = "cty"))
+trimmed_2016 <- agg_cnty_with_names_2016[order(-agg_cnty_with_names_2016$S000), ][1:12, ]
 
-
-#2015
-agg_cnty_OR_2015 <- flows_in_15[flows_in_15$h_state == "41", ] %>%
-  group_by(h_county) %>%
+agg_cnty_2015 <- flows_in_15[flows_in_15$h_state == "41" | flows_in_15$h_state == "53", ] %>%
+  group_by(h_stcty) %>%
   summarise(S000 = sum(S000))
-agg_cnty_OR_with_names_2015 <- inner_join(x = agg_cnty_OR_2015, y = unique(essential), by = "h_county")
-trimmed_2015 <- agg_cnty_OR_with_names_2015[order(-agg_cnty_OR_with_names_2015$S000), ][1:10, ]
+agg_cnty_with_names_2015 <- inner_join(x = agg_cnty_2015, y = unique(or_wa_xw %>% dplyr::select(cty, ctyname)), by = c("h_stcty" = "cty"))
+trimmed_2015 <- agg_cnty_with_names_2015[order(-agg_cnty_with_names_2015$S000), ][1:12, ]
 ```
 Aggregating by county over time (line plot)
 ```{r}
-top_10_in_over_time <- inner_join(trimmed_2017, agg_cnty_OR_with_names_2016, by = "ctyname")
-top_10_in_over_time <- top_10_in_over_time %>%
-  select(h_county.x, ctyname, S000.x, S000.y)
-top_10_in_over_time$'2017' <- top_10_in_over_time$S000.x
-top_10_in_over_time$'2016' <- top_10_in_over_time$S000.y
-top_10_in_over_time <- inner_join(top_10_in_over_time, agg_cnty_OR_with_names_2015, by = "ctyname") %>%
-  select(h_county.x, ctyname, '2017', '2016', S000)
-top_10_in_over_time$'2015' <- top_10_in_over_time$S000
-top_10_in_over_time$h_county <- top_10_in_over_time$h_county.x
-top_10_in_over_time <- top_10_in_over_time %>% select(-S000, -h_county.x)
-top_10_in_over_time <- top_10_in_over_time %>% select(ctyname, '2017', '2016', '2015')
-top_10_in_trans <- data.frame(t(top_10_in_over_time[, -1]))
-colnames(top_10_in_trans) <- top_10_in_over_time$ctyname
-top_10_in_trans$year <- c(2017, 2016, 2015) #SAVE NOW
-write_csv(top_10_in_trans, "../data/app_10_inflows_wasco.csv")
+top_12_in_over_time <- inner_join(trimmed_2017, agg_cnty_with_names_2016, by = "ctyname")
+top_12_in_over_time <- top_12_in_over_time %>%
+  dplyr::select(h_stcty.x, ctyname, S000.x, S000.y)
+top_12_in_over_time$'2017' <- top_12_in_over_time$S000.x
+top_12_in_over_time$'2016' <- top_12_in_over_time$S000.y
+top_12_in_over_time <- inner_join(top_12_in_over_time, agg_cnty_with_names_2015, by = "ctyname") %>%
+  dplyr::select(h_stcty.x, ctyname, '2017', '2016', S000)
+
+top_12_in_over_time$'2015' <- top_12_in_over_time$S000
+top_12_in_over_time$h_stcty <- top_12_in_over_time$h_stcty.x
+top_12_in_over_time <- top_12_in_over_time %>% dplyr::select(-S000, -h_stcty.x)
+top_12_in_over_time <- top_12_in_over_time %>% dplyr::select(ctyname, '2017', '2016', '2015')
+top_12_in_trans <- data.frame(t(top_12_in_over_time[, -1]))
+colnames(top_12_in_trans) <- top_12_in_over_time$ctyname
+top_12_in_trans$year <- c(2017, 2016, 2015) #SAVE NOW
+write_csv(top_12_in_trans, "../data/app_12_inflows_wasco.csv")
+
 #line plot for all jobs 2015-2017 by county
-ggplot(top_10_in_trans, aes(x = year)) +
-  ggtitle("Number of jobs flowing into Wasco County\nfrom other counties in Oregon \n2015-2017") +
+ggplotly(ggplot(top_12_in_trans, aes(x = year)) +
+  ggtitle("Number of jobs flowing into\nWasco County from other counties\n2015-2017") +
   labs(x = "Year", y = "Number of Jobs", colour = "County") + 
-  geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) + 
-  geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) + 
-  geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) + 
-  geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) + 
-  geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) + 
-  geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) + 
-  geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) + 
-  geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) + 
-  geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) + 
-  geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR")) +
-  scale_x_continuous(breaks = 0:2100)
-ggsave(path = "../output/lodes_maps/flows/in_flows", device = "png", filename = "in_county_flows_all_years.png", plot = last_plot())
+  geom_line(aes(y = `Hood River County, OR`, color = "Hood River County")) + 
+  geom_line(aes(y = `Klickitat County, WA`, color = "Klickitat County, WA")) + 
+  geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County")) + 
+  geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County")) + 
+  geom_line(aes(y = `Marion County, OR`, color = "Marion County")) + 
+  geom_line(aes(y = `Washington County, OR`, color = "Washington County")) + 
+  geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County")) + 
+  geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County")) + 
+  geom_line(aes(y = `Lane County, OR`, color = "Lane County")) + 
+  geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County")) + 
+  geom_line(aes(y = `Sherman County, OR`, color = "Sherman County")) +
+  geom_line(aes(y = `Skamania County, WA`, color = "Skamania County, WA")) +
+  scale_x_continuous(breaks = 0:2100))
 ```
+
+
+
 
 Outflows (those who live in wasco county but do not work there, open to other states)
 ```{r}
-bool_cond17 <- jobs_all_2017$h_county == "065" & jobs_all_2017$w_county != "065"
-bool_cond16 <- jobs_all_2016$h_county == "065" & jobs_all_2016$w_county != "065"
-bool_cond15 <- jobs_all_2015$h_county == "065" & jobs_all_2015$w_county != "065"
+#want those who work in washington to live in wasco, and those who live in wasco to not work in wasco
+bool_cond17 <-(jobs_all_2017$h_stcty == "41065" & jobs_all_2017$w_state == "53") | (jobs_all_2017$h_stcty == "41065" & jobs_all_2017$w_stcty != "41065")
+bool_cond16 <-(jobs_all_2016$h_stcty == "41065" & jobs_all_2016$w_state == "53") | (jobs_all_2016$h_stcty == "41065" & jobs_all_2016$w_stcty != "41065")
+bool_cond15 <-(jobs_all_2015$h_stcty == "41065" & jobs_all_2015$w_state == "53") | (jobs_all_2015$h_stcty == "41065" & jobs_all_2015$w_stcty != "41065")
 
 flows_out_17 <-jobs_all_2017[bool_cond17, ]
 flows_out_16 <-jobs_all_2016[bool_cond16, ]
@@ -205,66 +222,69 @@ flows_out_15 <-jobs_all_2015[bool_cond15, ]
 Most popular counties that those who live in Wasco County but not work in, go to work
 ```{r}
 out_agg_2017 <- flows_out_17 %>%
-  group_by(w_county) %>%
+  group_by(w_stcty) %>%
   summarise(S000 = sum(S000))
-or_xw$w_county <- substring(or_xw$cty, 3, 6)
-essential <- or_xw %>%
-  select(w_county, ctyname)
-agg_out_names_2017 <- inner_join(x = out_agg_2017, y = unique(essential), by = "w_county")
-trimmed_out_2017 <- agg_out_names_2017[order(-agg_out_names_2017$S000), ][1:10, ]
-
+essential <- or_wa_xw %>%
+  dplyr::select(cty, ctyname)
+agg_out_names_2017 <- inner_join(x = out_agg_2017, y = unique(essential), by = c("w_stcty" = "cty"))
+trimmed_out_2017 <- rbind(agg_out_names_2017[order(-agg_out_names_2017$S000), ][1:11, ],
+                          agg_out_names_2017[order(-agg_out_names_2017$S000), ][24, ])
 out_agg_2016 <- flows_out_16 %>%
-  group_by(w_county) %>%
+  group_by(w_stcty) %>%
   summarise(S000 = sum(S000))
-agg_out_names_2016 <- inner_join(x = out_agg_2016, y = unique(essential), by = "w_county")
-trimmed_out_2016 <- agg_out_names_2016[order(-agg_out_names_2016$S000), ][1:10, ]
-
+essential <- or_wa_xw %>%
+  dplyr::select(cty, ctyname)
+agg_out_names_2016 <- inner_join(x = out_agg_2016, y = unique(essential), by = c("w_stcty" = "cty"))
+trimmed_out_2016 <- rbind(agg_out_names_2016[order(-agg_out_names_2016$S000), ][1:11, ],
+                          agg_out_names_2016[order(-agg_out_names_2016$S000), ][23, ])
 out_agg_2015 <- flows_out_15 %>%
-  group_by(w_county) %>%
+  group_by(w_stcty) %>%
   summarise(S000 = sum(S000))
-agg_out_names_2015 <- inner_join(x = out_agg_2015, y = unique(essential), by = "w_county")
-trimmed_out_2015 <- agg_out_names_2015[order(-agg_out_names_2015$S000), ][1:10, ]
+essential <- or_wa_xw %>%
+  dplyr::select(cty, ctyname)
+agg_out_names_2015 <- inner_join(x = out_agg_2015, y = unique(essential), by = c("w_stcty" = "cty"))
+trimmed_out_2015 <- rbind(agg_out_names_2015[order(-agg_out_names_2015$S000), ][1:11, ],
+                          agg_out_names_2015[order(-agg_out_names_2015$S000), ][15, ])
 ```
 
-outflows over time!!
+outflows over time!
 ```{r}
-top_10_out_over_time <- inner_join(trimmed_out_2017, agg_out_names_2016, by = "ctyname")
-top_10_out_over_time <- top_10_out_over_time %>%
-  select(w_county.x, ctyname, S000.x, S000.y)
-top_10_out_over_time$'2017' <- top_10_out_over_time$S000.x
-top_10_out_over_time$'2016' <- top_10_out_over_time$S000.y
-top_10_out_over_time <- inner_join(top_10_out_over_time, agg_cnty_OR_with_names_2015, by = "ctyname") %>%
-  select(w_county.x, ctyname, '2017', '2016', S000)
-top_10_out_over_time$'2015' <- top_10_out_over_time$S000
-top_10_out_over_time$h_county <- top_10_out_over_time$w_county.x
-top_10_out_over_time <- top_10_out_over_time %>% select(-S000, -w_county.x)
-top_10_out_over_time <- top_10_out_over_time %>% select(ctyname, '2017', '2016', '2015')
-top_10_out_trans <- data.frame(t(top_10_out_over_time[, -1]))
-colnames(top_10_out_trans) <- top_10_out_over_time$ctyname
-top_10_out_trans$year <- c(2017, 2016, 2015)
-write_csv(top_10_out_trans, "../data/app_10_outflows_wasco.csv")
+top_12_out_over_time <- inner_join(trimmed_out_2017, agg_out_names_2016, by = "ctyname")
+top_12_out_over_time <- top_12_out_over_time %>%
+  dplyr::select(w_stcty.x, ctyname, S000.x, S000.y)
+top_12_out_over_time$'2017' <- top_12_out_over_time$S000.x
+top_12_out_over_time$'2016' <- top_12_out_over_time$S000.y
+top_12_out_over_time <- inner_join(top_12_out_over_time, agg_out_names_2015, by = "ctyname") %>%
+  dplyr::select(w_stcty.x, ctyname, '2017', '2016', S000)
+top_12_out_over_time$'2015' <- top_12_out_over_time$S000
+top_12_out_over_time$h_county <- top_12_out_over_time$w_stcty.x
+top_12_out_over_time <- top_12_out_over_time %>% dplyr::select(-S000, -w_stcty.x)
+top_12_out_over_time <- top_12_out_over_time %>% dplyr::select(ctyname, '2017', '2016', '2015')
+top_12_out_trans <- data.frame(t(top_12_out_over_time[, -1]))
+colnames(top_12_out_trans) <- top_12_out_over_time$ctyname
+top_12_out_trans$year <- c(2017, 2016, 2015)
+write_csv(top_12_out_trans, "../data/app_12_outflows_wasco.csv")
+top_12_out_trans
 
-#line plot for all jobs 2015-2017 by county
-ggplot(top_10_out_trans, aes(x = year)) +
-  ggtitle("Number of jobs flowing from Wasco County\ninto other counties in Oregon \n2015-2017") +
+ggplotly(ggplot(top_12_out_trans, aes(x = year)) +
+  ggtitle("Number of jobs flowing out of\nWasco County into other counties\n2015-2017") +
   labs(x = "Year", y = "Number of Jobs", colour = "County") + 
-  geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) + 
-  geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) + 
-  geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) + 
-  geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) + 
-  geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) + 
-  geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) + 
-  geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) + 
-  geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) + 
-  geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) + 
-  geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR")) +
-  scale_x_continuous(breaks = 0:2100)
+  geom_line(aes(y = `Hood River County, OR`, color = "Hood River County")) + 
+  geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County")) + 
+  geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County")) + 
+  geom_line(aes(y = `Klickitat County, WA`, color = "Klickitat County, WA")) + 
+  geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County")) + 
+  geom_line(aes(y = `Washington County, OR`, color = "Washington County")) + 
+  geom_line(aes(y = `Marion County, OR`, color = "Marion County")) + 
+  geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County")) + 
+  geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County")) + 
+  geom_line(aes(y = `Lane County, OR`, color = "Lane County")) + 
+  geom_line(aes(y = `Sherman County, OR`, color = "Sherman County")) +
+  geom_line(aes(y = `Skamania County, WA`, color = "Skamania County, WA")) +
+  scale_x_continuous(breaks = 0:2100))
 
-ggsave(path = "../output/lodes_maps/flows/out_flows", device = "png", filename = "out_county_flows_all_years.png", plot = last_plot())
+#ggsave(path = "../output/lodes_maps/flows/out_flows", device = "png", filename = "out_county_flows_all_years.png", plot = last_plot())
 ```
-
-
-
 
 
 Mapping S. Wasco

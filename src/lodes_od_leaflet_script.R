@@ -219,5 +219,3 @@ od_SI03leaf <- leaflet() %>%
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
-
-od_S000leaf

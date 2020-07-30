@@ -1,0 +1,135 @@
+---
+title: "Crop Data Layer S. Wasco"
+author: "Owen Hart"
+date: "7/28/2020"
+output: html_document
+---
+
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(sf)
+library(leaflet)
+library(mapview)
+library(reshape2)
+library(raster)
+library(tigris)
+```
+
+```{r}
+south_wasco_points <- st_read("../data/shps/swsd")
+```
+
+
+Aaron's script
+```{r}
+# FUNCTION TO CREATE A SEPARATE RASTER FOR EACH SPATIAL OBJECT (e.g. Census Tract)
+crop_mask_raster_to_spatial <- function(raster_obj, sf_obj) {
+  library(raster)
+  library(sf)
+  library(data.table)
+  for (i in 1:nrow(sf_obj)) {
+    sf_row <- sf_obj[i,]
+    sp_row <- as(st_geometry(sf_row), 'Spatial')
+    sp_row <- spTransform(sp_row, crs(raster_obj))
+    crp <- crop(raster_obj, sp_row)
+    msk <- mask(crp, sp_row)
+   
+    if (exists("out_ls") == F) out_ls <- list()
+    out_ls[sf_row$GEOID] <- msk
+  }
+  out_ls
+}
+ 
+# FUNCTION TO GET ACRES PER LAND COVER ITEM PER SPATIAL OBJECT
+raster_sqm_to_acres <- function(raster_list) {
+  options(scipen = 999)
+  for (i in 1:length(raster_list)) {
+    sqm <- data.table::setDT(aggregate(getValues(area(raster_list[[i]], weights=FALSE)), by=list(getValues(raster_list[[i]])), sum))
+    sqa <- sqm[,.(class = Group.1, sqm = x, acres = x*0.00024711)]
+    sqa$geoid <- names(raster_list[i])
+    if (exists("out_dt")) out_dt <- data.table::rbindlist(list(out_dt, sqa))
+    else out_dt <- sqa
+  }
+  out_dt
+}
+ 
+# READ RASTER FILE
+file_path <- "~/git/dspg20wasco/data/lodes/raster/CDL_2017_41065.tif"
+raster_2017 <- raster::raster(file_path)
+# GET SPATIAL GEORGAPHIES (sf file)
+#sf <- sf::st_as_sf(tigris::tracts("OR", "Wasco County"))
+sf <- sf::st_as_sf(tigris::block_groups("OR", "Wasco County"))
+# CREATE A SEPARATE RASTER FOR EACH SPATIAL OBJECT
+list_of_geo_rasters <- crop_mask_raster_to_spatial(raster_2017, sf)
+# GET ACRES PER LAND COVER ITEM PER SPATIAL OBJECT
+crop_acres_per_geo <- raster_sqm_to_acres(list_of_geo_rasters)
+# ADD YEAR
+yr <- stringr::str_match(file_path, "_(\\d\\d\\d\\d)")[,2]
+crop_acres_per_geo$year <- yr
+# CONVERT CODES TO LAND COVER/CROP NAMES
+crop_acres_per_geo$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo$class)
+ 
+# MERGE SPATIAL GEOGRAPHIES WITH THE CROP ACREAGE DATA
+sf_acres <- merge(sf, crop_acres_per_geo, by.x = "GEOID", by.y = "geoid")
+# ASSIGN A CRS
+sf_acres <- sf::st_set_crs(sf_acres, 4269)
+```
+
+```{r}
+cdl_2017 <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "red",
+    weight = 2,
+    opacity = .7,
+    group = "Basemap",
+    label = "South Wasco Region") %>%
+  addPolygons(data = sf_acres[sf_acres$desc == "Winter Wheat", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "Winter Wheat Acreage",
+              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
+                                    domain = sf_acres[sf_acres$desc == "Winter Wheat", ]$acres, 4)
+              (sf_acres[sf_acres$desc == "Winter Wheat", ]$acres),
+              label = sf_acres[sf_acres$desc == "Winter Wheat", ]$acres) %>%
+  addPolygons(data = sf_acres[sf_acres$desc == "Barley", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "Barley Acreage",
+              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
+                                    domain = sf_acres[sf_acres$desc == "Barley", ]$acres, 4)
+              (sf_acres[sf_acres$desc == "Barley", ]$acres),
+              label = sf_acres[sf_acres$desc == "Barley", ]$acres) %>%
+  addPolygons(data = sf_acres[sf_acres$desc == "Alfalfa", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "Alfalfa Acreage",
+              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
+                                    domain = sf_acres[sf_acres$desc == "Alfalfa", ]$acres, 4)
+              (sf_acres[sf_acres$desc == "Alfalfa", ]$acres),
+              label = sf_acres[sf_acres$desc == "Alfalfa", ]$acres) %>%
+  addPolygons(data = sf_acres[sf_acres$desc == "Cherries", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "Cherries Acreage",
+              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
+                                    domain = sf_acres[sf_acres$desc == "Cherries", ]$acres, 4)
+              (sf_acres[sf_acres$desc == "Cherries", ]$acres),
+              label = sf_acres[sf_acres$desc == "Cherries", ]$acres) %>%
+  addLayersControl(
+    baseGroups = c("Winter Wheat Acreage", "Barley Acreage", 
+                      "Alfalfa Acreage", "Cherries Acreage"),
+    options = layersControlOptions(collapsed = F)) %>%
+  hideGroup(c("Barley Acreage", "Alfalfa Acreage", "Cherries Acreage"))
+cdl_2017
+```

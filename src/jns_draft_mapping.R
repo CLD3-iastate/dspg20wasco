@@ -314,3 +314,92 @@ q <- bb %>%
   opq (timeout = 25*100) %>%
   add_osm_feature("shop", "supermarket") %>%
   osmdata_sf()
+
+
+### Pulling education data ------------
+
+library(openxlsx)
+
+"https://www.oregon.gov/ode/educator-resources/assessment/Documents/TestResults2019/pagr_State_ELA_1819.xlsx"
+"https://www.oregon.gov/ode/educator-resources/assessment/TestResults2018/pagr_State_ELA_1718.xlsx"
+"https://www.oregon.gov/ode/educator-resources/assessment/TestResults2017/pagr_State_ELA_1617.xlsx"
+"https://www.oregon.gov/ode/educator-resources/assessment/TestResults2016/pagr_State_ELA_1516.xlsx"
+"https://www.oregon.gov/ode/educator-resources/assessment/TestResults2015/pagr_State_ELA_1415.xlsx"
+
+"https://www.oregon.gov/ode/educator-resources/assessment/Documents/TestResults2019/pagr_Districts_ELA_1819.xlsx"
+"https://www.oregon.gov/ode/educator-resources/assessment/TestResults2018/pagr_Districts_ELA_1718.xlsx"
+
+make_url <- function(year = 2019, school_year = "1819") {
+  base_url <- "https://www.oregon.gov/ode/educator-resources/assessment/Documents/TestResults"
+  middle <- "/pagr_Districts_ELA_"
+  paste0(base_url, year, middle, school_year, ".xlsx")
+}
+
+get_file <- function(year = 2019, school_year = "1819") {
+  file_url <- make_url(year, school_year)
+  openxlsx::read.xlsx(file_url)
+}
+
+performance_districts_1819 <-  get_file("2019", "1819")
+performance_districts_1718 <- get_file("2018", "1718")
+performance_districts_1617 <- get_file("2017", "1617")
+performance_districts_1516 <- get_file("2016", "1516")
+performance_districts_1415 <- get_file("2015", "1415")
+
+write.csv(performance_districts_1415,
+          "performance_districts_1415.csv")
+
+read_csv("~/git/DSPG2020/wasco/data/education/absenteeism.csv") %>% distinct(year)
+
+2018-2019
+"https://www.ode.state.or.us/data/reportcard/media/20/RCmediaDistrictsAggregate.csv"
+2017-2018
+"https://www.ode.state.or.us/data/reportcard/media/19/RCmediaDistrictsAggregate.csv"
+2016-2017
+"https://www.ode.state.or.us/data/reportcard/media/18/RCmediaDistrictsAggregate.csv"
+2015-2016
+"https://www.ode.state.or.us/data/reportcard/media/17/RCmediaDistrictsAggregate.csv"
+2014-2015
+"https://www.ode.state.or.us/data/reportcard/media/16/RCmediaDistrictsAggregate.csv"
+
+make_url <- function(year = "20") {
+  base_url <- "https://www.ode.state.or.us/data/reportcard/media/"
+  end <- "/RCmediaDistrictsAggregate.csv"
+  paste0(base_url, year, end)
+}
+
+get_file <- function(year = "20") {
+  file_url <- make_url(year)
+  read_csv(file_url)
+}
+
+rc_districts_1819 <-  get_file("20")
+rc_districts_1718 <- get_file("19")
+rc_districts_1617 <- get_file("18")
+rc_districts_1516 <- get_file("17")
+rc_districts_1415 <- get_file("16")
+
+write.csv(rc_districts_1415,
+          "rc_districts_1415.csv")
+
+rc <- read_csv("~/git/DSPG2020/wasco/data/rc_districts_1819.csv")
+colnames(rc)
+
+### crdc for ap/act/sat -------------------
+library(educationdata)
+
+districts <- c("4104410", "4105250", "4106740", "4100021", "4111250", "4100048")
+
+education <-  get_education_data(level = 'schools',
+                                 source = 'crdc',
+                                 topic = 'ap-exams',
+                                 by = c("race", "sex"),
+                                 filters = list(year = 2011,
+                                                #grade = 9:12,
+                                                fips = "41"),
+                                 add_labels = TRUE)
+
+"https://www2.ed.gov/about/offices/list/opepd/ppss/crdc/crdc2015-16-pa-oct-2018.csv"
+
+crdc <- read_csv("~/git/DSPG2020/wasco/data/report.csv")
+

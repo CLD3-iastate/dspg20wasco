@@ -1,0 +1,203 @@
+---
+title: "LODES WAC Data"
+author: "Owen Hart"
+date: "7/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+libraries
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(sf)
+library(leaflet)
+library(mapview)
+library(reshape2)
+library(raster)
+library(tigris)
+```
+
+
+```{r}
+jobs_wac_2017 <- readRDS("../data/lodes/agg/jobs_wac_2017.Rds")
+jobs_wac_2016 <- readRDS("../data/lodes/agg/jobs_wac_2016.Rds")
+jobs_wac_2015 <- readRDS("../data/lodes/agg/jobs_wac_2015.Rds")
+
+wasco_points <- (blocks("OR", county = "Wasco"))
+wasco_lines <- data.frame(wasco_points)
+south_wasco_points <- st_read("../data/shps/swsd")
+```
+
+Mapping S. Wasco
+```{r}
+qtileC000 <- colorQuantile(c('#D1E0BF', '#E57200'), jobs_wac_2017$C000, 5)
+
+#C000 (all jobs)
+wac_C000leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 2,
+    opacity = 1,
+    group = "Basemap",
+    label = "South Wasco Region")
+
+wac_C000leaf <- wac_C000leaf %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2017),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileC000(jobs_wac_2017$C000),
+    label = jobs_wac_2017$C000) %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileC000(jobs_wac_2016$C000),
+    label = jobs_wac_2016$C000) %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileC000(jobs_wac_2015$C000),
+    label = jobs_wac_2015$C000) %>%
+  addLegend(
+    data = jobs_wac_2017,
+    "bottomright",
+    pal = qtileC000,
+    values = ~ C000,
+    title = "Wasco County All Job Density",
+    opacity = 1,
+    group = "All Jobs",
+    na.label = "NA") %>%
+  addLayersControl(
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+wac_C000leaf
+```
+
+
+```{r}
+#CNS01 (Agriculture, Forestry, Fishing and Hunting)
+wac_CNS01leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 2,
+    opacity = 1,
+    group = "Basemap",
+    label = "South Wasco Region")
+
+wac_CNS01leaf <- wac_CNS01leaf %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2017),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileC000(jobs_wac_2017$CNS01),
+    label = jobs_wac_2017$CNS01) %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileC000(jobs_wac_2016$CNS01),
+    label = jobs_wac_2016$CNS01) %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileC000(jobs_wac_2015$CNS01),
+    label = jobs_wac_2015$CNS01) %>%
+  addLegend(
+    data = jobs_wac_2017,
+    "bottomright",
+    pal = qtileC000,
+    values = ~ C000,
+    title = "Agriculture, Forestry, Fishing and Hunting\nJobs",
+    opacity = 1,
+    group = "All Jobs",
+    na.label = "NA") %>%
+  addLayersControl(
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+wac_CNS01leaf
+```
+
+```{r}
+#CNS02 (Mining, Quarrying, and Oil and Gas Extraction)
+wac_CNS02leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "purple",
+    weight = 2,
+    opacity = 1,
+    group = "Basemap",
+    label = "South Wasco Region")
+
+wac_CNS02leaf <- wac_CNS02leaf %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2017),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2017",
+    fillColor = ~qtileC000(jobs_wac_2017$CNS02),
+    label = jobs_wac_2017$CNS02) %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2016",
+    fillColor = ~qtileC000(jobs_wac_2016$CNS02),
+    label = jobs_wac_2016$CNS02) %>%
+  addPolygons(
+    data = st_as_sf(jobs_wac_2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = 1,
+    group = "2015",
+    fillColor = ~qtileC000(jobs_wac_2015$CNS02),
+    label = jobs_wac_2015$CNS02) %>%
+  addLegend(
+    data = jobs_wac_2017,
+    "bottomright",
+    pal = qtileC000,
+    values = ~ C000,
+    title = "Mining, Quarrying, and Gas Extraction\nJobs",
+    opacity = 1,
+    group = "All Jobs",
+    na.label = "NA") %>%
+  addLayersControl(
+#    baseGroups = c("South Wasco School District"),
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE)) %>%
+  hideGroup(c("2016", "2015"))
+wac_CNS02leaf
+```

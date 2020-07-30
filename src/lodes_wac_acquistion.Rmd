@@ -1,0 +1,140 @@
+---
+title: "Lodes WAC Accquisition"
+author: "Owen Hart"
+date: "7/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading in libraries
+```{r}
+library(R.utils)
+library(data.table)
+library(tidyr)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(sf)
+library(leaflet)
+library(mapview)
+library(reshape2)
+library(raster)
+library(tigris)
+```
+
+Downloading OR WAC
+```{r}
+#2017
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/wac/or_wac_S000_JT00_2017.csv.gz", 
+  destfile = "../data/lodes/or_wac_S000_JT00_2017.csv.gz")
+
+gunzip("../data/lodes/or_wac_S000_JT00_2017.csv.gz")
+
+#2016
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/wac/or_wac_S000_JT00_2016.csv.gz", 
+  destfile = "../data/lodes/or_wac_S000_JT00_2016.csv.gz")
+
+gunzip("../data/lodes/or_wac_S000_JT00_2016.csv.gz")
+
+#2015
+download.file(
+  url = "https://lehd.ces.census.gov/data/lodes/LODES7/or/wac/or_wac_S000_JT00_2015.csv.gz", 
+  destfile = "../data/lodes/or_wac_S000_JT00_2015.csv.gz")
+
+gunzip("../data/lodes/or_wac_S000_JT00_2015.csv.gz")
+```
+
+Reading in
+```{r}
+full_17 <- read_csv("../data/lodes/or_wac_S000_JT00_2017.csv", col_types = cols(w_geocode = col_character()))
+full_16 <- read_csv("../data/lodes/or_wac_S000_JT00_2016.csv", col_types = cols(w_geocode = col_character()))
+full_15 <- read_csv("../data/lodes/or_wac_S000_JT00_2015.csv", col_types = cols(w_geocode = col_character()))
+```
+
+Filtering so that it only includes Wasco County
+```{r}
+wasco17 <- full_17 %>% 
+  filter(w_geocode %in% full_17$w_geocode[substr(full_17$w_geocode, 1, 5) == "41065"])
+
+wasco16 <- full_16 %>% 
+  filter(w_geocode %in% full_16$w_geocode[substr(full_16$w_geocode, 1, 5) == "41065"])
+
+wasco15 <- full_15 %>% 
+  filter(w_geocode %in% full_15$w_geocode[substr(full_15$w_geocode, 1, 5) == "41065"])
+```
+
+```{r}
+wasco_points <- (blocks("OR", county = "Wasco"))
+wasco_lines <- data.frame(wasco_points)
+south_wasco_points <- st_read("../data/shps/swsd")
+```
+
+Joining each with Wasco Lines
+```{r}
+wascolines_17 <- inner_join(wasco17, wasco_lines, by = c("w_geocode" = "GEOID10"))
+wascolines_16 <- inner_join(wasco16, wasco_lines, by = c("w_geocode" = "GEOID10"))
+wascolines_15 <- inner_join(wasco15, wasco_lines, by = c("w_geocode" = "GEOID10"))
+```
+
+
+
+Aggregating by tract
+```{r}
+jobs_wac_2017 <- wascolines_17 %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>% 
+  summarise(C000 = sum(C000), CA01 = sum(CA01), CA02 = sum(CA02), CA03 = sum(CA03),
+            CE01 = sum(CE01), CE02 = sum(CE02), CE03 = sum(CE03), CNS01 = sum(CNS01),
+            CNS02 = sum(CNS02), CNS03 = sum(CNS03), CNS04 = sum(CNS04), CNS05 = sum(CNS05),
+            CNS06 = sum(CNS06), CNS07 = sum(CNS07), CNS08 = sum(CNS08), CNS09 = sum(CNS09),
+            CNS10 = sum(CNS10), CNS11 = sum(CNS11), CNS12 = sum(CNS12), CNS13 = sum(CNS13),
+            CNS14 = sum(CNS14), CNS15 = sum(CNS15), CNS16 = sum(CNS16), CNS17 = sum(CNS17),
+            CNS18 = sum(CNS18), CNS19 = sum(CNS19), CNS20 = sum(CNS20), CR01 = sum(CR01),
+            CR02 = sum(CR02), CR03 = sum(CR03), CR04 = sum(CR04), CR05 = sum(CR05),
+            CR07 = sum(CR07), CT01 = sum(CT01), CT02 = sum(CT02), CD01 = sum(CD01),
+            CD02 = sum(CD02), CD03 = sum(CD03), CD04 = sum(CD04), CS01 = sum(CS01),
+            CS02 = sum(CS02), CFA01 = sum(CFA01), CFA02 = sum(CFA02), CFA03 = sum(CFA03),
+            CFA04 = sum(CFA04), CFA05 = sum(CFA05), CFS01 = sum(CFS01), CFS02 = sum(CFS02),
+            CFS03 = sum(CFS03), CFS04 = sum(CFS04), CFS05 = sum(CFS05))
+jobs_wac_2016 <- wascolines_16 %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>% 
+  summarise(C000 = sum(C000), CA01 = sum(CA01), CA02 = sum(CA02), CA03 = sum(CA03),
+            CE01 = sum(CE01), CE02 = sum(CE02), CE03 = sum(CE03), CNS01 = sum(CNS01),
+            CNS02 = sum(CNS02), CNS03 = sum(CNS03), CNS04 = sum(CNS04), CNS05 = sum(CNS05),
+            CNS06 = sum(CNS06), CNS07 = sum(CNS07), CNS08 = sum(CNS08), CNS09 = sum(CNS09),
+            CNS10 = sum(CNS10), CNS11 = sum(CNS11), CNS12 = sum(CNS12), CNS13 = sum(CNS13),
+            CNS14 = sum(CNS14), CNS15 = sum(CNS15), CNS16 = sum(CNS16), CNS17 = sum(CNS17),
+            CNS18 = sum(CNS18), CNS19 = sum(CNS19), CNS20 = sum(CNS20), CR01 = sum(CR01),
+            CR02 = sum(CR02), CR03 = sum(CR03), CR04 = sum(CR04), CR05 = sum(CR05),
+            CR07 = sum(CR07), CT01 = sum(CT01), CT02 = sum(CT02), CD01 = sum(CD01),
+            CD02 = sum(CD02), CD03 = sum(CD03), CD04 = sum(CD04), CS01 = sum(CS01),
+            CS02 = sum(CS02), CFA01 = sum(CFA01), CFA02 = sum(CFA02), CFA03 = sum(CFA03),
+            CFA04 = sum(CFA04), CFA05 = sum(CFA05), CFS01 = sum(CFS01), CFS02 = sum(CFS02),
+            CFS03 = sum(CFS03), CFS04 = sum(CFS04), CFS05 = sum(CFS05))
+jobs_wac_2015 <- wascolines_15 %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>% 
+  summarise(C000 = sum(C000), CA01 = sum(CA01), CA02 = sum(CA02), CA03 = sum(CA03),
+            CE01 = sum(CE01), CE02 = sum(CE02), CE03 = sum(CE03), CNS01 = sum(CNS01),
+            CNS02 = sum(CNS02), CNS03 = sum(CNS03), CNS04 = sum(CNS04), CNS05 = sum(CNS05),
+            CNS06 = sum(CNS06), CNS07 = sum(CNS07), CNS08 = sum(CNS08), CNS09 = sum(CNS09),
+            CNS10 = sum(CNS10), CNS11 = sum(CNS11), CNS12 = sum(CNS12), CNS13 = sum(CNS13),
+            CNS14 = sum(CNS14), CNS15 = sum(CNS15), CNS16 = sum(CNS16), CNS17 = sum(CNS17),
+            CNS18 = sum(CNS18), CNS19 = sum(CNS19), CNS20 = sum(CNS20), CR01 = sum(CR01),
+            CR02 = sum(CR02), CR03 = sum(CR03), CR04 = sum(CR04), CR05 = sum(CR05),
+            CR07 = sum(CR07), CT01 = sum(CT01), CT02 = sum(CT02), CD01 = sum(CD01),
+            CD02 = sum(CD02), CD03 = sum(CD03), CD04 = sum(CD04), CS01 = sum(CS01),
+            CS02 = sum(CS02), CFA01 = sum(CFA01), CFA02 = sum(CFA02), CFA03 = sum(CFA03),
+            CFA04 = sum(CFA04), CFA05 = sum(CFA05), CFS01 = sum(CFS01), CFS02 = sum(CFS02),
+            CFS03 = sum(CFS03), CFS04 = sum(CFS04), CFS05 = sum(CFS05))
+```
+Saving agg files
+```{r}
+saveRDS(jobs_wac_2017, "../data/lodes/agg/jobs_wac_2017.Rds")
+saveRDS(jobs_wac_2016, "../data/lodes/agg/jobs_wac_2016.Rds")
+saveRDS(jobs_wac_2015, "../data/lodes/agg/jobs_wac_2015.Rds")
+```
+

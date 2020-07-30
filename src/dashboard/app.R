@@ -22,14 +22,14 @@ library(dplyr)
 library(readr)
 library(DT)
 
-source("theme.R")
-source("loadbaselayers.R")
-source("loadoverlays.R")
+source(here("/src/dashboard/theme.R"))
+source(here("/src/dashboard/loadbaselayers.R"))
+source(here("/src/dashboard/loadoverlays.R"))
 
 options(tigris_use_cache = TRUE)
 
 #load acs data#
-acs_data <- fread("Data/combined_acs.csv")
+acs_data <- fread(here("Data/combined_acs.csv"))
 acs_data$GEOID <- as.character(acs_data$GEOID)
 acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" |
                          NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
@@ -60,9 +60,6 @@ dspgpal = c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
             "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
-
-dspgpal = c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
-            "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
 
 ## Building UI -------
 
@@ -95,7 +92,9 @@ ui <- dashboardPagePlus(
       menuItem(
         tabName = "findings",
         text = "Findings",
-        icon = icon("chart-pie"),
+        icon = icon("chart-pie")
+        
+        ),
 
         ## Findings menu subitems (indicators) ---------
         menuSubItem(
@@ -117,8 +116,7 @@ ui <- dashboardPagePlus(
           tabName = "living",
           text = "Driver: Quality Standard of Living",
           icon = icon("laugh-beam")
-        )
-      ),
+        ),
       menuItem(
         tabName = "team",
         text = "Team",
@@ -506,7 +504,9 @@ ui <- dashboardPagePlus(
                       active = TRUE
                     ),
                     back_content = tagList()
-                  ))),
+                  )
+                )
+              ),
 
 
       ## Data tab ----------
@@ -594,10 +594,12 @@ ui <- dashboardPagePlus(
                     "[Optional: You can also include external collaborators in this section or a separate section.]"
                   )
                 )
-              ))))))
-#)
-#))
-#,
+              ))
+      ) # end of TAB ITEMS (global dashboard body)
+    ) # end of FLUID PAGE (global dashboard body)
+  )# end of DASHBOARD BODY
+) # end of DASHBOARD UI
+
 
 ## Right sidebar --------
 #rightSidebar(
@@ -724,7 +726,7 @@ server <- function(input, output, session) {
                                labels, "</div>")
       return(addLegend(map, "bottomright", colors = colorAdditions,
                        labels = labelAdditions, opacity = opacity, group = group))
-    }
+      }
 
     leaflet() %>%
       addTiles() %>%
@@ -778,7 +780,7 @@ server <- function(input, output, session) {
       addLegend(data = isochrones, position = "bottomleft", pal = isochronepal, values = ~value, labels = c("30 minutes", "1 hour"),
                 group = "isochrones", title = "driving time")
 
-  })
+  }) # end of leaflet food map
 
   ## Food table
 
@@ -818,7 +820,8 @@ server <- function(input, output, session) {
       #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
       ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
                                                modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                           "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))}
+                                                                           "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+      }
     ## Poverty rate -----
     else if (input$financial == "Poverty Rate") {
       ggplotly(ggplot(filter(acs_counties, year == input$year), aes(x = NAME, y = below_poverty,
@@ -849,10 +852,12 @@ server <- function(input, output, session) {
     scale_colour_manual(name = "Region", values = c(dspgpal[1], dspgpal[9], dspgpal[2], dspgpal[10])) +
     #geom_pointrange(aes(ymin=median_household_income - median_household_income_moe, ymax=median_household_income + median_household_income_moe)) +
     theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") + xlab("Year")
-  #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-  ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
+    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
+    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
                                            modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                       "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))})
+                                                                       "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+      }
+    )
 
 
   output$employment <- renderPlotly({ggplotly(ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"),
@@ -866,7 +871,9 @@ server <- function(input, output, session) {
                                                 scale_colour_manual(name = "Region", values = c(dspgpal[1], dspgpal[9], dspgpal[2], dspgpal[10])) +
                                                 #geom_pointrange(aes(ymin=employment_20_to_64 - employment_20_to_64_moe, ymax =employment_20_to_64 + employment_20_to_64_moe)) +
                                                 theme_minimal() + ggtitle("% of Adults (20-64) with Employment Status 2015-2018") + ylab("% of Adults (20-64) with Employment Status") + xlab("Year"),
-                                              tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))})
+                                              tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+      }
+    )
 
   ## Flows plots -------
   output$flows <- renderPlot({
@@ -901,7 +908,6 @@ server <- function(input, output, session) {
         geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) +
         geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
     }
-
   })
 
   ## Owen Leaflets --------
@@ -915,6 +921,7 @@ server <- function(input, output, session) {
       weight = 1,
       opacity = 1,
       group = "Basemap")
+  
   qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
   od_SI01leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
@@ -924,6 +931,7 @@ server <- function(input, output, session) {
       weight = 1,
       opacity = 1,
       group = "Basemap")
+  
   qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
   od_SI02leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
@@ -933,6 +941,7 @@ server <- function(input, output, session) {
       weight = 1,
       opacity = 1,
       group = "Basemap")
+  
   qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
   od_SI03leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
@@ -1106,11 +1115,11 @@ server <- function(input, output, session) {
           overlayGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
         hideGroup(c("2016", "2015"))}
-  })
+  }) # end of odleaf
 
 
 
-}
+} # end of BUILDING SERVER
 
 
 

@@ -42,7 +42,7 @@ wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
                     cb = TRUE)
 tract_geo <- rbind(or_tracts, wa_tracts)
 acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
-acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID") 
+acs_tracts <- inner_join(tract_geo, acs_tracts, by = "GEOID") %>% rename("NAME" = "NAME.y")
 
 
 
@@ -167,9 +167,9 @@ ggplotly(ggplot(filter(income_table, year ==2018))+
 
 This stacked bar chart condenses the busy plot of distributions from the previous grouped bar. It is easier to see where the heavier densities are at the income extremes.
 
-
-```{r}
-income <- acs_tracts %>% select(NAME,y, year, contains("income"))
+mock code for sf maps with tracts plots not working
+```
+income <- acs_tracts %>% select(NAME, year, contains("income"))
 income_perc <- income %>% select(!contains("moe"), -median_household_income, NAME, year)
 income_moe <- income %>% select(NAME, year, contains("moe"), -median_household_income_moe)
 income_perc <- melt(income_perc, id.vars = c("NAME", "year"), measure.vars = colnames(income_perc)[-c(1,2)])
@@ -435,8 +435,8 @@ ggplotly(ggplot(filter(race_table, year == 2018)) +
 This plot is not yet interactive, and needs some work on ordering of the grouped bars. But generally, south wasco, and its surrounding neighbors are majority a white puplation. The second most populus racial group are Hispanic or Latino group.
 
 
-
-```{r}
+mock code for sf maps with tracts plots not working
+```
 race <- acs_tracts %>% select(GEOID,NAME, year, contains("race")) # select appropriate variables
 race_moe <- race %>% select(NAME,year, contains("moe")) #separate moe estimates
 race_moe <- race_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colnames(race_moe)[-c(1,2)]) %>%
@@ -484,8 +484,8 @@ Compared to its immediate neighbors, South Wasco has the highest percentage of c
 
 
 
-
-```{r}
+mock code for sf maps with tracts plots not working
+```
 family <- select(filter(acs_tracts), NAME, year,contains("family"))
 family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_perc, 
                                  family_children_nonfamily_perc, family_nonfamily_household_perc,
@@ -536,8 +536,8 @@ ggplotly(ggplot(filter(ed_table, year == 2018)) +
 
 Generally, South Wasco has a large percentage of adults that are high school graduates and have some higher education. However, It has some of the lowest percentages of adults that havea bachelors degree or higher. Hood river has the highest educated population.
 
-
-```{r}
+mock code for sf maps with tracts plots not working
+```
 ed <- select(filter(acs_tracts), NAME, year, contains("education"))
 ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
 ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe, 

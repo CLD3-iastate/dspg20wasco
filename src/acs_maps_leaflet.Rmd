@@ -51,9 +51,7 @@ acs_tracts <- st_as_sf(inner_join(acs_tracts, tract_geo, by = c("GEOID")))
 acs_tracts$NAME <- acs_tracts$NAME.x
 acs_tracts$NAME.x <- NULL
 acs_tracts$NAME.y <- NULL
-#acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")  
-######## USE THE FOLLOWING ##########
-# color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
+#acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")
 graypal = "#ADB5BD"
 ```
 ```{r}
@@ -66,7 +64,7 @@ county_lines <- rbind(filter(or_county_lines, NAME %in%
 south_wasco_points <- st_read("../data/shps/swsd")
 ```
 
-Leaflet of % below poverty line
+###Leaflet of % below poverty line
 ```{r}
 perc_pov_pal <- colorQuantile(viridis_pal(option = "D")(3), domain = acs_tracts$below_poverty)
 perc_pov_leaf <- leaflet() %>%
@@ -135,7 +133,7 @@ perc_pov_leaf <- leaflet() %>%
     options = layersControlOptions(collapsed = FALSE))
 ```
 
-Leaflet showing % of employed adults 20-64
+###Leaflet showing % of employed adults 20-64
 ```{r}
 perc_emp_pal <- colorQuantile(viridis_pal(option = "D")(3), domain = acs_tracts$employment_20_to_64)
 perc_emp_leaf <- leaflet() %>%
@@ -207,36 +205,21 @@ perc_emp_leaf <- leaflet() %>%
 categories now!
 (Income Distribution, Educational Attainment, Racial and Ethnic Diversity, and Family Stability.)
 
+###Income Distribution
 ```{r}
-#grouped bar charts
-income <- dplyr::select(filter(acs_counties, year == 2018), NAME, contains("income"))
-income <- income %>% dplyr::select(!contains("moe"), -median_household_income)
-income <- melt(income, id.vars = "NAME", measure.vars = colnames(income)[-1])
-ggplotly(ggplot(income)+
-  geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge")+ 
-    scale_fill_manual(values = viridis(10, option = "D")) +
-  # scale_fill_discrete(name = "Income Bracket", labels = c("Less than 10,000", "10,000-14,999", "15,000-24,999",
-  #                                                         "25,000-34,999", "35,000-49,999", "50,000-74,999", 
-  #                                                         "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
-  #scale_colour_manual(name = "Income Bracket", values = dspgpal) +
-  #theme_minimal()+theme(axis.text.x = element_text(angle=30)) +
-  ylab("% of Population") + xlab("Region") +
-  ggtitle("Income Distribution for 2018") + coord_flip())
-
-```
-
-```{r}
-income_dist <- dplyr::select(filter(acs_tracts), NAME, year, contains("income"), geometry)%>% dplyr::select(!contains("moe"), -median_household_income)
+income_dist <- dplyr::select(acs_tracts, NAME, year, contains("income"), geometry)%>% dplyr::select(!contains("moe"), -median_household_income)
 income_dist_2018 <- filter(income_dist, year == 2018)
 income_dist_2017 <- filter(income_dist, year == 2017)
 income_dist_2016 <- filter(income_dist, year == 2016)
 income_dist_2015 <- filter(income_dist, year == 2015)
-income_dist_2018
 ```
 
 leaflet income dist 2018
 ```{r}
-income_dist_18_pal <- colorNumeric(viridis_pal(option = "D")(3), domain = c(0, 28.40))
+income_dist_max_perc_2018 <- max(apply(X = select(data_frame(income_dist_2018),
+                                                -year, -NAME, -geometry), 1, max, TRUE))
+income_dist_18_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, income_dist_max_perc_2018))
 
 income_dist_2018_leaf <- leaflet(income_dist_2018) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
@@ -329,7 +312,7 @@ income_dist_2018_leaf <- leaflet(income_dist_2018) %>%
   addLegend(
     "bottomright",
     pal = income_dist_18_pal,
-    values = ~ c(0, 28.40),
+    values = ~ c(0, income_dist_max_perc_2018),
     title = "% of Population in selected<br>Income Bracket by Census Tract (2018)",
     na.label = "NA") %>%
   addLayersControl(
@@ -341,7 +324,10 @@ income_dist_2018_leaf <- leaflet(income_dist_2018) %>%
 
 leaflet income dist 2017
 ```{r}
-income_dist_17_pal <- colorNumeric(viridis_pal(option = "D")(3), domain = c(0, 31.60))
+income_dist_max_perc_2017 <- max(apply(X = select(data_frame(income_dist_2017),
+                                                -year, -NAME, -geometry), 1, max, TRUE))
+income_dist_17_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, income_dist_max_perc_2017))
 income_dist_2017_leaf <- leaflet(income_dist_2017) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
@@ -433,7 +419,7 @@ income_dist_2017_leaf <- leaflet(income_dist_2017) %>%
   addLegend(
     "bottomright",
     pal = income_dist_17_pal,
-    values = ~ c(0, 31.60),
+    values = ~ c(0, income_dist_max_perc_2017),
     title = "% of Population in selected<br>Income Bracket by Census Tract (2017)",
     na.label = "NA") %>%
   
@@ -446,7 +432,10 @@ income_dist_2017_leaf <- leaflet(income_dist_2017) %>%
 
 leaflet income dist 2016
 ```{r}
-income_dist_16_pal <- colorNumeric(viridis_pal(option = "D")(3), domain = c(0, 27.60))
+income_dist_max_perc_2016 <- max(apply(X = select(data_frame(income_dist_2016),
+                                                -year, -NAME, -geometry), 1, max, TRUE))
+income_dist_16_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, income_dist_max_perc_2016))
 income_dist_2016_leaf <- leaflet(income_dist_2016) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
@@ -538,7 +527,7 @@ income_dist_2016_leaf <- leaflet(income_dist_2016) %>%
   addLegend(
     "bottomright",
     pal = income_dist_16_pal,
-    values = ~ c(0, 27.60),
+    values = ~ c(0, income_dist_max_perc_2016),
     title = "% of Population in selected<br>Income Bracket by Census Tract (2016)",
     na.label = "NA") %>%
   addLayersControl(
@@ -550,7 +539,10 @@ income_dist_2016_leaf <- leaflet(income_dist_2016) %>%
 
 leaflet income dist 2015
 ```{r}
-income_dist_15_pal <- colorNumeric(viridis_pal(option = "D")(3), domain = c(0, 32.900))
+income_dist_max_perc_2015 <- max(apply(X = select(data_frame(income_dist_2015),
+                                                -year, -NAME, -geometry), 1, max, TRUE))
+income_dist_15_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, income_dist_max_perc_2015))
 income_dist_2015_leaf <- leaflet(income_dist_2015) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
@@ -642,7 +634,7 @@ income_dist_2015_leaf <- leaflet(income_dist_2015) %>%
   addLegend(
     "bottomright",
     pal = income_dist_15_pal,
-    values = ~ c(0, 32.900),
+    values = ~ c(0, income_dist_max_perc_2015),
     title = "% of Population in selected<br>Income Bracket by Census Tract (2015)",
     na.label = "NA") %>%
   addLayersControl(
@@ -652,4 +644,371 @@ income_dist_2015_leaf <- leaflet(income_dist_2015) %>%
     options = layersControlOptions(collapsed = T))
 ```
 
+
+###Educational Attainment
+
+```{r}
+edu_attain <- dplyr::select(acs_tracts, NAME, year, contains("education"), geometry)
+edu_attain <- select(edu_attain, !contains("moe"))
+edu_attain_2018 <- filter(edu_attain, year == 2018)
+edu_attain_2017 <- filter(edu_attain, year == 2017)
+edu_attain_2016 <- filter(edu_attain, year == 2016)
+edu_attain_2015 <- filter(edu_attain, year == 2015)
+```
+
+educational attainment 2018
+```{r}
+edu_attain_max_perc_2018 <- max(apply(X = select(data_frame(edu_attain_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+edu_attain_2018_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, edu_attain_max_perc_2018))
+edu_attain_2018_leaf <- leaflet(edu_attain_2018) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Less than High School",
+    fillColor = ~edu_attain_2018_pal(education_less_hs),
+    label = ~education_less_hs) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "High School Graduate",
+    fillColor = ~edu_attain_2018_pal(education_hs_grad),
+    label = ~education_hs_grad) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Associates or Some College",
+    fillColor = ~edu_attain_2018_pal(education_assoc_some_college),
+    label = ~education_assoc_some_college) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Bachelors or Higher",
+    fillColor = ~edu_attain_2018_pal(education_bachelors_or_higher),
+    label = ~education_bachelors_or_higher) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = edu_attain_2018_pal,
+    values = ~ c(0, edu_attain_max_perc_2018),
+    title = "% of Population with selected<br>Education Level by Census Tract (2018)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("Less than High School", "High School Graduate",
+                   "Associates or Some College", "Bachelors or Higher"),
+    options = layersControlOptions(collapsed = T))
+```
+
+educational attainment 2017
+```{r}
+edu_attain_max_perc_2017 <- max(apply(X = select(data_frame(edu_attain_2017), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+edu_attain_2017_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, edu_attain_max_perc_2017))
+edu_attain_2017_leaf <- leaflet(edu_attain_2017) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Less than High School",
+    fillColor = ~edu_attain_2017_pal(education_less_hs),
+    label = ~education_less_hs) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "High School Graduate",
+    fillColor = ~edu_attain_2017_pal(education_hs_grad),
+    label = ~education_hs_grad) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Associates or Some College",
+    fillColor = ~edu_attain_2017_pal(education_assoc_some_college),
+    label = ~education_assoc_some_college) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Bachelors or Higher",
+    fillColor = ~edu_attain_2017_pal(education_bachelors_or_higher),
+    label = ~education_bachelors_or_higher) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = edu_attain_2017_pal,
+    values = ~ c(0, edu_attain_max_perc_2017),
+    title = "% of Population with selected<br>Education Level by Census Tract (2017)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("Less than High School", "High School Graduate",
+                   "Associates or Some College", "Bachelors or Higher"),
+    options = layersControlOptions(collapsed = T))
+```
+
+educational attainment 2016
+```{r}
+edu_attain_max_perc_2016 <- max(apply(X = select(data_frame(edu_attain_2016), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+edu_attain_2016_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, edu_attain_max_perc_2016))
+edu_attain_2016_leaf <- leaflet(edu_attain_2016) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Less than High School",
+    fillColor = ~edu_attain_2016_pal(education_less_hs),
+    label = ~education_less_hs) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "High School Graduate",
+    fillColor = ~edu_attain_2016_pal(education_hs_grad),
+    label = ~education_hs_grad) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Associates or Some College",
+    fillColor = ~edu_attain_2016_pal(education_assoc_some_college),
+    label = ~education_assoc_some_college) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Bachelors or Higher",
+    fillColor = ~edu_attain_2016_pal(education_bachelors_or_higher),
+    label = ~education_bachelors_or_higher) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = edu_attain_2016_pal,
+    values = ~ c(0, edu_attain_max_perc_2016),
+    title = "% of Population with selected<br>Education Level by Census Tract (2016)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("Less than High School", "High School Graduate",
+                   "Associates or Some College", "Bachelors or Higher"),
+    options = layersControlOptions(collapsed = T))
+```
+
+educational attainment 2015
+```{r}
+edu_attain_max_perc_2015 <- max(apply(X = select(data_frame(edu_attain_2015), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+edu_attain_2015_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, edu_attain_max_perc_2015))
+edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Less than High School",
+    fillColor = ~edu_attain_2015_pal(education_less_hs),
+    label = ~education_less_hs) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "High School Graduate",
+    fillColor = ~edu_attain_2015_pal(education_hs_grad),
+    label = ~education_hs_grad) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Associates or Some College",
+    fillColor = ~edu_attain_2015_pal(education_assoc_some_college),
+    label = ~education_assoc_some_college) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Bachelors or Higher",
+    fillColor = ~edu_attain_2015_pal(education_bachelors_or_higher),
+    label = ~education_bachelors_or_higher) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = edu_attain_2015_pal,
+    values = ~ c(0, edu_attain_max_perc_2015),
+    title = "% of Population with selected<br>Education Level by Census Tract (2015)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("Less than High School", "High School Graduate",
+                   "Associates or Some College", "Bachelors or Higher"),
+    options = layersControlOptions(collapsed = T))
+```
+
+###Racial Diversity
+```{r}
+race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
+race_div <- select(race_div, !contains("moe"))
+race_div_2018 <- filter(race_div, year == 2018)
+race_div_2017 <- filter(race_div, year == 2017)
+race_div_2016 <- filter(race_div, year == 2016)
+race_div_2015 <- filter(race_div, year == 2015)
+colnames(race_div_2018)
+```
+
+racial diversity 2018
+```{r}
+race_div_max_perc_2018 <- max(apply(X = select(data_frame(race_div_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+race_div_2018_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, race_div_max_perc_2018))
+
+race_div_2018_leaf <- leaflet(race_div_2018) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "White",
+    fillColor = ~race_div_2018_pal(race_white),
+    label = ~race_white) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Black",
+    fillColor = ~race_div_2018_pal(race_black),
+    label = ~race_black) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native American",
+    fillColor = ~race_div_2018_pal(race_american_indian),
+    label = ~race_american_indian) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Asian",
+    fillColor = ~race_div_2018_pal(race_asian),
+    label = ~race_asian) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native Hawaiian",
+    fillColor = ~race_div_2018_pal(race_native_hawaiian),
+    label = ~race_native_hawaiian) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Hispanic",
+    fillColor = ~race_div_2018_pal(race_hispanic),
+    label = ~race_hispanic) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Other",
+    fillColor = ~race_div_2018_pal(race_other),
+    label = ~race_other) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Two or More",
+    fillColor = ~race_div_2018_pal(race_two_more),
+    label = ~race_two_more) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = race_div_2018_pal,
+    values = ~ c(0, race_div_max_perc_2018),
+    title = "% of Population identifying with selected<br>racial group by Census Tract (2018)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
+                   "Hispanic", "Other", "Two or More"),
+    options = layersControlOptions(collapsed = T))
+race_div_2018_leaf
+```
 

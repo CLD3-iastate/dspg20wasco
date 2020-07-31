@@ -42,7 +42,7 @@ wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
                     cb = TRUE)
 tract_geo <- rbind(or_tracts, wa_tracts)
 acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
-acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")  
+acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID") 
 
 
 
@@ -132,8 +132,6 @@ ggplotly(ggplot(income)+
   # scale_fill_discrete(name = "Income Bracket", labels = c("Less than 10,000", "10,000-14,999", "15,000-24,999",
   #                                                         "25,000-34,999", "35,000-49,999", "50,000-74,999", 
   #                                                         "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
-  scale_colour_manual(name = "Income Bracket", values = dspgpal) +
-  #theme_minimal()+theme(axis.text.x = element_text(angle=30)) +
   ylab("% of Population") + xlab("Region") +
   ggtitle("Income Distribution for 2018") + coord_flip())
 ```
@@ -168,6 +166,27 @@ ggplotly(ggplot(filter(income_table, year ==2018))+
 ```
 
 This stacked bar chart condenses the busy plot of distributions from the previous grouped bar. It is easier to see where the heavier densities are at the income extremes.
+
+
+```{r}
+income <- acs_tracts %>% select(NAME,y, year, contains("income"))
+income_perc <- income %>% select(!contains("moe"), -median_household_income, NAME, year)
+income_moe <- income %>% select(NAME, year, contains("moe"), -median_household_income_moe)
+income_perc <- melt(income_perc, id.vars = c("NAME", "year"), measure.vars = colnames(income_perc)[-c(1,2)])
+income_moe <- income_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colnames(income_moe)[-c(1,2)]) %>%
+  rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
+income_table_tracts <- merge(x = income_perc, y = income_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(income_table_tracts, year == 2018), aes(fill = income_200k_more)) +
+  geom_sf(fill = "transparent", color = "gray20", size = 1, 
+          data = acs_tracts %>% group_by(COUNTYFP) %>% summarise()) + theme_minimal() +
+  labs(title = paste("Percent of households with income more than $200,000 by census track in", 2018, sep=" "))
+
+```
+
+
+
 
 
 ### Poverty Rate
@@ -207,7 +226,7 @@ ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo 
 #n
 ```
 
-
+sf map
 ```{r warning=FALSE, message=FALSE}
 ggplot() +
   geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = below_poverty)) +
@@ -286,6 +305,15 @@ ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo 
 ```
 
 
+```{r warning = FALSE, message=FALSE}
+# sf map
+ggplot() +
+  geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = labor_force_20_to_64)) +
+  labs(title = "Labor Force Participation Rate for Adults 20 to 64: 2015-2018") #+ 
+
+```
+
+
 
 ## Housing
 
@@ -346,7 +374,7 @@ ggplotly(ggplot(filter(housing_diverge, year == 2018),
                                   "<br>Affordable Housing: ", round(abs(value), digits = 1), "%")))+
            geom_bar(stat = "identity") + 
            scale_y_continuous(breaks = pretty(housing_diverge$value), labels = abs(pretty(housing_diverge$value))) +
-           scale_colour_manual(name = "Housing Ownership", values = c(dspgpal[1], dspgpal[9])) +
+           scale_colour_manual(name = "Housing Ownership", values = viridis(2, option="D")) +
            scale_fill_discrete(name = "Housing Ownership", labels = c("Own", "Rent")) +
            theme_minimal() + labs(x="Region",y="% of Occupied Housing Units") +
            coord_flip(), tooltip = "text") %>% layout(title = list(text = paste0("Affordable Housing 2015-2018",
@@ -408,6 +436,24 @@ This plot is not yet interactive, and needs some work on ordering of the grouped
 
 
 
+```{r}
+race <- acs_tracts %>% select(GEOID,NAME, year, contains("race")) # select appropriate variables
+race_moe <- race %>% select(NAME,year, contains("moe")) #separate moe estimates
+race_moe <- race_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colnames(race_moe)[-c(1,2)]) %>%
+  rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
+race <- race %>% select(!contains("moe"), NAME, year)
+race <- melt(race, id.vars = c("NAME", "year"),measure.vars = colnames(race)[-c(1,2)])
+race_table_tracts <- merge(x = race, y = race_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(race_table_tracts, year == 2018), aes(fill = race_hispanic)) +
+  labs(title = "Racial Diversity by Tract"") #+ 
+
+```
+
+
+
+
 ### Family Stability
 
 customizable tool tip and legend not working
@@ -435,6 +481,31 @@ ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fil
 ```
 
 Compared to its immediate neighbors, South Wasco has the highest percentage of children who are in a household with no family members. South Wasco also has the highest percentage of people living alone or with non family members.
+
+
+
+
+```{r}
+family <- select(filter(acs_tracts), NAME, year,contains("family"))
+family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_perc, 
+                                 family_children_nonfamily_perc, family_nonfamily_household_perc,
+                                 family_nonfamily_household_perc)
+family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_perc_moe,
+                               family_children_nonfamily_perc_moe, family_nonfamily_household_perc_moe,
+                               family_nonfamily_household_perc_moe)
+family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
+  rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
+family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
+family_table_tracts <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(family_table_tracts, year == 2018), aes(fill = family_single_parent_perc)) +
+  labs(title = "Family Stability by Tract - Single Parent 2018") #+ 
+
+```
+
+
+
 
 ### Educational Attainment
 
@@ -464,6 +535,23 @@ ggplotly(ggplot(filter(ed_table, year == 2018)) +
 
 
 Generally, South Wasco has a large percentage of adults that are high school graduates and have some higher education. However, It has some of the lowest percentages of adults that havea bachelors degree or higher. Hood river has the highest educated population.
+
+
+```{r}
+ed <- select(filter(acs_tracts), NAME, year, contains("education"))
+ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
+ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe, 
+                        education_assoc_some_college_moe, education_bachelors_or_higher_moe)
+ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>% 
+  rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
+ed_perc <- melt(ed_perc, id.vars = c("NAME", "year"), measure.vars = colnames(ed_perc)[-c(1,2)])
+ed_table_tracts <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(ed_table_tracts, year == 2018), aes(fill = education_hs_grad)) +
+  labs(title = "Educational Attainment by Tract - High School Grad 2018") #+ 
+
+```
 
 
  

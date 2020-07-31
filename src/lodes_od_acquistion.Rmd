@@ -91,7 +91,9 @@ aux15 <- fread("../data/lodes/or_od_aux_JT00_2015.csv",
 full_data15 <- rbind(main15, aux15)
 ```
 
-Filtering so that it only includes Wasco County
+Filtering so that it only includes Wasco County 
+----------
+ADD NEIGHBORHING COUNTIES!!!
 ```{r}
 wasco17_od <- full_data17 %>% 
   filter(w_geocode %in% full_data17$w_geocode[substr(full_data17$w_geocode, 1, 5) == "41065"]|h_geocode %in% full_data17$h_geocode[substr(full_data17$h_geocode, 1, 5) == "41065"])

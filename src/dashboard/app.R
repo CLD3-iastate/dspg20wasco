@@ -21,6 +21,7 @@ library(R.utils)
 library(dplyr)
 library(readr)
 library(DT)
+library(viridis)
 
 # DATA: Sourcing theme, shp files ------
 source("theme.R")
@@ -380,9 +381,10 @@ conditionalPanel(
                     back_content = tagList(
                       column(
                         width = 12,
-                        align = "center",
+                        align = "center"
                         #Indicator table snippet
-                        DTOutput("acs_counties"))
+                        #DTOutput("acs_counties")
+                        )
                         ))),
 # UI: PANEL - Job flows  -------
                         conditionalPanel(
@@ -755,6 +757,8 @@ conditionalPanel(
 ## SERVER: Begins --------
 server <- function(input, output, session) {
 
+  graypal = "#ADB5BD"
+  
 ## SERVER: INDICATOR TABLES -------
 ## SERVER: DATA TABLES -----
 ## SERVER: DATA TABLE - Food systems map -----

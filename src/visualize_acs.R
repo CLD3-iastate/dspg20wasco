@@ -236,3 +236,26 @@ ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fil
            scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
            ylab("% of children") + xlab("Region") + coord_flip()+ theme_minimal() +
            ggtitle("Family Structure for Children under 18-2018"))
+
+
+
+#----------Educational Attainment--------------#
+ed <- select(filter(acs_counties_neighbors), NAME, year, contains("education"))
+ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
+ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe, 
+                        education_assoc_some_college_moe, education_bachelors_or_higher_moe)
+ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>% 
+  rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
+ed_perc <- melt(ed_perc, id.vars = c("NAME", "year"), measure.vars = colnames(ed_perc)[-c(1,2)])
+ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year"))
+#grouped bar chart for own and rent occupancy
+ggplotly(ggplot(filter(ed_table, year == 2018)) +
+           geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge") +
+           scale_fill_manual(values = viridis(4, option = "D"),
+                             name = "Educational Attainment",
+                             breaks = c("education_less_hs","education_hs_grad","education_assoc_some_college", "education_bachelors_or_higher"),
+                             labels = c("Less than High School", "High School Graduate or Equivalent (GED)","Associates Degree or Some College", "Bachelors or Higher")) +
+           #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
+           ylab("% of Adults 25 and Older") + xlab("Region") + 
+           coord_flip()+ theme_minimal() +
+           ggtitle("Educational Attainment for Adults 25 and older-2018"))

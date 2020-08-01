@@ -52,9 +52,9 @@ acs_tracts <- st_as_sf(inner_join(acs_tracts, tract_geo, by = c("GEOID")))
 acs_tracts$NAME <- acs_tracts$NAME.x
 acs_tracts$NAME.x <- NULL
 acs_tracts$NAME.y <- NULL
-#acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")
 graypal = "#ADB5BD"
 ```
+Getting county outlines
 ```{r}
 or_county_lines <- counties(state = "OR")
 wa_county_lines <- counties(state = "WA")
@@ -62,6 +62,7 @@ county_lines <- rbind(filter(or_county_lines, NAME %in%
                                c("Wasco", "Hood River", "Sherman", "Jefferson")),
                       filter(wa_county_lines, NAME %in% c("Skamania", "Klickitat"))
                       )
+saveRDS(county_lines, "../data/acs_leaflet_countylines.Rds")
 south_wasco_points <- st_read("../data/shps/swsd")
 ```
 
@@ -443,8 +444,7 @@ income_dist_2018_leaf <- leaflet(income_dist_2018) %>%
     weight = 2,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = income_dist_18_pal,
@@ -630,8 +630,7 @@ income_dist_2017_leaf <- leaflet(income_dist_2017) %>%
     weight = 2,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = income_dist_17_pal,
@@ -817,8 +816,7 @@ income_dist_2016_leaf <- leaflet(income_dist_2016) %>%
     weight = 2,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = income_dist_16_pal,
@@ -1004,8 +1002,7 @@ income_dist_2015_leaf <- leaflet(income_dist_2015) %>%
     weight = 2,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = income_dist_15_pal,
@@ -1017,6 +1014,14 @@ income_dist_2015_leaf <- leaflet(income_dist_2015) %>%
                    "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                    "> $200K"),
     options = layersControlOptions(collapsed = T))
+```
+
+Viewing all income leaflets
+```{r}
+income_dist_2018_leaf
+income_dist_2017_leaf
+income_dist_2016_leaf
+income_dist_2015_leaf
 ```
 
 
@@ -1113,8 +1118,7 @@ edu_attain_2018_leaf <- leaflet(edu_attain_2018) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = edu_attain_2018_pal,
@@ -1208,8 +1212,7 @@ edu_attain_2017_leaf <- leaflet(edu_attain_2017) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = edu_attain_2017_pal,
@@ -1303,8 +1306,7 @@ edu_attain_2016_leaf <- leaflet(edu_attain_2016) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = edu_attain_2016_pal,
@@ -1398,8 +1400,7 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = edu_attain_2015_pal,
@@ -1411,6 +1412,14 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
                    "Associates or Some College", "Bachelors or Higher"),
     options = layersControlOptions(collapsed = T))
 ```
+
+```{r}
+edu_attain_2018_leaf
+edu_attain_2017_leaf
+edu_attain_2016_leaf
+edu_attain_2015_leaf
+```
+
 
 ###Racial Diversity (over time)
 ```{r}

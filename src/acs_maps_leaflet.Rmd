@@ -908,80 +908,522 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
     options = layersControlOptions(collapsed = T))
 ```
 
-###Racial Diversity
+###Racial Diversity (over time)
 ```{r}
 race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
 race_div <- select(race_div, !contains("moe"))
-race_div_2018 <- filter(race_div, year == 2018)
-race_div_2017 <- filter(race_div, year == 2017)
-race_div_2016 <- filter(race_div, year == 2016)
-race_div_2015 <- filter(race_div, year == 2015)
-colnames(race_div_2018)
 ```
 
-racial diversity 2018
+breakdown of % white over time
 ```{r}
-race_div_max_perc_2018 <- max(apply(X = select(data_frame(race_div_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
-race_div_2018_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, race_div_max_perc_2018))
-
-race_div_2018_leaf <- leaflet(race_div_2018) %>%
+perc_white_max <- max(race_div$race_white)
+perc_white_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_white_max))
+perc_white_leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
+    data = filter(race_div, year == 2018),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "White",
-    fillColor = ~race_div_2018_pal(race_white),
+    group = "2018",
+    fillColor = ~perc_white_pal(race_white),
     label = ~race_white) %>%
   addPolygons(
+    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Black",
-    fillColor = ~race_div_2018_pal(race_black),
+    group = "2017",
+    fillColor = ~perc_white_pal(race_white),
+    label = ~race_white) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_white_pal(race_white),
+    label = ~race_white) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_white_pal(race_white),
+    label = ~race_white) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    data = race_div,
+    "bottomright",
+    pal = perc_white_pal,
+    values = ~ c(0, perc_white_max),
+    title = "% of Population identifying as<br>white by Census Tract",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+```
+
+breakdown of % black over time
+```{r}
+perc_black_max <- max(race_div$race_black)
+perc_black_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_black_max))
+perc_black_leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    data = filter(race_div, year == 2018),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2018",
+    fillColor = ~perc_black_pal(race_black),
     label = ~race_black) %>%
   addPolygons(
+    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Native American",
-    fillColor = ~race_div_2018_pal(race_american_indian),
+    group = "2017",
+    fillColor = ~perc_black_pal(race_black),
+    label = ~race_black) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_black_pal(race_black),
+    label = ~race_black) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_black_pal(race_black),
+    label = ~race_black) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    data = race_div,
+    "bottomright",
+    pal = perc_black_pal,
+    values = ~ c(0, perc_black_max),
+    title = "% of Population identifying as<br>Black by Census Tract",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+```
+
+breakdown of % Native American over time
+```{r}
+perc_na_max <- max(race_div$race_american_indian)
+perc_na_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_na_max))
+perc_na_leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    data = filter(race_div, year == 2018),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2018",
+    fillColor = ~perc_na_pal(race_american_indian),
     label = ~race_american_indian) %>%
   addPolygons(
+    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Asian",
-    fillColor = ~race_div_2018_pal(race_asian),
+    group = "2017",
+    fillColor = ~perc_na_pal(race_american_indian),
+    label = ~race_american_indian) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_na_pal(race_american_indian),
+    label = ~race_american_indian) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_na_pal(race_american_indian),
+    label = ~race_american_indian) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    data = race_div,
+    "bottomright",
+    pal = perc_na_pal,
+    values = ~ c(0, perc_na_max),
+    title = "% of Population identifying as<br>Native American by Census Tract",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+perc_na_leaf
+```
+
+breakdown of % Asian over time
+```{r}
+perc_asian_max <- max(race_div$race_asian)
+perc_asain_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_asian_max))
+perc_asain_leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    data = filter(race_div, year == 2018),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2018",
+    fillColor = ~perc_asain_pal(race_asian),
     label = ~race_asian) %>%
   addPolygons(
+    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Native Hawaiian",
-    fillColor = ~race_div_2018_pal(race_native_hawaiian),
+    group = "2017",
+    fillColor = ~perc_asain_pal(race_asian),
+    label = ~race_asian) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_asain_pal(race_asian),
+    label = ~race_asian) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_asain_pal(race_asian),
+    label = ~race_asian) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    data = race_div,
+    "bottomright",
+    pal = perc_asain_pal,
+    values = ~ c(0, perc_asian_max),
+    title = "% of Population identifying as<br>Asian by Census Tract",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+```
+
+breakdown of % Native Hawaiian over time
+```{r}
+perc_nh_max <- max(race_div$race_native_hawaiian)
+perc_nh_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_nh_max))
+perc_nh_leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    data = filter(race_div, year == 2018),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2018",
+    fillColor = ~perc_nh_pal(race_native_hawaiian),
     label = ~race_native_hawaiian) %>%
   addPolygons(
+    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Hispanic",
-    fillColor = ~race_div_2018_pal(race_hispanic),
+    group = "2017",
+    fillColor = ~perc_nh_pal(race_native_hawaiian),
+    label = ~race_native_hawaiian) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_nh_pal(race_native_hawaiian),
+    label = ~race_native_hawaiian) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_nh_pal(race_native_hawaiian),
+    label = ~race_native_hawaiian) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    data = race_div,
+    "bottomright",
+    pal = perc_nh_pal,
+    values = ~ c(0, perc_nh_max),
+    title = "% of Population identifying as<br>Native Hawaiian by Census Tract",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+```
+
+breakdown of % Hispanic over time (something really weird going on in 2015 w/ recording of hispanic 
+and white groups)
+```{r}
+perc_hisp_max <- max(race_div$race_hispanic)
+perc_hisp_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_hisp_max))
+perc_hisp_leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    data = filter(race_div, year == 2018),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2018",
+    fillColor = ~perc_hisp_pal(race_hispanic),
     label = ~race_hispanic) %>%
   addPolygons(
+    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Other",
-    fillColor = ~race_div_2018_pal(race_other),
+    group = "2017",
+    fillColor = ~perc_hisp_pal(race_hispanic),
+    label = ~race_hispanic) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_hisp_pal(race_hispanic),
+    label = ~race_hispanic) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_hisp_pal(race_hispanic),
+    label = ~race_hispanic) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    data = race_div,
+    "bottomright",
+    pal = perc_hisp_pal,
+    values = ~ c(0, perc_hisp_max),
+    title = "% of Population identifying as<br>Hispanic by Census Tract",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+```
+
+breakdown of % other over time
+```{r}
+perc_oth_max <- max(race_div$race_other)
+perc_oth_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_oth_max))
+perc_oth_leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    data = filter(race_div, year == 2018),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2018",
+    fillColor = ~perc_oth_pal(race_other),
     label = ~race_other) %>%
   addPolygons(
+    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Two or More",
-    fillColor = ~race_div_2018_pal(race_two_more),
+    group = "2017",
+    fillColor = ~perc_oth_pal(race_other),
+    label = ~race_other) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_oth_pal(race_other),
+    label = ~race_other) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_oth_pal(race_other),
+    label = ~race_other) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    data = race_div,
+    "bottomright",
+    pal = perc_oth_pal,
+    values = ~ c(0, perc_oth_max),
+    title = "% of Population identifying as<br>Other by Census Tract",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+perc_oth_leaf
+```
+
+breakdown of % 2 or more over time
+```{r}
+perc_two_more_max <- max(race_div$race_two_more)
+perc_two_more_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, perc_two_more_max))
+perc_two_more_leaf <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    data = filter(race_div, year == 2018),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2018",
+    fillColor = ~perc_two_more_pal(race_two_more),
+    label = ~race_two_more) %>%
+  addPolygons(
+    data = filter(race_div, year == 2017),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2017",
+    fillColor = ~perc_two_more_pal(race_two_more),
+    label = ~race_two_more) %>%
+  addPolygons(
+    data = filter(race_div, year == 2016),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2016",
+    fillColor = ~perc_two_more_pal(race_two_more),
+    label = ~race_two_more) %>%
+  addPolygons(
+    data = filter(race_div, year == 2015),
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "2015",
+    fillColor = ~perc_two_more_pal(race_two_more),
     label = ~race_two_more) %>%
   addPolylines(
     data = south_wasco_points,
@@ -1000,15 +1442,277 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     group = "Basemap",
     label = county_lines$NAME) %>%
   addLegend(
+    data = race_div,
     "bottomright",
-    pal = race_div_2018_pal,
-    values = ~ c(0, race_div_max_perc_2018),
-    title = "% of Population identifying with selected<br>racial group by Census Tract (2018)",
+    pal = perc_two_more_pal,
+    values = ~ c(0, perc_two_more_max),
+    title = "% of Population identifying with two or more<br>racial groups by Census Tract",
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
-                   "Hispanic", "Other", "Two or More"),
-    options = layersControlOptions(collapsed = T))
-race_div_2018_leaf
+    baseGroups = c("2018", "2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = F))
+perc_two_more_leaf
 ```
 
+###Family Stability
+
+```{r}
+fam_stab <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry)
+fam_stab <- select(fam_stab, !contains("moe")) %>% select(!contains("total"))
+fam_stab_2018 <- filter(fam_stab, year == 2018)
+fam_stab_2017 <- filter(fam_stab, year == 2017)
+fam_stab_2016 <- filter(fam_stab, year == 2016)
+fam_stab_2015 <- filter(fam_stab, year == 2015)
+```
+
+family stability 2018
+```{r}
+fam_stab_max_perc_2018 <- max(apply(X = select(data_frame(fam_stab_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+fam_stab_2018_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, fam_stab_max_perc_2018))
+fam_stab_2018_leaf <- leaflet(fam_stab_2018) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Married",
+    fillColor = ~fam_stab_2018_pal(family_married_parent_perc),
+    label = ~family_married_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Unmarried",
+    fillColor = ~fam_stab_2018_pal(family_single_parent_perc),
+    label = ~family_single_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Orphaned Children",
+    fillColor = ~fam_stab_2018_pal(family_children_nonfamily_perc),
+    label = ~family_children_nonfamily_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Married Couples with no Children",
+    fillColor = ~fam_stab_2018_pal(family_nonfamily_household_perc),
+    label = ~family_nonfamily_household_perc) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = fam_stab_2018_pal,
+    values = ~ c(0, fam_stab_max_perc_2018),
+    title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2018)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
+                   "% of Orphaned Children", "% of Married Couples with no Children"),
+    options = layersControlOptions(collapsed = T))
+```
+
+family stability 2017
+```{r}
+fam_stab_max_perc_2017 <- max(apply(X = select(data_frame(fam_stab_2017), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+fam_stab_2017_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, fam_stab_max_perc_2017))
+fam_stab_2017_leaf <- leaflet(fam_stab_2017) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Married",
+    fillColor = ~fam_stab_2017_pal(family_married_parent_perc),
+    label = ~family_married_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Unmarried",
+    fillColor = ~fam_stab_2017_pal(family_single_parent_perc),
+    label = ~family_single_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Orphaned Children",
+    fillColor = ~fam_stab_2017_pal(family_children_nonfamily_perc),
+    label = ~family_children_nonfamily_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Married Couples with no Children",
+    fillColor = ~fam_stab_2017_pal(family_nonfamily_household_perc),
+    label = ~family_nonfamily_household_perc) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = fam_stab_2017_pal,
+    values = ~ c(0, fam_stab_max_perc_2017),
+    title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2017)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
+                   "% of Orphaned Children", "% of Married Couples with no Children"),
+    options = layersControlOptions(collapsed = T))
+```
+
+family stability 2016
+```{r}
+fam_stab_max_perc_2016 <- max(apply(X = select(data_frame(fam_stab_2016), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+fam_stab_2016_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, fam_stab_max_perc_2016))
+fam_stab_2016_leaf <- leaflet(fam_stab_2016) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Married",
+    fillColor = ~fam_stab_2016_pal(family_married_parent_perc),
+    label = ~family_married_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Unmarried",
+    fillColor = ~fam_stab_2016_pal(family_single_parent_perc),
+    label = ~family_single_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Orphaned Children",
+    fillColor = ~fam_stab_2016_pal(family_children_nonfamily_perc),
+    label = ~family_children_nonfamily_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Married Couples with no Children",
+    fillColor = ~fam_stab_2016_pal(family_nonfamily_household_perc),
+    label = ~family_nonfamily_household_perc) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = fam_stab_2016_pal,
+    values = ~ c(0, fam_stab_max_perc_2016),
+    title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2016)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
+                   "% of Orphaned Children", "% of Married Couples with no Children"),
+    options = layersControlOptions(collapsed = T))
+```
+
+family stability 2015
+```{r}
+fam_stab_max_perc_2015 <- max(apply(X = select(data_frame(fam_stab_2015), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+fam_stab_2015_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, fam_stab_max_perc_2015))
+fam_stab_2015_leaf <- leaflet(fam_stab_2015) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Married",
+    fillColor = ~fam_stab_2015_pal(family_married_parent_perc),
+    label = ~family_married_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Parents who are Unmarried",
+    fillColor = ~fam_stab_2015_pal(family_single_parent_perc),
+    label = ~family_single_parent_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Orphaned Children",
+    fillColor = ~fam_stab_2015_pal(family_children_nonfamily_perc),
+    label = ~family_children_nonfamily_perc) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "% of Married Couples with no Children",
+    fillColor = ~fam_stab_2015_pal(family_nonfamily_household_perc),
+    label = ~family_nonfamily_household_perc) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = county_lines$NAME) %>%
+  addLegend(
+    "bottomright",
+    pal = fam_stab_2015_pal,
+    values = ~ c(0, fam_stab_max_perc_2015),
+    title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2015)",
+    na.label = "NA") %>%
+  addLayersControl(
+    baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
+                   "% of Orphaned Children", "% of Married Couples with no Children"),
+    options = layersControlOptions(collapsed = T))
+```

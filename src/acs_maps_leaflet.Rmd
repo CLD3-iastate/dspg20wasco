@@ -77,7 +77,14 @@ perc_pov_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2018",
     fillColor = ~perc_pov_pal(below_poverty),
-    label = ~below_poverty) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(below_poverty_moe, 1), "%<br/>",
+                          "<strong> Percent below the poverty line: <strong>", 
+                          round(below_poverty, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     data = filter(acs_tracts, year == 2017),
     weight = 1,
@@ -85,7 +92,14 @@ perc_pov_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2017",
     fillColor = ~perc_pov_pal(below_poverty),
-    label = ~below_poverty) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(below_poverty_moe, 1), "%<br/>",
+                          "<strong> Percent below the poverty line: <strong>", 
+                          round(below_poverty, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     data = filter(acs_tracts, year == 2016),
     weight = 1,
@@ -93,7 +107,14 @@ perc_pov_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2016",
     fillColor = ~perc_pov_pal(below_poverty),
-    label = ~below_poverty) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(below_poverty_moe, 1), "%<br/>",
+                          "<strong> Percent below the poverty line: <strong>", 
+                          round(below_poverty, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     data = filter(acs_tracts, year == 2015),
     weight = 1,
@@ -101,7 +122,14 @@ perc_pov_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2015",
     fillColor = ~perc_pov_pal(below_poverty),
-    label = ~below_poverty) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(below_poverty_moe, 1), "%<br/>",
+                          "<strong> Percent below the poverty line: <strong>", 
+                          round(below_poverty, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#5e4b6b",
@@ -116,8 +144,7 @@ perc_pov_leaf <- leaflet() %>%
     weight = 2,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     data = acs_tracts,
     "bottomright",
@@ -132,6 +159,7 @@ perc_pov_leaf <- leaflet() %>%
   addLayersControl(
     baseGroups = c("2018", "2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
+perc_pov_leaf
 ```
 
 ###Leaflet showing % of employed adults 20-64
@@ -146,7 +174,14 @@ perc_emp_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2018",
     fillColor = ~perc_emp_pal(employment_20_to_64),
-    label = ~employment_20_to_64) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(employment_20_to_64_moe, 1), "%<br/>",
+                          "<strong> Percent employed between 20-64: <strong>", 
+                          round(employment_20_to_64, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     data = filter(acs_tracts, year == 2017),
     weight = 1,
@@ -154,7 +189,14 @@ perc_emp_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2017",
     fillColor = ~perc_emp_pal(employment_20_to_64),
-    label = ~employment_20_to_64) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(employment_20_to_64_moe, 1), "%<br/>",
+                          "<strong> Percent employed between 20-64: <strong>", 
+                          round(employment_20_to_64, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     data = filter(acs_tracts, year == 2016),
     weight = 1,
@@ -162,7 +204,14 @@ perc_emp_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2016",
     fillColor = ~perc_emp_pal(employment_20_to_64),
-    label = ~employment_20_to_64) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(employment_20_to_64_moe, 1), "%<br/>",
+                          "<strong> Percent employed between 20-64: <strong>", 
+                          round(employment_20_to_64, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     data = filter(acs_tracts, year == 2015),
     weight = 1,
@@ -170,7 +219,14 @@ perc_emp_leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2015",
     fillColor = ~perc_emp_pal(employment_20_to_64),
-    label = ~employment_20_to_64) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(employment_20_to_64_moe, 1), "%<br/>",
+                          "<strong> Percent employed between 20-64: <strong>", 
+                          round(employment_20_to_64, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#5e4b6b",
@@ -185,8 +241,7 @@ perc_emp_leaf <- leaflet() %>%
     weight = 2,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     data = acs_tracts,
     "bottomright",
@@ -213,6 +268,7 @@ income_dist_2018 <- filter(income_dist, year == 2018)
 income_dist_2017 <- filter(income_dist, year == 2017)
 income_dist_2016 <- filter(income_dist, year == 2016)
 income_dist_2015 <- filter(income_dist, year == 2015)
+income_dist_moe <- dplyr::select(acs_tracts, NAME, year, contains("income"), geometry) %>% select(!contains("total"))
 ```
 
 leaflet income dist 2018
@@ -221,7 +277,6 @@ income_dist_max_perc_2018 <- max(apply(X = select(data_frame(income_dist_2018),
                                                 -year, -NAME, -geometry), 1, max, TRUE))
 income_dist_18_pal <- colorNumeric(viridis_pal(option = "D")(3), 
                                    domain = c(0, income_dist_max_perc_2018))
-
 income_dist_2018_leaf <- leaflet(income_dist_2018) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
@@ -230,70 +285,150 @@ income_dist_2018_leaf <- leaflet(income_dist_2018) %>%
     fillOpacity = .7,
     group = "< $10K",
     fillColor = ~income_dist_18_pal(income_less_than_10k),
-    label = ~income_less_than_10k) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_less_than_10k_moe, 1), "%<br/>",
+                          "<strong> Percent earning < $10K: <strong>", 
+                          round(income_less_than_10k, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$10K - $14999",
     fillColor = ~income_dist_18_pal(income_10k_14999),
-    label = ~income_10k_14999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_10k_14999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $10K - $14999: <strong>", 
+                          round(income_10k_14999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$15K - $24999",
     fillColor = ~income_dist_18_pal(income_15k_24999),
-    label = ~income_15k_24999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_15k_24999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $15K - $24999: <strong>", 
+                          round(income_15k_24999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$25K - $34999",
     fillColor = ~income_dist_18_pal(income_25k_34999),
-    label = ~income_25k_34999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_25k_34999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $25K - $34999: <strong>", 
+                          round(income_25k_34999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$35K - $49999",
     fillColor = ~income_dist_18_pal(income_35K_49999),
-    label = ~income_35K_49999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_35K_49999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $35K - $49999: <strong>", 
+                          round(income_35K_49999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$50K - $74999",
     fillColor = ~income_dist_18_pal(income_50K_74999),
-    label = ~income_50K_74999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_50K_74999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $50K - $74999: <strong>", 
+                          round(income_50K_74999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$75K - $99999",
     fillColor = ~income_dist_18_pal(income_75K_99999),
-    label = ~income_75K_99999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_75K_99999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $75K - $99999: <strong>", 
+                          round(income_75K_99999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$100K - $149999",
     fillColor = ~income_dist_18_pal(income_100K_149999),
-    label = ~income_100K_149999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_100K_149999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $100K - $149999: <strong>", 
+                          round(income_100K_149999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$150K - $199999",
     fillColor = ~income_dist_18_pal(income_150K_199999),
-    label = ~income_150K_199999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_150K_199999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $150K - $199999: <strong>", 
+                          round(income_150K_199999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "> $200K",
     fillColor = ~income_dist_18_pal(income_200K_more),
-    label = ~income_200K_more) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2018$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2018)$income_200K_more, 1), "%<br/>",
+                          "<strong> Percent earning > $200K: <strong>", 
+                          round(income_200K_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -337,70 +472,150 @@ income_dist_2017_leaf <- leaflet(income_dist_2017) %>%
     fillOpacity = .7,
     group = "< $10K",
     fillColor = ~income_dist_17_pal(income_less_than_10k),
-    label = ~income_less_than_10k) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_less_than_10k_moe, 1), "%<br/>",
+                          "<strong> Percent earning < $10K: <strong>", 
+                          round(income_less_than_10k, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$10K - $14999",
     fillColor = ~income_dist_17_pal(income_10k_14999),
-    label = ~income_10k_14999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_10k_14999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $10K - $14999: <strong>", 
+                          round(income_10k_14999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$15K - $24999",
     fillColor = ~income_dist_17_pal(income_15k_24999),
-    label = ~income_15k_24999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_15k_24999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $15K - $24999: <strong>", 
+                          round(income_15k_24999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$25K - $34999",
     fillColor = ~income_dist_17_pal(income_25k_34999),
-    label = ~income_25k_34999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_25k_34999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $25K - $34999: <strong>", 
+                          round(income_25k_34999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$35K - $49999",
     fillColor = ~income_dist_17_pal(income_35K_49999),
-    label = ~income_35K_49999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_35K_49999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $35K - $49999: <strong>", 
+                          round(income_35K_49999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$50K - $74999",
     fillColor = ~income_dist_17_pal(income_50K_74999),
-    label = ~income_50K_74999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_50K_74999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $50K - $74999: <strong>", 
+                          round(income_50K_74999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$75K - $99999",
     fillColor = ~income_dist_17_pal(income_75K_99999),
-    label = ~income_75K_99999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_75K_99999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $75K - $99999: <strong>", 
+                          round(income_75K_99999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$100K - $149999",
     fillColor = ~income_dist_17_pal(income_100K_149999),
-    label = ~income_100K_149999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_100K_149999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $100K - $149999: <strong>", 
+                          round(income_100K_149999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$150K - $199999",
     fillColor = ~income_dist_17_pal(income_150K_199999),
-    label = ~income_150K_199999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_150K_199999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $150K - $199999: <strong>", 
+                          round(income_150K_199999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "> $200K",
     fillColor = ~income_dist_17_pal(income_200K_more),
-    label = ~income_200K_more) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2017$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2017)$income_200K_more, 1), "%<br/>",
+                          "<strong> Percent earning > $200K: <strong>", 
+                          round(income_200K_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -412,7 +627,7 @@ income_dist_2017_leaf <- leaflet(income_dist_2017) %>%
   addPolylines(
     data = county_lines,
     color = "#d48537",
-    weight = 1,
+    weight = 2,
     opacity = 1,
     fillOpacity= 0,
     group = "Basemap",
@@ -423,7 +638,6 @@ income_dist_2017_leaf <- leaflet(income_dist_2017) %>%
     values = ~ c(0, income_dist_max_perc_2017),
     title = "% of Population in selected<br>Income Bracket by Census Tract (2017)",
     na.label = "NA") %>%
-  
   addLayersControl(
     baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                    "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
@@ -445,70 +659,150 @@ income_dist_2016_leaf <- leaflet(income_dist_2016) %>%
     fillOpacity = .7,
     group = "< $10K",
     fillColor = ~income_dist_16_pal(income_less_than_10k),
-    label = ~income_less_than_10k) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_less_than_10k_moe, 1), "%<br/>",
+                          "<strong> Percent earning < $10K: <strong>", 
+                          round(income_less_than_10k, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$10K - $14999",
     fillColor = ~income_dist_16_pal(income_10k_14999),
-    label = ~income_10k_14999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_10k_14999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $10K - $14999: <strong>", 
+                          round(income_10k_14999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$15K - $24999",
     fillColor = ~income_dist_16_pal(income_15k_24999),
-    label = ~income_15k_24999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_15k_24999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $15K - $24999: <strong>", 
+                          round(income_15k_24999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$25K - $34999",
     fillColor = ~income_dist_16_pal(income_25k_34999),
-    label = ~income_25k_34999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_25k_34999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $25K - $34999: <strong>", 
+                          round(income_25k_34999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$35K - $49999",
     fillColor = ~income_dist_16_pal(income_35K_49999),
-    label = ~income_35K_49999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_35K_49999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $35K - $49999: <strong>", 
+                          round(income_35K_49999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$50K - $74999",
     fillColor = ~income_dist_16_pal(income_50K_74999),
-    label = ~income_50K_74999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_50K_74999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $50K - $74999: <strong>", 
+                          round(income_50K_74999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$75K - $99999",
     fillColor = ~income_dist_16_pal(income_75K_99999),
-    label = ~income_75K_99999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_75K_99999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $75K - $99999: <strong>", 
+                          round(income_75K_99999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$100K - $149999",
     fillColor = ~income_dist_16_pal(income_100K_149999),
-    label = ~income_100K_149999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_100K_149999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $100K - $149999: <strong>", 
+                          round(income_100K_149999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$150K - $199999",
     fillColor = ~income_dist_16_pal(income_150K_199999),
-    label = ~income_150K_199999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_150K_199999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $150K - $199999: <strong>", 
+                          round(income_150K_199999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "> $200K",
     fillColor = ~income_dist_16_pal(income_200K_more),
-    label = ~income_200K_more) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2016$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2016)$income_200K_more, 1), "%<br/>",
+                          "<strong> Percent earning > $200K: <strong>", 
+                          round(income_200K_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -520,7 +814,7 @@ income_dist_2016_leaf <- leaflet(income_dist_2016) %>%
   addPolylines(
     data = county_lines,
     color = "#d48537",
-    weight = 1,
+    weight = 2,
     opacity = 1,
     fillOpacity= 0,
     group = "Basemap",
@@ -552,70 +846,150 @@ income_dist_2015_leaf <- leaflet(income_dist_2015) %>%
     fillOpacity = .7,
     group = "< $10K",
     fillColor = ~income_dist_15_pal(income_less_than_10k),
-    label = ~income_less_than_10k) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_less_than_10k_moe, 1), "%<br/>",
+                          "<strong> Percent earning < $10K: <strong>", 
+                          round(income_less_than_10k, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$10K - $14999",
     fillColor = ~income_dist_15_pal(income_10k_14999),
-    label = ~income_10k_14999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_10k_14999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $10K - $14999: <strong>", 
+                          round(income_10k_14999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$15K - $24999",
     fillColor = ~income_dist_15_pal(income_15k_24999),
-    label = ~income_15k_24999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_15k_24999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $15K - $24999: <strong>", 
+                          round(income_15k_24999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$25K - $34999",
     fillColor = ~income_dist_15_pal(income_25k_34999),
-    label = ~income_25k_34999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_25k_34999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $25K - $34999: <strong>", 
+                          round(income_25k_34999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$35K - $49999",
     fillColor = ~income_dist_15_pal(income_35K_49999),
-    label = ~income_35K_49999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_35K_49999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $35K - $49999: <strong>", 
+                          round(income_35K_49999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$50K - $74999",
     fillColor = ~income_dist_15_pal(income_50K_74999),
-    label = ~income_50K_74999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_50K_74999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $50K - $74999: <strong>", 
+                          round(income_50K_74999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$75K - $99999",
     fillColor = ~income_dist_15_pal(income_75K_99999),
-    label = ~income_75K_99999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_75K_99999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $75K - $99999: <strong>", 
+                          round(income_75K_99999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$100K - $149999",
-    fillColor = ~income_dist_16_pal(income_100K_149999),
-    label = ~income_100K_149999) %>%
+    fillColor = ~income_dist_15_pal(income_100K_149999),
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_100K_149999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $100K - $149999: <strong>", 
+                          round(income_100K_149999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "$150K - $199999",
     fillColor = ~income_dist_15_pal(income_150K_199999),
-    label = ~income_150K_199999) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_150K_199999_moe, 1), "%<br/>",
+                          "<strong> Percent earning $150K - $199999: <strong>", 
+                          round(income_150K_199999, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "> $200K",
     fillColor = ~income_dist_15_pal(income_200K_more),
-    label = ~income_200K_more) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(income_dist_2015$NAME, 20, 60), "<br/>",
+                          substr(income_dist_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(income_dist_moe, 
+                                       year == 2015)$income_200K_more, 1), "%<br/>",
+                          "<strong> Percent earning > $200K: <strong>", 
+                          round(income_200K_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -627,7 +1001,7 @@ income_dist_2015_leaf <- leaflet(income_dist_2015) %>%
   addPolylines(
     data = county_lines,
     color = "#d48537",
-    weight = 1,
+    weight = 2,
     opacity = 1,
     fillOpacity= 0,
     group = "Basemap",
@@ -655,6 +1029,7 @@ edu_attain_2018 <- filter(edu_attain, year == 2018)
 edu_attain_2017 <- filter(edu_attain, year == 2017)
 edu_attain_2016 <- filter(edu_attain, year == 2016)
 edu_attain_2015 <- filter(edu_attain, year == 2015)
+edu_attain_moe <- dplyr::select(acs_tracts, NAME, year, contains("education")) %>% select(!contains("total"))
 ```
 
 educational attainment 2018
@@ -668,30 +1043,62 @@ edu_attain_2018_leaf <- leaflet(edu_attain_2018) %>%
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Less than High School",
+    group = "2018",
     fillColor = ~edu_attain_2018_pal(education_less_hs),
-    label = ~education_less_hs) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2018$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2018)$education_less_hs_moe, 1), "%<br/>",
+                          "<strong> Percent < HS Education: <strong>", 
+                          round(education_less_hs, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "High School Graduate",
     fillColor = ~edu_attain_2018_pal(education_hs_grad),
-    label = ~education_hs_grad) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2018$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2018)$education_hs_grad_moe, 1), "%<br/>",
+                          "<strong> Percent HS Graduate: <strong>", 
+                          round(education_hs_grad, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Associates or Some College",
     fillColor = ~edu_attain_2018_pal(education_assoc_some_college),
-    label = ~education_assoc_some_college) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2018$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2018)$education_assoc_some_college_moe, 1), "%<br/>",
+                          "<strong> Percent AA or Some College: <strong>", 
+                          round(education_assoc_some_college, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Bachelors or Higher",
     fillColor = ~edu_attain_2018_pal(education_bachelors_or_higher),
-    label = ~education_bachelors_or_higher) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2018$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2018)$education_bachelors_or_higher_moe, 1), "%<br/>",
+                          "<strong> Percent Bachelors or Higher: <strong>", 
+                          round(education_bachelors_or_higher, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -731,30 +1138,62 @@ edu_attain_2017_leaf <- leaflet(edu_attain_2017) %>%
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Less than High School",
+    group = "2018",
     fillColor = ~edu_attain_2017_pal(education_less_hs),
-    label = ~education_less_hs) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2017$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2017)$education_less_hs_moe, 1), "%<br/>",
+                          "<strong> Percent < HS Education: <strong>", 
+                          round(education_less_hs, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "High School Graduate",
     fillColor = ~edu_attain_2017_pal(education_hs_grad),
-    label = ~education_hs_grad) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2017$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2017)$education_hs_grad_moe, 1), "%<br/>",
+                          "<strong> Percent HS Graduate: <strong>", 
+                          round(education_hs_grad, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Associates or Some College",
     fillColor = ~edu_attain_2017_pal(education_assoc_some_college),
-    label = ~education_assoc_some_college) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2017$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2017)$education_assoc_some_college_moe, 1), "%<br/>",
+                          "<strong> Percent AA or Some College: <strong>", 
+                          round(education_assoc_some_college, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Bachelors or Higher",
     fillColor = ~edu_attain_2017_pal(education_bachelors_or_higher),
-    label = ~education_bachelors_or_higher) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2017$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2017)$education_bachelors_or_higher_moe, 1), "%<br/>",
+                          "<strong> Percent Bachelors or Higher: <strong>", 
+                          round(education_bachelors_or_higher, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -794,30 +1233,62 @@ edu_attain_2016_leaf <- leaflet(edu_attain_2016) %>%
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Less than High School",
+    group = "2018",
     fillColor = ~edu_attain_2016_pal(education_less_hs),
-    label = ~education_less_hs) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2016$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2016)$education_less_hs_moe, 1), "%<br/>",
+                          "<strong> Percent < HS Education: <strong>", 
+                          round(education_less_hs, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "High School Graduate",
     fillColor = ~edu_attain_2016_pal(education_hs_grad),
-    label = ~education_hs_grad) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2016$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2016)$education_hs_grad_moe, 1), "%<br/>",
+                          "<strong> Percent HS Graduate: <strong>", 
+                          round(education_hs_grad, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Associates or Some College",
     fillColor = ~edu_attain_2016_pal(education_assoc_some_college),
-    label = ~education_assoc_some_college) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2016$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2016)$education_assoc_some_college_moe, 1), "%<br/>",
+                          "<strong> Percent AA or Some College: <strong>", 
+                          round(education_assoc_some_college, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Bachelors or Higher",
     fillColor = ~edu_attain_2016_pal(education_bachelors_or_higher),
-    label = ~education_bachelors_or_higher) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2016$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2016)$education_bachelors_or_higher_moe, 1), "%<br/>",
+                          "<strong> Percent Bachelors or Higher: <strong>", 
+                          round(education_bachelors_or_higher, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -857,30 +1328,62 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Less than High School",
+    group = "2018",
     fillColor = ~edu_attain_2015_pal(education_less_hs),
-    label = ~education_less_hs) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2015)$education_less_hs_moe, 1), "%<br/>",
+                          "<strong> Percent < HS Education: <strong>", 
+                          round(education_less_hs, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "High School Graduate",
     fillColor = ~edu_attain_2015_pal(education_hs_grad),
-    label = ~education_hs_grad) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2015)$education_hs_grad_moe, 1), "%<br/>",
+                          "<strong> Percent HS Graduate: <strong>", 
+                          round(education_hs_grad, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Associates or Some College",
     fillColor = ~edu_attain_2015_pal(education_assoc_some_college),
-    label = ~education_assoc_some_college) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2015)$education_assoc_some_college_moe, 1), "%<br/>",
+                          "<strong> Percent AA or Some College: <strong>", 
+                          round(education_assoc_some_college, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Bachelors or Higher",
     fillColor = ~edu_attain_2015_pal(education_bachelors_or_higher),
-    label = ~education_bachelors_or_higher) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
+                          substr(edu_attain_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(edu_attain_moe, 
+                                       year == 2015)$education_bachelors_or_higher_moe, 1), "%<br/>",
+                          "<strong> Percent Bachelors or Higher: <strong>", 
+                          round(education_bachelors_or_higher, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -914,518 +1417,166 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
 race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
 race_div <- select(race_div, !contains("moe"))
 race_div_2018 <- filter(race_div, year == 2018)
+race_div_2017 <- filter(race_div, year == 2017)
+race_div_2016 <- filter(race_div, year == 2016)
+race_div_2015 <- filter(race_div, year == 2015)
+race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
+  select(!contains("total"))
 ```
 
-breakdown of % white over time
 ```{r}
-perc_white_max <- max(race_div$race_white)
-perc_white_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_white_max))
-perc_white_leaf <- leaflet() %>%
+race_div_white_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_white))
+race_div_black_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_black))
+race_div_na_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_american_indian))
+race_div_asain_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_asian))
+race_div_nh_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_native_hawaiian))
+race_div_hisp_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_hispanic))
+race_div_oth_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_other))
+race_div_multi_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(race_div$race_two_more))
+
+race_div_2018_leaf <- leaflet(race_div_2018) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
-    data = filter(race_div, year == 2018),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_white_pal(race_white),
+    group = "White",
+    fillColor = ~race_div_white_pal(race_white),
+    label = ~lapply(paste(sep = "", 
+                          substr(race_div_2018$NAME, 20, 60), "<br/>",
+                          substr(race_div_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_white_moe, 1), "%<br/>",
+                          "<strong> Percent White: <strong>", 
+                          round(race_white, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_white_pal,
+    values = ~ race_white,
+    group = "White",
+    title = "% of Population identifying as<br>White by Census Tract (2018)",
+    na.label = "NA")  %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Black",
+    fillColor = ~race_div_black_pal(race_black),
+    label = ~lapply(paste(sep = "", 
+                          substr(race_div_2018$NAME, 20, 60), "<br/>",
+                          substr(race_div_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_black_moe, 1), "%<br/>",
+                          "<strong> Percent Black: <strong>", 
+                          round(race_black, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_black_pal,
+    values = ~ race_black,
+    group = "Black",
+    title = "% of Population identifying as<br>Black by Census Tract (2018)",
+    na.label = "NA") %>%
+  
+  
+  
+  
+  
+  addLayersControl(
+    baseGroups = c("White", "Black"),
+    options = layersControlOptions(collapsed = T)) %>%
+  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Two or More")) %>%
+  htmlwidgets::onRender("
+    function(el, x) {
+      var updateLegend = function () {
+          var selectedGroup = document.querySelectorAll('input:checked')[0].nextSibling.innerText.substr(1);
+
+          document.querySelectorAll('.legend').forEach(a => a.hidden=true);
+          document.querySelectorAll('.legend').forEach(l => {
+            if (l.children[0].children[0].innerText == selectedGroup) l.hidden=false;
+          });
+      };
+      updateLegend();
+      this.on('baselayerchange', e => updateLegend());
+    }")
+race_div_2018_leaf
+```
+
+
+racial diversity 2018
+```{r}
+race_div_max_perc_2018 <- max(apply(X = select(data_frame(race_div_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+race_div_2018_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+                                   domain = c(0, race_div_max_perc_2018))
+race_div_2018_leaf <- leaflet(race_div_2018) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "White",
+    fillColor = ~race_div_2018_pal(race_white),
     label = ~race_white) %>%
   addPolygons(
-    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_white_pal(race_white),
-    label = ~race_white) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_white_pal(race_white),
-    label = ~race_white) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_white_pal(race_white),
-    label = ~race_white) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "#ffce9e",
-    weight = 2,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = "South Wasco County Region") %>%
-  addPolylines(
-    data = county_lines,
-    color = "#d48537",
-    weight = 1,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
-  addLegend(
-    data = race_div,
-    "bottomright",
-    pal = perc_white_pal,
-    values = ~ c(0, perc_white_max),
-    title = "% of Population identifying as<br>white by Census Tract",
-    na.label = "NA") %>%
-  addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-```
-
-breakdown of % black over time
-```{r}
-perc_black_max <- max(race_div$race_black)
-perc_black_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_black_max))
-perc_black_leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    data = filter(race_div, year == 2018),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_black_pal(race_black),
+    group = "Black",
+    fillColor = ~race_div_2018_pal(race_black),
     label = ~race_black) %>%
   addPolygons(
-    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_black_pal(race_black),
-    label = ~race_black) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_black_pal(race_black),
-    label = ~race_black) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_black_pal(race_black),
-    label = ~race_black) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "#ffce9e",
-    weight = 2,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = "South Wasco County Region") %>%
-  addPolylines(
-    data = county_lines,
-    color = "#d48537",
-    weight = 1,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
-  addLegend(
-    data = race_div,
-    "bottomright",
-    pal = perc_black_pal,
-    values = ~ c(0, perc_black_max),
-    title = "% of Population identifying as<br>Black by Census Tract",
-    na.label = "NA") %>%
-  addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-```
-
-breakdown of % Native American over time
-```{r}
-perc_na_max <- max(race_div$race_american_indian)
-perc_na_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_na_max))
-perc_na_leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    data = filter(race_div, year == 2018),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_na_pal(race_american_indian),
+    group = "Native American",
+    fillColor = ~race_div_2018_pal(race_american_indian),
     label = ~race_american_indian) %>%
   addPolygons(
-    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_na_pal(race_american_indian),
-    label = ~race_american_indian) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_na_pal(race_american_indian),
-    label = ~race_american_indian) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_na_pal(race_american_indian),
-    label = ~race_american_indian) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "#ffce9e",
-    weight = 2,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = "South Wasco County Region") %>%
-  addPolylines(
-    data = county_lines,
-    color = "#d48537",
-    weight = 1,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
-  addLegend(
-    data = race_div,
-    "bottomright",
-    pal = perc_na_pal,
-    values = ~ c(0, perc_na_max),
-    title = "% of Population identifying as<br>Native American by Census Tract",
-    na.label = "NA") %>%
-  addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-perc_na_leaf
-```
-
-breakdown of % Asian over time
-```{r}
-perc_asian_max <- max(race_div$race_asian)
-perc_asain_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_asian_max))
-perc_asain_leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    data = filter(race_div, year == 2018),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_asain_pal(race_asian),
+    group = "Asian",
+    fillColor = ~race_div_2018_pal(race_asian),
     label = ~race_asian) %>%
   addPolygons(
-    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_asain_pal(race_asian),
-    label = ~race_asian) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_asain_pal(race_asian),
-    label = ~race_asian) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_asain_pal(race_asian),
-    label = ~race_asian) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "#ffce9e",
-    weight = 2,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = "South Wasco County Region") %>%
-  addPolylines(
-    data = county_lines,
-    color = "#d48537",
-    weight = 1,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
-  addLegend(
-    data = race_div,
-    "bottomright",
-    pal = perc_asain_pal,
-    values = ~ c(0, perc_asian_max),
-    title = "% of Population identifying as<br>Asian by Census Tract",
-    na.label = "NA") %>%
-  addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-```
-
-breakdown of % Native Hawaiian over time
-```{r}
-perc_nh_max <- max(race_div$race_native_hawaiian)
-perc_nh_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_nh_max))
-perc_nh_leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    data = filter(race_div, year == 2018),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_nh_pal(race_native_hawaiian),
+    group = "Native Hawaiian",
+    fillColor = ~race_div_2018_pal(race_native_hawaiian),
     label = ~race_native_hawaiian) %>%
   addPolygons(
-    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_nh_pal(race_native_hawaiian),
-    label = ~race_native_hawaiian) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_nh_pal(race_native_hawaiian),
-    label = ~race_native_hawaiian) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_nh_pal(race_native_hawaiian),
-    label = ~race_native_hawaiian) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "#ffce9e",
-    weight = 2,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = "South Wasco County Region") %>%
-  addPolylines(
-    data = county_lines,
-    color = "#d48537",
-    weight = 1,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
-  addLegend(
-    data = race_div,
-    "bottomright",
-    pal = perc_nh_pal,
-    values = ~ c(0, perc_nh_max),
-    title = "% of Population identifying as<br>Native Hawaiian by Census Tract",
-    na.label = "NA") %>%
-  addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-```
-
-breakdown of % Hispanic over time (something really weird going on in 2015 w/ recording of hispanic 
-and white groups)
-```{r}
-perc_hisp_max <- max(race_div$race_hispanic)
-perc_hisp_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_hisp_max))
-perc_hisp_leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    data = filter(race_div, year == 2018),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_hisp_pal(race_hispanic),
+    group = "Hispanic",
+    fillColor = ~race_div_2018_pal(race_hispanic),
     label = ~race_hispanic) %>%
   addPolygons(
-    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_hisp_pal(race_hispanic),
-    label = ~race_hispanic) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_hisp_pal(race_hispanic),
-    label = ~race_hispanic) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_hisp_pal(race_hispanic),
-    label = ~race_hispanic) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "#ffce9e",
-    weight = 2,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = "South Wasco County Region") %>%
-  addPolylines(
-    data = county_lines,
-    color = "#d48537",
-    weight = 1,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
-  addLegend(
-    data = race_div,
-    "bottomright",
-    pal = perc_hisp_pal,
-    values = ~ c(0, perc_hisp_max),
-    title = "% of Population identifying as<br>Hispanic by Census Tract",
-    na.label = "NA") %>%
-  addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-```
-
-breakdown of % other over time
-```{r}
-perc_oth_max <- max(race_div$race_other)
-perc_oth_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_oth_max))
-perc_oth_leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    data = filter(race_div, year == 2018),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_oth_pal(race_other),
+    group = "Other",
+    fillColor = ~race_div_2018_pal(race_other),
     label = ~race_other) %>%
   addPolygons(
-    data = filter(race_div, year == 2017),
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_oth_pal(race_other),
-    label = ~race_other) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_oth_pal(race_other),
-    label = ~race_other) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_oth_pal(race_other),
-    label = ~race_other) %>%
-  addPolylines(
-    data = south_wasco_points,
-    color = "#ffce9e",
-    weight = 2,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = "South Wasco County Region") %>%
-  addPolylines(
-    data = county_lines,
-    color = "#d48537",
-    weight = 1,
-    opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
-  addLegend(
-    data = race_div,
-    "bottomright",
-    pal = perc_oth_pal,
-    values = ~ c(0, perc_oth_max),
-    title = "% of Population identifying as<br>Other by Census Tract",
-    na.label = "NA") %>%
-  addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-perc_oth_leaf
-```
-
-breakdown of % 2 or more over time
-```{r}
-perc_two_more_max <- max(race_div$race_two_more)
-perc_two_more_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, perc_two_more_max))
-perc_two_more_leaf <- leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    data = filter(race_div, year == 2018),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2018",
-    fillColor = ~perc_two_more_pal(race_two_more),
-    label = ~race_two_more) %>%
-  addPolygons(
-    data = filter(race_div, year == 2017),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2017",
-    fillColor = ~perc_two_more_pal(race_two_more),
-    label = ~race_two_more) %>%
-  addPolygons(
-    data = filter(race_div, year == 2016),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2016",
-    fillColor = ~perc_two_more_pal(race_two_more),
-    label = ~race_two_more) %>%
-  addPolygons(
-    data = filter(race_div, year == 2015),
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "2015",
-    fillColor = ~perc_two_more_pal(race_two_more),
+    group = "Two or More",
+    fillColor = ~race_div_2018_pal(race_two_more),
     label = ~race_two_more) %>%
   addPolylines(
     data = south_wasco_points,
@@ -1444,17 +1595,18 @@ perc_two_more_leaf <- leaflet() %>%
     group = "Basemap",
     label = county_lines$NAME) %>%
   addLegend(
-    data = race_div,
     "bottomright",
-    pal = perc_two_more_pal,
-    values = ~ c(0, perc_two_more_max),
-    title = "% of Population identifying with two or more<br>racial groups by Census Tract",
+    pal = race_div_2018_pal,
+    values = ~ c(0, race_div_max_perc_2018),
+    title = "% of Population identifying with selected<br>racial group by Census Tract (2018)",
     na.label = "NA") %>%
   addLayersControl(
-    baseGroups = c("2018", "2017", "2016", "2015"),
-    options = layersControlOptions(collapsed = F))
-perc_two_more_leaf
+    baseGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
+                   "Hispanic", "Other", "Two or More"),
+    options = layersControlOptions(collapsed = T))
+race_div_2018_leaf
 ```
+
 
 ###Family Stability
 
@@ -1481,28 +1633,46 @@ fam_stab_2018_leaf <- leaflet(fam_stab_2018) %>%
     fillOpacity = .7,
     group = "% of Parents who are Married",
     fillColor = ~fam_stab_2018_pal(family_married_parent_perc),
-    label = ~family_married_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2018$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2018)$family_married_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_married_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "% of Parents who are Unmarried",
     fillColor = ~fam_stab_2018_pal(family_single_parent_perc),
-    label = ~family_single_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2018$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2018)$family_single_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Unmarried: <strong>", 
+                          round(family_single_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "% of Orphaned Children",
+    group = "% of Children in Nonfamily Household",
     fillColor = ~fam_stab_2018_pal(family_children_nonfamily_perc),
-    label = ~family_children_nonfamily_perc) %>%
-  addPolygons(
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "% of Married Couples with no Children",
-    fillColor = ~fam_stab_2018_pal(family_nonfamily_household_perc),
-    label = ~family_nonfamily_household_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2018$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2018$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2018)$family_children_nonfamily_perc_moe,
+                                1), "%<br/>",
+                          "<strong> Percent Children in Nonfamily Household: <strong>", 
+                          round(family_children_nonfamily_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -1517,8 +1687,7 @@ fam_stab_2018_leaf <- leaflet(fam_stab_2018) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = fam_stab_2018_pal,
@@ -1527,8 +1696,8 @@ fam_stab_2018_leaf <- leaflet(fam_stab_2018) %>%
     na.label = "NA") %>%
   addLayersControl(
     baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
-                   "% of Orphaned Children", "% of Married Couples with no Children"),
-    options = layersControlOptions(collapsed = T))
+                   "% of Children in Nonfamily Household"),
+    options = layersControlOptions(collapsed = F))
 ```
 
 family stability 2017
@@ -1544,28 +1713,46 @@ fam_stab_2017_leaf <- leaflet(fam_stab_2017) %>%
     fillOpacity = .7,
     group = "% of Parents who are Married",
     fillColor = ~fam_stab_2017_pal(family_married_parent_perc),
-    label = ~family_married_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2017$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2017)$family_married_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_married_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "% of Parents who are Unmarried",
     fillColor = ~fam_stab_2017_pal(family_single_parent_perc),
-    label = ~family_single_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2017$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2017)$family_single_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_single_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "% of Orphaned Children",
+    group = "% of Children in Nonfamily Household",
     fillColor = ~fam_stab_2017_pal(family_children_nonfamily_perc),
-    label = ~family_children_nonfamily_perc) %>%
-  addPolygons(
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "% of Married Couples with no Children",
-    fillColor = ~fam_stab_2017_pal(family_nonfamily_household_perc),
-    label = ~family_nonfamily_household_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2017$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2017$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2017)$family_children_nonfamily_perc_moe,
+                                1), "%<br/>",
+                          "<strong> Percent Children in Nonfamily Household: <strong>", 
+                          round(family_children_nonfamily_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -1580,8 +1767,7 @@ fam_stab_2017_leaf <- leaflet(fam_stab_2017) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = fam_stab_2017_pal,
@@ -1590,8 +1776,8 @@ fam_stab_2017_leaf <- leaflet(fam_stab_2017) %>%
     na.label = "NA") %>%
   addLayersControl(
     baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
-                   "% of Orphaned Children", "% of Married Couples with no Children"),
-    options = layersControlOptions(collapsed = T))
+                   "% of Children in Nonfamily Household"),
+    options = layersControlOptions(collapsed = F))
 ```
 
 family stability 2016
@@ -1607,28 +1793,46 @@ fam_stab_2016_leaf <- leaflet(fam_stab_2016) %>%
     fillOpacity = .7,
     group = "% of Parents who are Married",
     fillColor = ~fam_stab_2016_pal(family_married_parent_perc),
-    label = ~family_married_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2016$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2016)$family_married_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_married_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "% of Parents who are Unmarried",
     fillColor = ~fam_stab_2016_pal(family_single_parent_perc),
-    label = ~family_single_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2016$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2016)$family_single_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_single_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "% of Orphaned Children",
+    group = "% of Children in Nonfamily Household",
     fillColor = ~fam_stab_2016_pal(family_children_nonfamily_perc),
-    label = ~family_children_nonfamily_perc) %>%
-  addPolygons(
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "% of Married Couples with no Children",
-    fillColor = ~fam_stab_2016_pal(family_nonfamily_household_perc),
-    label = ~family_nonfamily_household_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2016$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2016$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2016)$family_children_nonfamily_perc_moe,
+                                1), "%<br/>",
+                          "<strong> Percent Children in Nonfamily Household: <strong>", 
+                          round(family_children_nonfamily_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -1643,8 +1847,7 @@ fam_stab_2016_leaf <- leaflet(fam_stab_2016) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = fam_stab_2016_pal,
@@ -1653,14 +1856,9 @@ fam_stab_2016_leaf <- leaflet(fam_stab_2016) %>%
     na.label = "NA") %>%
   addLayersControl(
     baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
-                   "% of Orphaned Children", "% of Married Couples with no Children"),
-    options = layersControlOptions(collapsed = T))
+                   "% of Children in Nonfamily Household"),
+    options = layersControlOptions(collapsed = F))
 ```
-
-```{r}
-filter(fam_stab_moe, year == 2015)$family_married_parent_perc_moe
-```
-
 
 family stability 2015
 ```{r}
@@ -1703,7 +1901,7 @@ fam_stab_2015_leaf <- leaflet(fam_stab_2015) %>%
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "% of Orphaned Children",
+    group = "% of Children in Nonfamily Household",
     fillColor = ~fam_stab_2015_pal(family_children_nonfamily_perc),
     label = ~lapply(paste(sep = "", 
                           substr(fam_stab_2015$NAME, 20, 60), "<br/>",
@@ -1712,24 +1910,8 @@ fam_stab_2015_leaf <- leaflet(fam_stab_2015) %>%
                           round(filter(fam_stab_moe, 
                                        year == 2015)$family_children_nonfamily_perc_moe,
                                 1), "%<br/>",
-                          "<strong> Percent Married: <strong>", 
+                          "<strong> Percent Children in Nonfamily Household: <strong>", 
                           round(family_children_nonfamily_perc, 1), "<strong>%"),
-                    htmltools::HTML)) %>%
-  addPolygons(
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "% of Married Couples with no Children",
-    fillColor = ~fam_stab_2015_pal(family_nonfamily_household_perc),
-    label = ~lapply(paste(sep = "", 
-                          substr(fam_stab_2015$NAME, 20, 60), "<br/>",
-                          substr(fam_stab_2015$NAME, 1, 17), 
-                          "<br/>Margins of error: ",
-                          round(filter(fam_stab_moe, 
-                                       year == 2015)$family_nonfamily_household_perc_moe, 
-                                1), "%<br/>",
-                          "<strong> Percent Married: <strong>", 
-                          round(family_nonfamily_household_perc, 1), "<strong>%"),
                     htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
@@ -1754,13 +1936,15 @@ fam_stab_2015_leaf <- leaflet(fam_stab_2015) %>%
     na.label = "NA") %>%
   addLayersControl(
     baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
-                   "% of Orphaned Children", "% of Married Couples with no Children"),
-    options = layersControlOptions(collapsed = T))
-fam_stab_2015_leaf
+                   "% of Children in Nonfamily Household"),
+    options = layersControlOptions(collapsed = F))
 ```
 
-
-
+Viewing all fam
 ```{r}
+fam_stab_2018_leaf
+fam_stab_2017_leaf
+fam_stab_2016_leaf
+fam_stab_2015_leaf
 ```
 

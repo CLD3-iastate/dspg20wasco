@@ -25,7 +25,7 @@ library(htmltools)
 
 ```{r}
 #read in combined dataset
-acs_data <- fread(here("/data/acs/combined_acs.csv")) 
+acs_data <- fread(("../data/acs/combined_acs.csv"))
 acs_data$GEOID <- as.character(acs_data$GEOID)
 acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
                          NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
@@ -34,7 +34,8 @@ acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, 
                          NAME == "Marion County, Oregon" | NAME == "Washington County, Oregon" |
                          NAME == "Deschutes County, Oregon" | NAME == "Lane County, Oregon" | 
                          NAME == "Umatilla County, Oregon" |
-                         NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
+                         NAME == "Skamania County, Washington" | 
+                         NAME == "Klickitat County, Washington" | 
                          NAME == "Oregon")  
 acs_counties_neighbors <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
                          NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
@@ -261,7 +262,6 @@ perc_emp_leaf <- leaflet() %>%
 
 categories now!
 (Income Distribution, Educational Attainment, Racial and Ethnic Diversity, and Family Stability.)
-
 ###Income Distribution
 ```{r}
 income_dist <- dplyr::select(acs_tracts, NAME, year, contains("income"), geometry)%>% dplyr::select(!contains("moe"), -median_household_income)
@@ -1431,16 +1431,13 @@ race_div_2016 <- filter(race_div, year == 2016)
 race_div_2015 <- filter(race_div, year == 2015)
 race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
   select(!contains("total"))
-```
-
-```{r}
 race_div_white_pal <- colorNumeric(viridis_pal(option = "D")(3), 
                                    domain = c(race_div$race_white))
 race_div_black_pal <- colorNumeric(viridis_pal(option = "D")(3), 
                                    domain = c(race_div$race_black))
 race_div_na_pal <- colorNumeric(viridis_pal(option = "D")(3), 
                                    domain = c(race_div$race_american_indian))
-race_div_asain_pal <- colorNumeric(viridis_pal(option = "D")(3), 
+race_div_asian_pal <- colorNumeric(viridis_pal(option = "D")(3), 
                                    domain = c(race_div$race_asian))
 race_div_nh_pal <- colorNumeric(viridis_pal(option = "D")(3), 
                                    domain = c(race_div$race_native_hawaiian))
@@ -1450,9 +1447,14 @@ race_div_oth_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                    domain = c(race_div$race_other))
 race_div_multi_pal <- colorNumeric(viridis_pal(option = "D")(3), 
                                    domain = c(race_div$race_two_more))
+```
 
+
+Racial Diversity 2018
+```{r}
 race_div_2018_leaf <- leaflet(race_div_2018) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
+  #white
   addPolygons(
     weight = 1,
     opacity = 0,
@@ -1460,8 +1462,8 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     group = "White",
     fillColor = ~race_div_white_pal(race_white),
     label = ~lapply(paste(sep = "", 
-                          substr(race_div_2018$NAME, 20, 60), "<br/>",
-                          substr(race_div_2018$NAME, 1, 17), 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
                           "<br/>Margins of error: ",
                           round(filter(race_div_moe, 
                                        year == 2018)$race_white_moe, 1), "%<br/>",
@@ -1475,6 +1477,7 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     group = "White",
     title = "% of Population identifying as<br>White by Census Tract (2018)",
     na.label = "NA")  %>%
+  #black
   addPolygons(
     weight = 1,
     opacity = 0,
@@ -1482,8 +1485,8 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     group = "Black",
     fillColor = ~race_div_black_pal(race_black),
     label = ~lapply(paste(sep = "", 
-                          substr(race_div_2018$NAME, 20, 60), "<br/>",
-                          substr(race_div_2018$NAME, 1, 17), 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
                           "<br/>Margins of error: ",
                           round(filter(race_div_moe, 
                                        year == 2018)$race_black_moe, 1), "%<br/>",
@@ -1497,96 +1500,144 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     group = "Black",
     title = "% of Population identifying as<br>Black by Census Tract (2018)",
     na.label = "NA") %>%
-  
-  
-  
-  
-  
-  addLayersControl(
-    baseGroups = c("White", "Black"),
-    options = layersControlOptions(collapsed = T)) %>%
-  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian",
-              "Hispanic", "Other", "Two or More")) %>%
-  htmlwidgets::onRender("
-    function(el, x) {
-      var updateLegend = function () {
-          var selectedGroup = document.querySelectorAll('input:checked')[0].nextSibling.innerText.substr(1);
-
-          document.querySelectorAll('.legend').forEach(a => a.hidden=true);
-          document.querySelectorAll('.legend').forEach(l => {
-            if (l.children[0].children[0].innerText == selectedGroup) l.hidden=false;
-          });
-      };
-      updateLegend();
-      this.on('baselayerchange', e => updateLegend());
-    }")
-race_div_2018_leaf
-```
-
-
-racial diversity 2018
-```{r}
-race_div_max_perc_2018 <- max(apply(X = select(data_frame(race_div_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
-race_div_2018_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, race_div_max_perc_2018))
-race_div_2018_leaf <- leaflet(race_div_2018) %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addPolygons(
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "White",
-    fillColor = ~race_div_2018_pal(race_white),
-    label = ~race_white) %>%
-  addPolygons(
-    weight = 1,
-    opacity = 0,
-    fillOpacity = .7,
-    group = "Black",
-    fillColor = ~race_div_2018_pal(race_black),
-    label = ~race_black) %>%
+  #NA
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Native American",
-    fillColor = ~race_div_2018_pal(race_american_indian),
-    label = ~race_american_indian) %>%
+    fillColor = ~race_div_na_pal(race_american_indian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_american_indian_moe, 1), "%<br/>",
+                          "<strong> Percent Native American: <strong>", 
+                          round(race_american_indian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_na_pal,
+    values = ~ race_american_indian,
+    group = "Native American",
+    title = "% of Population identifying as<br>Native American by Census Tract (2018)",
+    na.label = "NA") %>%
+  #asian
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Asian",
-    fillColor = ~race_div_2018_pal(race_asian),
-    label = ~race_asian) %>%
+    fillColor = ~race_div_asian_pal(race_asian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_asian_moe, 1), "%<br/>",
+                          "<strong> Percent Asian: <strong>", 
+                          round(race_asian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_asian_pal,
+    values = ~ race_asian,
+    group = "Asian",
+    title = "% of Population identifying as<br>Asian by Census Tract (2018)",
+    na.label = "NA") %>%
+  #nh
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Native Hawaiian",
-    fillColor = ~race_div_2018_pal(race_native_hawaiian),
-    label = ~race_native_hawaiian) %>%
+    fillColor = ~race_div_nh_pal(race_native_hawaiian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_native_hawaiian_moe, 1), "%<br/>",
+                          "<strong> Percent Native Hawaiian: <strong>", 
+                          round(race_native_hawaiian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_nh_pal,
+    values = ~ race_native_hawaiian,
+    group = "Native Hawaiian",
+    title = "% of Population identifying as<br>Native Hawaiian by Census Tract (2018)",
+    na.label = "NA") %>%
+  #hispanic
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Hispanic",
-    fillColor = ~race_div_2018_pal(race_hispanic),
-    label = ~race_hispanic) %>%
+    fillColor = ~race_div_hisp_pal(race_hispanic),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_hispanic_moe, 1), "%<br/>",
+                          "<strong> Percent Hispanic: <strong>", 
+                          round(race_hispanic, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_hisp_pal,
+    values = ~ race_hispanic,
+    group = "Hispanic",
+    title = "% of Population identifying as<br>Hispanic by Census Tract (2018)",
+    na.label = "NA") %>%
+  #other
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "Other",
-    fillColor = ~race_div_2018_pal(race_other),
-    label = ~race_other) %>%
+    fillColor = ~race_div_oth_pal(race_other),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_other_moe, 1), "%<br/>",
+                          "<strong> Percent Other: <strong>", 
+                          round(race_other, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_oth_pal,
+    values = ~ race_other,
+    group = "Other",
+    title = "% of Population identifying as<br>Other by Census Tract (2018)",
+    na.label = "NA") %>%
+  #multi
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "Two or More",
-    fillColor = ~race_div_2018_pal(race_two_more),
-    label = ~race_two_more) %>%
+    group = "Multiple Groups",
+    fillColor = ~race_div_multi_pal(race_two_more),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2018)$race_two_more_moe, 1), "%<br/>",
+                          "<strong> Percent Multiple Groups: <strong>", 
+                          round(race_two_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_multi_pal,
+    values = ~ race_two_more,
+    group = "Multiple Groups",
+    title = "% of Population identifying with<br>multiple racial groups by Census Tract (2018)",
+    na.label = "NA") %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -1601,24 +1652,658 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
+  addLayersControl(
+    overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"),
+    options = layersControlOptions(collapsed = T)) %>%
+  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"))
+```
+
+Racial Diversity 2017
+```{r}
+race_div_2017_leaf <- leaflet(race_div_2017) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  #white
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "White",
+    fillColor = ~race_div_white_pal(race_white),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_white_moe, 1), "%<br/>",
+                          "<strong> Percent White: <strong>", 
+                          round(race_white, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
   addLegend(
     "bottomright",
-    pal = race_div_2018_pal,
-    values = ~ c(0, race_div_max_perc_2018),
-    title = "% of Population identifying with selected<br>racial group by Census Tract (2018)",
+    pal = race_div_white_pal,
+    values = ~ race_white,
+    group = "White",
+    title = "% of Population identifying as<br>White by Census Tract (2017)",
+    na.label = "NA")  %>%
+  #black
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Black",
+    fillColor = ~race_div_black_pal(race_black),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_black_moe, 1), "%<br/>",
+                          "<strong> Percent Black: <strong>", 
+                          round(race_black, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_black_pal,
+    values = ~ race_black,
+    group = "Black",
+    title = "% of Population identifying as<br>Black by Census Tract (2017)",
     na.label = "NA") %>%
+  #NA
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native American",
+    fillColor = ~race_div_na_pal(race_american_indian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_american_indian_moe, 1), "%<br/>",
+                          "<strong> Percent Native American: <strong>", 
+                          round(race_american_indian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_na_pal,
+    values = ~ race_american_indian,
+    group = "Native American",
+    title = "% of Population identifying as<br>Native American by Census Tract (2017)",
+    na.label = "NA") %>%
+  #asian
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Asian",
+    fillColor = ~race_div_asian_pal(race_asian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_asian_moe, 1), "%<br/>",
+                          "<strong> Percent Asian: <strong>", 
+                          round(race_asian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_asian_pal,
+    values = ~ race_asian,
+    group = "Asian",
+    title = "% of Population identifying as<br>Asian by Census Tract (2017)",
+    na.label = "NA") %>%
+  #nh
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native Hawaiian",
+    fillColor = ~race_div_nh_pal(race_native_hawaiian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_native_hawaiian_moe, 1), "%<br/>",
+                          "<strong> Percent Native Hawaiian: <strong>", 
+                          round(race_native_hawaiian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_nh_pal,
+    values = ~ race_native_hawaiian,
+    group = "Native Hawaiian",
+    title = "% of Population identifying as<br>Native Hawaiian by Census Tract (2017)",
+    na.label = "NA") %>%
+  #hispanic
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Hispanic",
+    fillColor = ~race_div_hisp_pal(race_hispanic),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_hispanic_moe, 1), "%<br/>",
+                          "<strong> Percent Hispanic: <strong>", 
+                          round(race_hispanic, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_hisp_pal,
+    values = ~ race_hispanic,
+    group = "Hispanic",
+    title = "% of Population identifying as<br>Hispanic by Census Tract (2017)",
+    na.label = "NA") %>%
+  #other
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Other",
+    fillColor = ~race_div_oth_pal(race_other),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_other_moe, 1), "%<br/>",
+                          "<strong> Percent Other: <strong>", 
+                          round(race_other, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_oth_pal,
+    values = ~ race_other,
+    group = "Other",
+    title = "% of Population identifying as<br>Other by Census Tract (2017)",
+    na.label = "NA") %>%
+  #multi
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Multiple Groups",
+    fillColor = ~race_div_multi_pal(race_two_more),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2017)$race_two_more_moe, 1), "%<br/>",
+                          "<strong> Percent Multiple Groups: <strong>", 
+                          round(race_two_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_multi_pal,
+    values = ~ race_two_more,
+    group = "Multiple Groups",
+    title = "% of Population identifying with<br>multiple racial groups by Census Tract (2017)",
+    na.label = "NA") %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap") %>%
   addLayersControl(
-    baseGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
-                   "Hispanic", "Other", "Two or More"),
-    options = layersControlOptions(collapsed = T))
+    overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"),
+    options = layersControlOptions(collapsed = T)) %>%
+  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"))
+```
+
+Racial Diversity 2016
+```{r}
+race_div_2016_leaf <- leaflet(race_div_2016) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  #white
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "White",
+    fillColor = ~race_div_white_pal(race_white),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_white_moe, 1), "%<br/>",
+                          "<strong> Percent White: <strong>", 
+                          round(race_white, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_white_pal,
+    values = ~ race_white,
+    group = "White",
+    title = "% of Population identifying as<br>White by Census Tract (2016)",
+    na.label = "NA")  %>%
+  #black
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Black",
+    fillColor = ~race_div_black_pal(race_black),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_black_moe, 1), "%<br/>",
+                          "<strong> Percent Black: <strong>", 
+                          round(race_black, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_black_pal,
+    values = ~ race_black,
+    group = "Black",
+    title = "% of Population identifying as<br>Black by Census Tract (2016)",
+    na.label = "NA") %>%
+  #NA
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native American",
+    fillColor = ~race_div_na_pal(race_american_indian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_american_indian_moe, 1), "%<br/>",
+                          "<strong> Percent Native American: <strong>", 
+                          round(race_american_indian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_na_pal,
+    values = ~ race_american_indian,
+    group = "Native American",
+    title = "% of Population identifying as<br>Native American by Census Tract (2016)",
+    na.label = "NA") %>%
+  #asian
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Asian",
+    fillColor = ~race_div_asian_pal(race_asian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_asian_moe, 1), "%<br/>",
+                          "<strong> Percent Asian: <strong>", 
+                          round(race_asian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_asian_pal,
+    values = ~ race_asian,
+    group = "Asian",
+    title = "% of Population identifying as<br>Asian by Census Tract (2016)",
+    na.label = "NA") %>%
+  #nh
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native Hawaiian",
+    fillColor = ~race_div_nh_pal(race_native_hawaiian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_native_hawaiian_moe, 1), "%<br/>",
+                          "<strong> Percent Native Hawaiian: <strong>", 
+                          round(race_native_hawaiian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_nh_pal,
+    values = ~ race_native_hawaiian,
+    group = "Native Hawaiian",
+    title = "% of Population identifying as<br>Native Hawaiian by Census Tract (2016)",
+    na.label = "NA") %>%
+  #hispanic
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Hispanic",
+    fillColor = ~race_div_hisp_pal(race_hispanic),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_hispanic_moe, 1), "%<br/>",
+                          "<strong> Percent Hispanic: <strong>", 
+                          round(race_hispanic, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_hisp_pal,
+    values = ~ race_hispanic,
+    group = "Hispanic",
+    title = "% of Population identifying as<br>Hispanic by Census Tract (2016)",
+    na.label = "NA") %>%
+  #other
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Other",
+    fillColor = ~race_div_oth_pal(race_other),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_other_moe, 1), "%<br/>",
+                          "<strong> Percent Other: <strong>", 
+                          round(race_other, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_oth_pal,
+    values = ~ race_other,
+    group = "Other",
+    title = "% of Population identifying as<br>Other by Census Tract (2016)",
+    na.label = "NA") %>%
+  #multi
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Multiple Groups",
+    fillColor = ~race_div_multi_pal(race_two_more),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2016)$race_two_more_moe, 1), "%<br/>",
+                          "<strong> Percent Multiple Groups: <strong>", 
+                          round(race_two_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_multi_pal,
+    values = ~ race_two_more,
+    group = "Multiple Groups",
+    title = "% of Population identifying with<br>multiple racial groups by Census Tract (2016)",
+    na.label = "NA") %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap") %>%
+  addLayersControl(
+    overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"),
+    options = layersControlOptions(collapsed = T)) %>%
+  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"))
+```
+
+Racial Diversity 2015
+```{r}
+race_div_2015_leaf <- leaflet(race_div_2015) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  #white
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "White",
+    fillColor = ~race_div_white_pal(race_white),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_white_moe, 1), "%<br/>",
+                          "<strong> Percent White: <strong>", 
+                          round(race_white, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_white_pal,
+    values = ~ race_white,
+    group = "White",
+    title = "% of Population identifying as<br>White by Census Tract (2015)",
+    na.label = "NA")  %>%
+  #black
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Black",
+    fillColor = ~race_div_black_pal(race_black),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_black_moe, 1), "%<br/>",
+                          "<strong> Percent Black: <strong>", 
+                          round(race_black, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_black_pal,
+    values = ~ race_black,
+    group = "Black",
+    title = "% of Population identifying as<br>Black by Census Tract (2015)",
+    na.label = "NA") %>%
+  #NA
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native American",
+    fillColor = ~race_div_na_pal(race_american_indian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_american_indian_moe, 1), "%<br/>",
+                          "<strong> Percent Native American: <strong>", 
+                          round(race_american_indian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_na_pal,
+    values = ~ race_american_indian,
+    group = "Native American",
+    title = "% of Population identifying as<br>Native American by Census Tract (2015)",
+    na.label = "NA") %>%
+  #asian
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Asian",
+    fillColor = ~race_div_asian_pal(race_asian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_asian_moe, 1), "%<br/>",
+                          "<strong> Percent Asian: <strong>", 
+                          round(race_asian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_asian_pal,
+    values = ~ race_asian,
+    group = "Asian",
+    title = "% of Population identifying as<br>Asian by Census Tract (2015)",
+    na.label = "NA") %>%
+  #nh
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Native Hawaiian",
+    fillColor = ~race_div_nh_pal(race_native_hawaiian),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_native_hawaiian_moe, 1), "%<br/>",
+                          "<strong> Percent Native Hawaiian: <strong>", 
+                          round(race_native_hawaiian, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_nh_pal,
+    values = ~ race_native_hawaiian,
+    group = "Native Hawaiian",
+    title = "% of Population identifying as<br>Native Hawaiian by Census Tract (2015)",
+    na.label = "NA") %>%
+  #hispanic
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Hispanic",
+    fillColor = ~race_div_hisp_pal(race_hispanic),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_hispanic_moe, 1), "%<br/>",
+                          "<strong> Percent Hispanic: <strong>", 
+                          round(race_hispanic, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_hisp_pal,
+    values = ~ race_hispanic,
+    group = "Hispanic",
+    title = "% of Population identifying as<br>Hispanic by Census Tract (2015)",
+    na.label = "NA") %>%
+  #other
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Other",
+    fillColor = ~race_div_oth_pal(race_other),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_other_moe, 1), "%<br/>",
+                          "<strong> Percent Other: <strong>", 
+                          round(race_other, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_oth_pal,
+    values = ~ race_other,
+    group = "Other",
+    title = "% of Population identifying as<br>Other by Census Tract (2015)",
+    na.label = "NA") %>%
+  #multi
+  addPolygons(
+    weight = 1,
+    opacity = 0,
+    fillOpacity = .7,
+    group = "Multiple Groups",
+    fillColor = ~race_div_multi_pal(race_two_more),
+    label = ~lapply(paste(sep = "", 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(race_div_moe, 
+                                       year == 2015)$race_two_more_moe, 1), "%<br/>",
+                          "<strong> Percent Multiple Groups: <strong>", 
+                          round(race_two_more, 1), "<strong>%"),
+                    htmltools::HTML)) %>% 
+  addLegend(
+    "bottomright",
+    pal = race_div_multi_pal,
+    values = ~ race_two_more,
+    group = "Multiple Groups",
+    title = "% of Population identifying with<br>multiple racial groups by Census Tract (2015)",
+    na.label = "NA") %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "#ffce9e",
+    weight = 2,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap",
+    label = "South Wasco County Region") %>%
+  addPolylines(
+    data = county_lines,
+    color = "#d48537",
+    weight = 1,
+    opacity = 1,
+    fillOpacity= 0,
+    group = "Basemap") %>%
+  addLayersControl(
+    overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"),
+    options = layersControlOptions(collapsed = T)) %>%
+  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian",
+              "Hispanic", "Other", "Multiple Groups"))
+```
+
+viewing all maps
+```{r}
 race_div_2018_leaf
+race_div_2017_leaf
+race_div_2016_leaf
+race_div_2015_leaf
 ```
 
 
 ###Family Stability
-
 ```{r}
 fam_stab <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry)
 fam_stab <- select(fam_stab, !contains("moe")) %>% select(!contains("total"))

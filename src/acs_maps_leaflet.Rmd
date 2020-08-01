@@ -20,6 +20,7 @@ library(here)
 library(viridis)
 library(dplyr)
 library(leaflet)
+library(htmltools)
 ```
 
 ```{r}
@@ -912,6 +913,7 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
 ```{r}
 race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
 race_div <- select(race_div, !contains("moe"))
+race_div_2018 <- filter(race_div, year == 2018)
 ```
 
 breakdown of % white over time
@@ -1463,6 +1465,7 @@ fam_stab_2018 <- filter(fam_stab, year == 2018)
 fam_stab_2017 <- filter(fam_stab, year == 2017)
 fam_stab_2016 <- filter(fam_stab, year == 2016)
 fam_stab_2015 <- filter(fam_stab, year == 2015)
+fam_stab_moe <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry) %>% select(!contains("total"))
 ```
 
 family stability 2018
@@ -1654,6 +1657,11 @@ fam_stab_2016_leaf <- leaflet(fam_stab_2016) %>%
     options = layersControlOptions(collapsed = T))
 ```
 
+```{r}
+filter(fam_stab_moe, year == 2015)$family_married_parent_perc_moe
+```
+
+
 family stability 2015
 ```{r}
 fam_stab_max_perc_2015 <- max(apply(X = select(data_frame(fam_stab_2015), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
@@ -1667,28 +1675,62 @@ fam_stab_2015_leaf <- leaflet(fam_stab_2015) %>%
     fillOpacity = .7,
     group = "% of Parents who are Married",
     fillColor = ~fam_stab_2015_pal(family_married_parent_perc),
-    label = ~family_married_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2015$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2015)$family_married_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_married_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "% of Parents who are Unmarried",
     fillColor = ~fam_stab_2015_pal(family_single_parent_perc),
-    label = ~family_single_parent_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2015$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2015)$family_single_parent_perc_moe, 1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_single_parent_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "% of Orphaned Children",
     fillColor = ~fam_stab_2015_pal(family_children_nonfamily_perc),
-    label = ~family_children_nonfamily_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2015$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2015)$family_children_nonfamily_perc_moe,
+                                1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_children_nonfamily_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
     group = "% of Married Couples with no Children",
     fillColor = ~fam_stab_2015_pal(family_nonfamily_household_perc),
-    label = ~family_nonfamily_household_perc) %>%
+    label = ~lapply(paste(sep = "", 
+                          substr(fam_stab_2015$NAME, 20, 60), "<br/>",
+                          substr(fam_stab_2015$NAME, 1, 17), 
+                          "<br/>Margins of error: ",
+                          round(filter(fam_stab_moe, 
+                                       year == 2015)$family_nonfamily_household_perc_moe, 
+                                1), "%<br/>",
+                          "<strong> Percent Married: <strong>", 
+                          round(family_nonfamily_household_perc, 1), "<strong>%"),
+                    htmltools::HTML)) %>%
   addPolylines(
     data = south_wasco_points,
     color = "#ffce9e",
@@ -1703,8 +1745,7 @@ fam_stab_2015_leaf <- leaflet(fam_stab_2015) %>%
     weight = 1,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
-    label = county_lines$NAME) %>%
+    group = "Basemap") %>%
   addLegend(
     "bottomright",
     pal = fam_stab_2015_pal,
@@ -1715,4 +1756,11 @@ fam_stab_2015_leaf <- leaflet(fam_stab_2015) %>%
     baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried", 
                    "% of Orphaned Children", "% of Married Couples with no Children"),
     options = layersControlOptions(collapsed = T))
+fam_stab_2015_leaf
 ```
+
+
+
+```{r}
+```
+

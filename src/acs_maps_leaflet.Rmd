@@ -63,7 +63,7 @@ county_lines <- rbind(filter(or_county_lines, NAME %in%
                                c("Wasco", "Hood River", "Sherman", "Jefferson")),
                       filter(wa_county_lines, NAME %in% c("Skamania", "Klickitat"))
                       )
-saveRDS(county_lines, "../data/acs_leaflet_countylines.Rds")
+saveRDS(county_lines, "../data/leaflet_countylines.Rds")
 south_wasco_points <- st_read("../data/shps/swsd")
 ```
 
@@ -1432,23 +1432,22 @@ race_div_2015 <- filter(race_div, year == 2015)
 race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
   select(!contains("total"))
 race_div_white_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_white))
+                                   domain = race_div$race_white)
 race_div_black_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_black))
+                                   domain = race_div$race_black)
 race_div_na_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_american_indian))
+                                   domain = race_div$race_american_indian)
 race_div_asian_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_asian))
+                                   domain = race_div$race_asian)
 race_div_nh_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_native_hawaiian))
+                                   domain = race_div$race_native_hawaiian)
 race_div_hisp_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_hispanic))
+                                   domain = race_div$race_hispanic)
 race_div_oth_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_other))
+                                   domain = race_div$race_other)
 race_div_multi_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(race_div$race_two_more))
+                                   domain = race_div$race_two_more)
 ```
-
 
 Racial Diversity 2018
 ```{r}
@@ -1644,20 +1643,18 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     weight = 2,
     opacity = 1,
     fillOpacity= 0,
-    group = "Basemap",
     label = "South Wasco County Region") %>%
   addPolylines(
     data = county_lines,
     color = "#d48537",
     weight = 1,
     opacity = 1,
-    fillOpacity= 0,
-    group = "Basemap") %>%
+    fillOpacity= 0) %>%
   addLayersControl(
     overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
               "Hispanic", "Other", "Multiple Groups"),
     options = layersControlOptions(collapsed = T)) %>%
-  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian",
+  hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian", 
               "Hispanic", "Other", "Multiple Groups"))
 ```
 

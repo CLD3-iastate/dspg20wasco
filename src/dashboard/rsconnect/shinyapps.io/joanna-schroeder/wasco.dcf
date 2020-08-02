@@ -5,8 +5,8 @@ account: joanna-schroeder
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2609852
-bundleId: 3450757
+bundleId: 3465614
 url: https://joanna-schroeder.shinyapps.io/wasco/
-when: 1596034899.31154
+when: 1596377004.95391
 asMultiple: FALSE
 asStatic: FALSE

@@ -29,16 +29,49 @@ q <- bb %>%
 #query
 shops <- osmdata_sf(q)
 
-grocery <- shops$osm_polygons %>%
+grocery_p <- shops$osm_points %>%
   filter(str_detect(shop, "convenience|supermarket|farm")) %>%
   select(name, shop, payment.snap, payment.wic)
 
 cntrd = st_centroid(grocery)
 
-coords <- do.call(rbind, st_geometry(cntrd)) %>%
-  as_tibble() %>% setNames(c("lon","lat"))
+stores <- rbind(cntrd, grocery_p)
 
-cntrd %>% filter(str_detect(payment.snap, "yes"))
+## Editing for proper filtering, manual deduplication
+stores["791573620", "name"] = "The Outpost (Madras)"
+stores["7708392087", "name"] = "The Outpost (The Dalles)"
+stores["146717290", "name"] = "Safeway (Madras)"
+stores["219077848", "name"] = "Safeway (The Dalles)"
+stores["371944173", "name"] = "Safeway (Hood River)"
+stores["781471220", "name"] = "Grocery Outlet (Madras)"
+stores["4139660089", "name"] = "Grocery Outlet (The Dalles)"
+stores["383548025", "name"] = "Food Mart (Hood River, Cascade Ave.)"
+stores["403413315", "name"] = "Food Mart (Hood River, East Marina Dr. Chevron)"
+stores["403413317", "name"] = "Food Mart (Hood River, East Marina Dr. Shell)"
+stores["438300809", "name"] = "Food Mart (Madras)"
+stores["438300809", "name"] = "Food Mart (Hood River, Pacific Ave.)"
+stores["619840103", "name"] = "Food Mart (The Dalles)"
+stores["3905855641", "name"] = "Food Mart (Biggs Junction)"
+stores["4358176653", "name"] = "Food Mart (Mt. Hood National Forest)"
+stores["387276212", "name"] = "Circle K (Biggs Junction)"
+stores["438300805", "name"] = "Circle K (Madras)"
+stores["438300804", "name"] = "Chevron (Madras)"
+stores["593082948", "name"] = "Chevron (The Dalles)"
+stores["441287009", "name"] = "The Boys Pine Grove Grocery"
+stores["7178227164", "name"] = "MsIssac's Store"
+
+duplicates <- c("7708382086", "383523137", "7705702785", "619840105", "282760541", "298871008", "7706134885")
+
+stores <- stores[!rownames(stores) %in% duplicates, ]
+
+st_write(stores, "~/git/DSPG2020/wasco/data/stores.shp")
+
+
+
+#coords <- do.call(rbind, st_geometry(cntrd)) %>%
+  #as_tibble() %>% setNames(c("lon","lat"))
+
+#cntrd %>% filter(str_detect(payment.snap, "yes"))
 
 
 ## Pulling in SWSD ------

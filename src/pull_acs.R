@@ -306,6 +306,8 @@ combined_acs <- combined_acs %>%
 
           family_children_total = B09005_001E, family_children_total_moe = B09005_001M,
           family_married_parent_perc = B09005_003E/B09005_001E*100, family_married_parent_perc_moe = B09005_003M/B09005_001E*100,
+          family_single_parent_male_perc = B09005_004E/B09005_001E*100, family_single_parent_male_perc_moe = B09005_004M/B09005_001E*100,
+          family_single_parent_female_perc = B09005_005E/B09005_001E*100, family_single_parent_female_perc_moe = B09005_005M/B09005_001E*100,
           family_single_parent_perc = (B09005_004E + B09005_005E)/B09005_001E*100, family_single_parent_perc_moe = (B09005_004M + B09005_005M)/B09005_001E*100,
           family_children_nonfamily_perc = B09005_006E/B09005_001E*100,family_children_nonfamily_perc_moe = B09005_006M/B09005_001E*100,
           family_nonfamily_household_perc = B09019_024E/B09019_002E*100, family_nonfamily_household_perc_moe = B09019_024M/B09019_002E*100,
@@ -378,7 +380,7 @@ or_counties <- counties(state = "OR",  cb = TRUE) %>%
 wa_counties <- counties(state = "WA", #county = c("Skamania", "Klickitat"),
                     cb = TRUE) %>% filter(NAME == "Skamania" | NAME =="Klickitat")
 counties_geo <- rbind(or_counties, wa_counties)
-acs_counties <- geo_join(counties_geo, acs_counties, by = "GEOID")
+acs_counties <- inner_join(counties_geo, acs_counties, by = "GEOID")
 #saveRDS(acs_counties, file = here("/data/acs_counties.Rds"))
 
 
@@ -387,8 +389,8 @@ or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "
 wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
                     cb = TRUE)
 tract_geo <- rbind(or_tracts, wa_tracts)
-acs_tracts <- acs_data %>% filter(grepl("Tract",NAME))
-acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")
+acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
+acs_tracts <- inner_join(tract_geo, acs_tracts, by = "GEOID") %>% rename("NAME" = "NAME.y")
 #saveRDS(acs_tracts, file = here("/data/acs_tracts.Rds"))
 
 ####### PRACTICE CODE #######

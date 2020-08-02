@@ -6,7 +6,7 @@ library(here)
 ##### Perfomance data: #####
 years <- c(1415,1516,1617,1718,1819)
 # %ELA proficiency change between 3rd & 8th grade | columns consistent for all years
-
+# Change is 8th - 3rd grade
 ela_districts <- unique(fread(here("/data/education/performance_districts_1415.csv")) %>% 
   filter(Student.Group == "Total Population (All Students)",
          Grade.Level == "Grade 3" | Grade.Level == "Grade 8") %>% 

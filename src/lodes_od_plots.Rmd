@@ -14,7 +14,6 @@ library(readr)
 library(ggplot2)
 library(sf)
 library(leaflet)
-library(mapview)
 library(reshape2)
 library(raster)
 library(tigris)
@@ -310,8 +309,8 @@ wascolines_15 <- inner_join(wasco15_od2, wasco_lines, by = c("w_geocode" = "GEOI
 
 Grouping by work geocode (because that is going to be Wasco County)
 ```{r}
-agg_17 <- wascolines_17 %>%
-  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
+agg_17 <- st_as_sf(wascolines_17) %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10) %>%
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
             SA02 = sum(SA02), 
@@ -322,9 +321,9 @@ agg_17 <- wascolines_17 %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-saveRDS(st_as_sf(agg_17), "../data/app_lodes_od_agg_2017.Rds")
-agg_16 <- wascolines_16 %>%
-  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
+saveRDS(agg_17, "../data/app_lodes_od_agg_2017.Rds")
+agg_16 <- st_as_sf(wascolines_16) %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10) %>%
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
             SA02 = sum(SA02), 
@@ -335,9 +334,9 @@ agg_16 <- wascolines_16 %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-saveRDS(st_as_sf(agg_16), "../data/app_lodes_od_agg_2016.Rds")
-agg_15 <- wascolines_15 %>%
-  group_by(w_geocode, INTPTLAT10, INTPTLON10, geometry) %>%
+saveRDS(agg_16, "../data/app_lodes_od_agg_2016.Rds")
+agg_15 <- st_as_sf(wascolines_15) %>%
+  group_by(w_geocode, INTPTLAT10, INTPTLON10) %>%
   summarise(S000 = sum(S000), 
             SA01 = sum(SA01), 
             SA02 = sum(SA02), 
@@ -348,10 +347,8 @@ agg_15 <- wascolines_15 %>%
             SI01 = sum(SI01), 
             SI02 = sum(SI02), 
             SI03 = sum(SI03))
-saveRDS(st_as_sf(agg_15), "../data/app_lodes_od_agg_2015.Rds")
+saveRDS(agg_15, "../data/app_lodes_od_agg_2015.Rds")
 ```
-
-
 
 interactive maps
 ```{r}
@@ -404,6 +401,7 @@ od_S000leaf <- leaflet() %>%
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
+od_S000leaf
 ```
 
 ```{r}

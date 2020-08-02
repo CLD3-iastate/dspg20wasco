@@ -105,6 +105,10 @@ saveRDS(acres_16, "../data/app_acres_16.Rds")
 saveRDS(acres_15, "../data/app_acres_15.Rds")
 ```
 
+```{r}
+acres_17
+```
+
 
 Winter Wheat
 ```{r}
@@ -128,7 +132,11 @@ cdl_ww <- leaflet() %>%
               fillOpacity = .7,
               group = "2017",
               fillColor = ~ colors_ww(acres),
-              label = acres_17[acres_17$desc == "Winter Wheat", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Winter Wheat", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Winter Wheat", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addLegend(
     data = rbind(acres_17[acres_17$desc == "Winter Wheat", ],
                  acres_16[acres_16$desc == "Winter Wheat", ],
@@ -149,14 +157,22 @@ cdl_ww <- leaflet() %>%
               fillOpacity = .7,
               group = "2016",
               fillColor = ~ colors_ww(acres),
-              label = acres_16[acres_16$desc == "Winter Wheat", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Winter Wheat", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Winter Wheat", ]$acres), 0),
+                              htmltools::HTML)) %>% 
   addPolygons(data = acres_15[acres_15$desc == "Winter Wheat", ],
               weight = .3,
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
               fillColor = ~ colors_ww(acres),
-              label = acres_15[acres_15$desc == "Winter Wheat", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Winter Wheat", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Winter Wheat", ]$acres), 0),
+                              htmltools::HTML)) %>% 
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
@@ -183,7 +199,11 @@ cdl_barley <- leaflet() %>%
               fillOpacity = .7,
               group = "2017",
               fillColor = ~ colors_bar(acres),
-              label = acres_17[acres_17$desc == "Barley", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Barley", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Barley", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addLegend(
     data = rbind(acres_17[acres_17$desc == "Barley", ],
                           acres_16[acres_16$desc == "Barley", ],
@@ -204,14 +224,22 @@ cdl_barley <- leaflet() %>%
               fillOpacity = .7,
               group = "2016",
               fillColor = ~ colors_bar(acres),
-              label = acres_16[acres_16$desc == "Barley", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Barley", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Barley", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addPolygons(data = acres_15[acres_15$desc == "Barley", ],
               weight = .3,
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
               fillColor = ~ colors_bar(acres),
-              label = acres_15[acres_15$desc == "Barley", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Barley", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Barley", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
@@ -238,7 +266,11 @@ cdl_alfalfa <- leaflet() %>%
               fillOpacity = .7,
               group = "2017",
               fillColor = ~ colors_alf(acres),
-              label = acres_17[acres_17$desc == "Alfalfa", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Alfalfa", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Alfalfa", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addLegend(
     data = rbind(acres_17[acres_17$desc == "Alfalfa", ],
                  acres_16[acres_16$desc == "Alfalfa", ],
@@ -259,14 +291,22 @@ cdl_alfalfa <- leaflet() %>%
               fillOpacity = .7,
               group = "2016",
               fillColor = ~ colors_alf(acres),
-              label = acres_16[acres_16$desc == "Alfalfa", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Alfalfa", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Alfalfa", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addPolygons(data = acres_15[acres_15$desc == "Alfalfa", ],
               weight = .3,
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
               fillColor = ~ colors_alf(acres),
-              label = acres_15[acres_15$desc == "Alfalfa", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Alfalfa", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Alfalfa", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))
@@ -293,14 +333,18 @@ cdl_cherries <- leaflet() %>%
               fillOpacity = .7,
               group = "2017",
               fillColor = ~ colors_cher(acres),
-              label = acres_17[acres_17$desc == "Cherries", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Cherries", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Cherries", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addLegend(
     data = rbind(acres_17[acres_17$desc == "Cherries", ], 
                  acres_16[acres_16$desc == "Cherries", ],
                  acres_15[acres_15$desc == "Cherries", ]),
     "bottomright",
     pal = colors_cher,
-    values = ~ acres,
+    values = ~acres,
     labFormat = function(type, cuts, p) {
       n = length(cuts)
       p = paste0(round(p * 100), '%')
@@ -314,14 +358,22 @@ cdl_cherries <- leaflet() %>%
               fillOpacity = .7,
               group = "2016",
               fillColor = ~ colors_cher(acres),
-              label = acres_16[acres_16$desc == "Cherries", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Cherries", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Cherries", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addPolygons(data = acres_15[acres_15$desc == "Cherries", ],
               weight = .3,
               opacity = 1,
               fillOpacity = .7,
               group = "2015",
               fillColor = ~ colors_cher(acres),
-              label = acres_15[acres_15$desc == "Cherries", ]$acres) %>%
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Cherries", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Cherries", ]$acres), 0),
+                              htmltools::HTML)) %>%
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE))

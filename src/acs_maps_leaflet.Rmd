@@ -1039,16 +1039,18 @@ edu_attain_moe <- dplyr::select(acs_tracts, NAME, year, contains("education")) %
 
 educational attainment 2018
 ```{r}
-edu_attain_max_perc_2018 <- max(apply(X = select(data_frame(edu_attain_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
-edu_attain_2018_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, edu_attain_max_perc_2018))
+edu_attain_max_perc_2018 <- max(apply(X = select(data_frame(edu_attain_2018),
+                                                    -year, -NAME, -geometry), 1, max, TRUE))
+edu_attain_2018_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2018))
+
 edu_attain_2018_leaf <- leaflet(edu_attain_2018) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2018",
+    group = "Less than High School",
     fillColor = ~edu_attain_2018_pal(education_less_hs),
     label = ~lapply(paste(sep = "", 
                           substr(edu_attain_2018$NAME, 20, 60), "<br/>",
@@ -1133,16 +1135,18 @@ edu_attain_2018_leaf <- leaflet(edu_attain_2018) %>%
 
 educational attainment 2017
 ```{r}
-edu_attain_max_perc_2017 <- max(apply(X = select(data_frame(edu_attain_2017), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
-edu_attain_2017_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, edu_attain_max_perc_2017))
+edu_attain_max_perc_2017 <- max(apply(X = select(data_frame(edu_attain_2017),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
+edu_attain_2017_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2017))
+
 edu_attain_2017_leaf <- leaflet(edu_attain_2017) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2018",
+    group = "2017",
     fillColor = ~edu_attain_2017_pal(education_less_hs),
     label = ~lapply(paste(sep = "", 
                           substr(edu_attain_2017$NAME, 20, 60), "<br/>",
@@ -1227,16 +1231,18 @@ edu_attain_2017_leaf <- leaflet(edu_attain_2017) %>%
 
 educational attainment 2016
 ```{r}
-edu_attain_max_perc_2016 <- max(apply(X = select(data_frame(edu_attain_2016), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
-edu_attain_2016_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, edu_attain_max_perc_2016))
+edu_attain_max_perc_2016 <- max(apply(X = select(data_frame(edu_attain_2016),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
+edu_attain_2016_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2016))
+
 edu_attain_2016_leaf <- leaflet(edu_attain_2016) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2018",
+    group = "Less than High School",
     fillColor = ~edu_attain_2016_pal(education_less_hs),
     label = ~lapply(paste(sep = "", 
                           substr(edu_attain_2016$NAME, 20, 60), "<br/>",
@@ -1321,20 +1327,22 @@ edu_attain_2016_leaf <- leaflet(edu_attain_2016) %>%
 
 educational attainment 2015
 ```{r}
-edu_attain_max_perc_2015 <- max(apply(X = select(data_frame(edu_attain_2015), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
-edu_attain_2015_pal <- colorNumeric(viridis_pal(option = "D")(3), 
-                                   domain = c(0, edu_attain_max_perc_2015))
+edu_attain_max_perc_2015 <- max(apply(X = select(data_frame(edu_attain_2015),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
+edu_attain_2015_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2015))
+  
 edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolygons(
     weight = 1,
     opacity = 0,
     fillOpacity = .7,
-    group = "2018",
+    group = "Less than High School",
     fillColor = ~edu_attain_2015_pal(education_less_hs),
     label = ~lapply(paste(sep = "", 
-                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                          substr(edu_attain_2015$NAME, 1, 17), 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
                           "<br/>Margins of error: ",
                           round(filter(edu_attain_moe, 
                                        year == 2015)$education_less_hs_moe, 1), "%<br/>",
@@ -1348,8 +1356,8 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
     group = "High School Graduate",
     fillColor = ~edu_attain_2015_pal(education_hs_grad),
     label = ~lapply(paste(sep = "", 
-                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                          substr(edu_attain_2015$NAME, 1, 17), 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
                           "<br/>Margins of error: ",
                           round(filter(edu_attain_moe, 
                                        year == 2015)$education_hs_grad_moe, 1), "%<br/>",
@@ -1363,8 +1371,8 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
     group = "Associates or Some College",
     fillColor = ~edu_attain_2015_pal(education_assoc_some_college),
     label = ~lapply(paste(sep = "", 
-                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                          substr(edu_attain_2015$NAME, 1, 17), 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
                           "<br/>Margins of error: ",
                           round(filter(edu_attain_moe, 
                                        year == 2015)$education_assoc_some_college_moe, 1), "%<br/>",
@@ -1378,8 +1386,8 @@ edu_attain_2015_leaf <- leaflet(edu_attain_2015) %>%
     group = "Bachelors or Higher",
     fillColor = ~edu_attain_2015_pal(education_bachelors_or_higher),
     label = ~lapply(paste(sep = "", 
-                          substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                          substr(edu_attain_2015$NAME, 1, 17), 
+                          substr(NAME, 20, 60), "<br/>",
+                          substr(NAME, 1, 17), 
                           "<br/>Margins of error: ",
                           round(filter(edu_attain_moe, 
                                        year == 2015)$education_bachelors_or_higher_moe, 1), "%<br/>",
@@ -1651,11 +1659,13 @@ race_div_2018_leaf <- leaflet(race_div_2018) %>%
     opacity = 1,
     fillOpacity= 0) %>%
   addLayersControl(
+    position = "topleft",
     overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
               "Hispanic", "Other", "Multiple Groups"),
     options = layersControlOptions(collapsed = T)) %>%
   hideGroup(c("Black", "Native American", "Asian", "Native Hawaiian", 
               "Hispanic", "Other", "Multiple Groups"))
+
 ```
 
 Racial Diversity 2017
@@ -1862,6 +1872,7 @@ race_div_2017_leaf <- leaflet(race_div_2017) %>%
     fillOpacity= 0,
     group = "Basemap") %>%
   addLayersControl(
+    position = "topleft",
     overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
               "Hispanic", "Other", "Multiple Groups"),
     options = layersControlOptions(collapsed = T)) %>%
@@ -2073,6 +2084,7 @@ race_div_2016_leaf <- leaflet(race_div_2016) %>%
     fillOpacity= 0,
     group = "Basemap") %>%
   addLayersControl(
+    position = "topleft",
     overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
               "Hispanic", "Other", "Multiple Groups"),
     options = layersControlOptions(collapsed = T)) %>%
@@ -2284,6 +2296,7 @@ race_div_2015_leaf <- leaflet(race_div_2015) %>%
     fillOpacity= 0,
     group = "Basemap") %>%
   addLayersControl(
+    position = "topleft",
     overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
               "Hispanic", "Other", "Multiple Groups"),
     options = layersControlOptions(collapsed = T)) %>%

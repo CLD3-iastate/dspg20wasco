@@ -28,7 +28,7 @@ Visualize with the grouped line chart
 ```{r}
 ggplot(alice_counties, aes(x = Year, y=Percent_ALICE_Households, ,group = County, color = Wasco)) +
   geom_line() + 
-  scale_color_manual(values = viridis(2, option = "D"), name = "Region", labels = c("ok", "fine")) +
+  scale_color_manual(values = viridis(2, option = "D"), name = "Region") +
   theme_minimal()
 ```
 

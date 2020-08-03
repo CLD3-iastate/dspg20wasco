@@ -33,33 +33,25 @@ options(tigris_use_cache = TRUE)
 #read in combined dataset
 acs_data <- fread(("Data/combined_acs.csv"))
 acs_data$GEOID <- as.character(acs_data$GEOID)
-acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" |
-                         NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
-                         NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
-                         NAME == "Multnomah County, Oregon" | NAME == "Clackamas County, Oregon" |
-                         NAME == "Marion County, Oregon" | NAME == "Washington County, Oregon" |
-                         NAME == "Deschutes County, Oregon" | NAME == "Lane County, Oregon" |
-                         NAME == "Umatilla County, Oregon" |
-                         NAME == "Skamania County, Washington" |
-                         NAME == "Klickitat County, Washington" |
-                         NAME == "Oregon")
-acs_counties_neighbors <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" |
-                                   NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
-                                   NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
-                                   NAME == "Skamania County, Washington" |
-                                   NAME == "Klickitat County, Washington" | NAME == "Oregon")
+acs_counties <- readRDS(here("/data/acs_counties.Rds"))
+acs_counties <- acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, OR",
+                                                                               "Wasco County, OR", "Oregon"), 
+                                                                other_level = "Neighboring Counties"),
+                                        #### To get the south wasco lines to be most visible, order the factor levels
+                                        #### so that south wasco is drawn last (drawn over the rest)
+                                        #### Plotly eliminates transparency of lines
+                                        south_wasco = factor(south_wasco , levels= c("Neighboring Counties",
+                                                                                     "Oregon","Wasco County, OR", 
+                                                                                     "South Wasco County School District 1, OR")))
+acs_counties_neighbors <- filter(acs_counties, NAME == "South Wasco County School District 1, OR" | 
+                                   NAME == "Wasco County, OR"| NAME == "Hood River County, OR" |
+                                   NAME == "Sherman County, OR" | NAME == "Jefferson County, OR" |
+                                   NAME == "Skamania County, WA" | NAME == "Klickitat County, WA" | 
+                                   NAME == "Oregon")  
 #get tract level geography
-or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "Jefferson"),
-                    cb = TRUE)
-wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
-                    cb = TRUE)
-tract_geo <- rbind(or_tracts, wa_tracts)
-acs_tracts <- acs_data %>% filter(grepl("Tract",NAME))
-acs_tracts <- st_as_sf(inner_join(acs_tracts, tract_geo, by = c("GEOID")))
-acs_tracts$NAME <- acs_tracts$NAME.x
+acs_tracts <- readRDS(here("/data/acs_tracts.Rds"))
 acs_tracts$NAME.x <- NULL
-acs_tracts$NAME.y <- NULL
-graypal = "#ADB5BD"
+
 or_county_lines <- counties(state = "OR")
 wa_county_lines <- counties(state = "WA")
 county_lines <- rbind(filter(or_county_lines, NAME %in%
@@ -74,13 +66,20 @@ income_dist_2016 <- filter(income_dist, year == 2016)
 income_dist_2015 <- filter(income_dist, year == 2015)
 income_dist_moe <- dplyr::select(acs_tracts, NAME, year, contains("income"), geometry) %>% select(!contains("total"))
 
-edu_attain <- dplyr::select(acs_tracts, NAME, year, contains("education"), geometry)
-edu_attain <- select(edu_attain, !contains("moe"))
+edu_attain <- dplyr::select(acs_tracts, NAME, year, contains("education"), geometry) %>% dplyr::select(!contains("moe"))
 edu_attain_2018 <- filter(edu_attain, year == 2018)
 edu_attain_2017 <- filter(edu_attain, year == 2017)
 edu_attain_2016 <- filter(edu_attain, year == 2016)
 edu_attain_2015 <- filter(edu_attain, year == 2015)
-edu_attain_moe <- dplyr::select(acs_tracts, NAME, year, contains("education")) %>% select(!contains("total"))
+edu_attain_moe <- dplyr::select(acs_tracts, NAME, year, contains("education"), geometry) %>% select(!contains("total"))
+
+fam_stab <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry)
+fam_stab <- select(fam_stab, !contains("moe")) %>% select(!contains("total"))
+fam_stab_2018 <- filter(fam_stab, year == 2018)
+fam_stab_2017 <- filter(fam_stab, year == 2017)
+fam_stab_2016 <- filter(fam_stab, year == 2016)
+fam_stab_2015 <- filter(fam_stab, year == 2015)
+fam_stab_moe <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry) %>% select(!contains("total"))
 
 race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
 race_div <- select(race_div, !contains("moe"))
@@ -90,43 +89,27 @@ race_div_2016 <- filter(race_div, year == 2016)
 race_div_2015 <- filter(race_div, year == 2015)
 race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
   select(!contains("total"))
-race_div_white_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_white)
-race_div_black_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_black)
-race_div_na_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                domain = race_div$race_american_indian)
-race_div_asian_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_asian)
-race_div_nh_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                domain = race_div$race_native_hawaiian)
-race_div_hisp_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                  domain = race_div$race_hispanic)
-race_div_oth_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                 domain = race_div$race_other)
-race_div_multi_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_two_more)
 
 ######## USE THE FOLLOWING ##########
 # color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
 graypal = "#ADB5BD"
 ## Loading in LODES
-top_10_in <- read_csv("Data/app_10_inflows_wasco.csv")
-top_10_out <- read_csv("Data/app_10_outflows_wasco.csv")
+top_12_in <- data.table(read_csv("Data/app_12_inflows_wasco.csv"))
+top_12_out <- data.table(read_csv("Data/app_12_outflows_wasco.csv"))
 agg_17 <- readRDS("Data/app_lodes_od_agg_2017.Rds")
 agg_16 <- readRDS("Data/app_lodes_od_agg_2016.Rds")
 agg_15 <- readRDS("Data/app_lodes_od_agg_2015.Rds")
 #wasco_points <- blocks("OR", county = "Wasco")
 #wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("Data/shps/swsd")
-water_use_by_sector_t <- readRDS("Data/app_usgs_water_use.Rds")
+water_use_by_sector_t <- data.table(readRDS("Data/app_usgs_water_use.Rds"))
 acres_17 <- readRDS("Data/app_acres_17.Rds")
 acres_16 <- readRDS("Data/app_acres_16.Rds")
 acres_15 <- readRDS("Data/app_acres_15.Rds")
 
 # Color palettes -----
-dspgpal <- c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
-            "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
+# dspgpal <- c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
+#             "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
 
@@ -342,25 +325,30 @@ ui <- dashboardPagePlus(
                   inputId = "infrastructureselect",
                   label = "I'm wondering...",
                   list(" " = " ",
-                    "What are the wind and solar projects in South Wasco?" = "WindSolar",
-                    "What is access to broadband like in South Wasco?" = "Broadband",
-                  "What is access to water like in South Wasco?" = "Water",
-                  "What is public transit like in South Wasco?" = "Transit"),
+                    "What is the importance of wind & wolar projects to South Wasco?" = "WindSolar",
+                    "What is access to broadband like and why is it important?" = "Broadband",
+                    "What is water use like in Wasco?" = "Water",
+                    "What is the transit system like in South Wasco?" = "Transit"),
                   width = "300px", selected = NULL
                 )),
 ## UI: PANEL - Wind and solar -------
                 conditionalPanel(
                   condition = "input.infrastructureselect == 'WindSolar'",
                   boxPlus(
-                   title = "What are the wind and solar projects in South Wasco?"
-                    #img of wind solar infocard
-                  )),
+                   title = "What is the importance of wind & wolar projects to South Wasco?",
+                   width = 4,
+                    #img of wind solar infocard,
+                   HTML('<div class="canva-embed" data-design-id="DAEDe8MzN7A" data-height-ratio="2.5000" style="padding:250.0000% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAEDe8MzN7A&#x2F;view?utm_content=DAEDe8MzN7A&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Wind &amp; Solar Projects in Wasco</a>')
+                   )
+                  ),
 ## UI: PANEL - Broadband -------
                 conditionalPanel(
                   condition = "input.infrastructureselect == 'Broadband'",
                   boxPlus(
-                  title = "What is access to broadband like in South Wasco?"
+                  title = "What is access to broadband like and why is it important?",
+                  width = 4,
                   #img of broadband infocard
+                  HTML('<div class="canva-embed" data-design-id="DAEDhGP13C4" data-height-ratio="2.5000" style="padding:250.0000% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAEDhGP13C4&#x2F;view?utm_content=DAEDhGP13C4&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Broadband Access</a> by Owen Hart')
                   )),
 ## UI: PANEL - Water -------
                 conditionalPanel(
@@ -369,10 +357,10 @@ ui <- dashboardPagePlus(
                     id = 5,
                     main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
                     header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is access to water like in South Wasco?",
+                    front_title = "What is water use like in Wasco?",
                     back_title = "Data",
                     "",
-                    plotOutput("waterplot"),
+                    plotlyOutput("waterplot"),
                     back_content = tagList(
                       column(
                         width = 12,
@@ -385,8 +373,10 @@ ui <- dashboardPagePlus(
                conditionalPanel(
                  condition = "input.infrastructureselect == 'Transit'",
                  boxPlus(
-                 title = "What is public transit like in South Wasco?"
+                   title = "What is the transit system like in South Wasco?",
+                   width = 4,
                   # img of transit infocard
+                   HTML('<div class="canva-embed" data-design-id="DAEDgP5Krv8" data-height-ratio="2.5000" style="padding:250.0000% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAEDgP5Krv8&#x2F;view?utm_content=DAEDgP5Krv8&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Transportation in Wasco County</a> by Owen Hart')
                 ))), # END OF INFRASTRUCTURE
 
 
@@ -489,7 +479,7 @@ conditionalPanel(
                             front_title = "How do workers flow in and out of South Wasco?",
                             selectInput("flows", "Inflows or Outflows?",
                                         c("Inflows", "Outflows")),
-                            plotOutput("flows"),
+                            plotlyOutput("flowsplot"),
                             back_title = "Flows Data",
                             # Full back with table and indicator snippet
                             "",
@@ -681,7 +671,7 @@ conditionalPanel(
       list(" " = " ",
         "What is the racial diversity of South Wasco?" = "Race",
            "What types of familiy structures are in South Wasco?" = "Family",
-           "What is the highest educational achievement of people in South Wasco?" = "Education"),
+           "What is the educational background of people in South Wasco?" = "Education"),
       width = "300px", selected = NULL
     ))),
 # UI: PANEL - Race  --------
@@ -748,7 +738,7 @@ conditionalPanel(
                     id = 18,
                     main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
                     header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the highest educational achievement of people in South Wasco?",
+                    front_title = "What is the educational background of people in South Wasco?",
                     selectInput("degreeyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
                     leafletOutput("degreemap"),
@@ -1382,20 +1372,36 @@ server <- function(input, output, session) {
 
 ## SERVER: TAB - Infrastructure cluster ----
 ## SERVER: PANEL - Water ----
-## plotOutput("waterplot") ----
+## plotlyOutput("waterplot") ----
 
-  output$waterplot <- renderPlot({
-    water_use_plot <- ggplot(data = water_use_by_sector_t, aes(x = year, group = 1)) +
-      ggtitle("Water Use in Wasco County by Sector (1985-2015)") +
-      labs(x = "Year", y = "Millions of Gallons per Day", color = NULL) +
-      geom_line(aes(y = `Aquaculture Water Use (mGal/D)`, color = "Aquaculture Water Use")) +
-      geom_line(aes(y = `Commercial Water Use (mGal/D)`, color = "Commercial Water Use")) +
-      geom_line(aes(y = `Domestic Water Use (mGal/D)`, color = "Domestic Water Use")) +
-      geom_line(aes(y = `Industrial Water Use (mGal/D)`, color = "Industrial Water Use")) +
-      geom_line(aes(y = `Livestock Water Use (mGal/D)`, color = "Livestock Water Use")) +
-      geom_line(aes(y = `Mining Water Use (mGal/D)`, color = "Mining Water Use")) +
-      geom_line(aes(y = `Total Water supplied to Public (mGal/D)`, color = "Resident Water Use")) +
-      geom_line(aes(y = `Wastewater Treatment (mGal/D)`, color = "Wastewater Treatment"))
+  output$waterplot <- renderPlotly({
+    
+    water_use_melt <- melt(data = water_use_by_sector_t, id.vars = c("year"), 
+                                                         measure.vars = colnames(water_use_by_sector_t)[-length(water_use_by_sector_t)]) %>%
+    rename(c("sector" = "variable", "gallons" = "value"))
+  water_use_melt$sector <- recode(water_use_melt$sector, "Aquaculture Water Use (mGal/D)" = "Aquaculture",
+                                  "Commercial Water Use (mGal/D)" = "Commercial",
+                                  "Domestic Water Use (mGal/D)" ="Domestic",
+                                  "Industrial Water Use (mGal/D)" = "Industrial",
+                                  "Irrigation Water Use (mGal/D)" = "Irrigation",
+                                  "Livestock Water Use (mGal/D)" = "Livestock",
+                                  "Mining Water Use (mGal/D)" = "Mining",
+                                  "Total Water supplied to Public (mGal/D)"= "Total Water Supplied to Public",
+                                  "Wastewater Treatment (mGal/D)" = "Wastewater Treatment")
+  
+  ggplotly(ggplot(water_use_melt, aes(x=year, y=gallons, group = sector, color = sector,
+                                      text = paste0("Sector: ", sector,
+                                                    "<br>Year: ", year,
+                                                    "<br>Water Use: ", gallons, " (mGal/D)"))) +
+             geom_line(size = 1) + 
+             geom_point(size = 1.5) +
+             scale_colour_manual(name = "Sector", values = viridis(9, option = "D")) +
+             theme_minimal() + ggtitle("Water Use in Wasco County by Sector (1985-2015)") + 
+             ylab("Millions of Gallons per Day (mGal/D)") + xlab("Year"), tooltip = "text") %>% 
+    config(displayModeBar = "static", displaylogo = FALSE, 
+           modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                       "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+  
   })
 
 ## SERVER: TAB - Learn and earn driver ----
@@ -1403,7 +1409,6 @@ server <- function(input, output, session) {
 ## SERVER: PANEL - Employment ratio ----
 ## plotlyOutput("empratioplot") -----
 ## leafletOutput("percempmap") -----
-
   output$percempmap <- renderLeaflet({
     perc_emp_pal <- colorQuantile(viridis_pal(option = "D")(3), domain = acs_tracts$employment_20_to_64)
     leaflet() %>%
@@ -1500,286 +1505,301 @@ server <- function(input, output, session) {
   })
 
   output$empratioplot <- renderPlotly({
-    p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-                , aes(x=year, y=employment_20_to_64, group = NAME, color = south_wasco,
-                      text = paste0("Region: ", NAME,
-                                    "<br>Year: ", year,
-                                    "<br>Percent Employed: ", employment_20_to_64, "%",
-                                    "<br>Margin of Error: ", employment_20_to_64_moe, "%"))) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2) +
-      scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-      scale_alpha_manual(values=c(1,1,1,0.1)) +
-      theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + ylab("Employment Ratio") + xlab("Year")
-    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
-                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    ggplotly(ggplot(acs_counties, aes(x=year, y=employment_20_to_64, group = NAME, color = south_wasco,
+                                      text = paste0("Region: ", NAME,
+                                                    "<br>Year: ", year,
+                                                    "<br>Percent Employed: ", employment_20_to_64, "%",
+                                                    "<br>Margin of Error: ", employment_20_to_64_moe, "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
+               theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + 
+               ylab("Employment Ratio (%)") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Labor force participation ----
 ## plotlyOutput("laborforceplot") ------
 
   output$laborforceplot <- renderPlotly({
-    p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-                , aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
-                      text = paste0("Region: ", NAME,
-                                    "<br>Year: ", year,
-                                    "<br>Labor Force Participation Rate: ", labor_force_20_to_64, "%",
-                                    "<br>Margin of Error: ", labor_force_20_to_64_moe, "%"))) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2) +
-      scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-      scale_alpha_manual(values=c(1,1,1,0.1)) +
-      theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year")
-    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
-                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    ggplotly(ggplot(acs_counties, aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
+                                      text = paste0("Region: ", NAME,
+                                                    "<br>Year: ", year,
+                                                    "<br>Labor Force Participation Rate: ", labor_force_20_to_64, "%",
+                                                    "<br>Margin of Error: ", labor_force_20_to_64_moe, "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
+               #scale_alpha_manual(values=c(1,1,1,0.1)) +
+               theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Job flows ----
-## plotOutput("flows") ------
+## plotlyOutput("flows") ------
 
-  output$flows <- renderPlot({
+  output$flowsplot <- renderPlotly({
     if (input$flows == "Inflows"){
-      ggplot(top_10_in, aes(x = year)) +
-        ggtitle("Number of jobs flowing into Wasco County\nfrom other counties in Oregon from\n2015-2017") +
-        labs(x = "Year", y = "Number of Jobs", colour = "County") +
-        geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) +
-        geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) +
-        geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) +
-        geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) +
-        geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) +
-        geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) +
-        geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) +
-        geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) +
-        geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) +
-        geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+      top_12_in_melt <- melt(data = top_12_in, id.vars = c("year"), 
+                             measure.vars = colnames(top_12_in)[-length(top_12_in)]) %>%
+        rename(c("county" = "variable", "jobs" = "value"))
+      
+      ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = county,
+                                          text = paste0("County: ", county,
+                                                        "<br>Year: ", year,
+                                                        "<br>Number of Jobs: ", jobs))) +
+                 geom_line(size = 1) + 
+                 geom_point(size = 1.5) +
+                 scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+                 scale_x_continuous(breaks = 0:2100) +
+                 theme_minimal() + ggtitle("Number of jobs flowing into Wasco County (2015-2017)") + 
+                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 
+        config(displayModeBar = "static", displaylogo = FALSE, 
+               modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                           "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 
     }
     else if (input$flows == "Outflows"){
-      ggplot(top_10_out, aes(x = year)) +
-        ggtitle("Number of jobs flowing from Wasco County\ninto other counties in Oregon from\n2015-2017") +
-        labs(x = "Year", y = "Number of Jobs", colour = "County") +
-        geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) +
-        geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) +
-        geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) +
-        geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) +
-        geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) +
-        geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) +
-        geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) +
-        geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) +
-        geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) +
-        geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+      top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"), 
+                              measure.vars = colnames(top_12_out)[-length(top_12_out)]) %>%
+        rename(c("county" = "variable", "jobs" = "value"))
+      
+      ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = county,
+                                           text = paste0("County: ", county,
+                                                         "<br>Year: ", year,
+                                                         "<br>Number of Jobs: ", jobs))) +
+                 geom_line(size = 1) + 
+                 geom_point(size = 1.5) +
+                 scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+                 scale_x_continuous(breaks = 0:2100) +
+                 theme_minimal() + ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") + 
+                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 
+        config(displayModeBar = "static", displaylogo = FALSE, 
+               modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                           "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+      
     }
   })
 
 ## SERVER: PANEL - Industry Sectors -----
 ## leafletOutput("odleaf")----
-
-  #S000 (all jobs) by year -------
-  qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
   od_S000leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
-      weight = 1,
+      weight = 2,
       opacity = 1,
-      group = "Basemap")
+      group = "Basemap",
+      label = "South Wasco Region")
 
-  qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
-  od_SI01leaf <- leaflet() %>%
+  od_SI01leaf <-leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
-      weight = 1,
+      weight = 2,
       opacity = 1,
-      group = "Basemap")
+      group = "Basemap",
+      label = "South Wasco Region")
 
-  qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
-  od_SI02leaf <- leaflet() %>%
+  od_SI02leaf <-leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
-      weight = 1,
+      weight = 2,
       opacity = 1,
-      group = "Basemap")
+      group = "Basemap",
+      label = "South Wasco Region")
 
-  qtileS000 <- colorQuantile(c('#D1E0BF', '#E57200'), agg_17$S000, 5)
   od_SI03leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
-      weight = 1,
+      weight = 2,
       opacity = 1,
-      group = "Basemap")
+      group = "Basemap",
+      label = "South Wasco Region")
 
   output$odleaf <- renderLeaflet({
     if (input$sect == "All"){
+      #S000 (all jobs) by year -------
       od_S000leaf %>%
         addPolygons(
           data = st_as_sf(agg_17),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2017",
-          fillColor = ~qtileS000(agg_17$S000),
+          fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_17$S000)(agg_17$S000),
           label = agg_17$S000) %>%
+        addLegend(
+          data = rbind(agg_17, agg_16, agg_15),
+          "bottomright",
+          pal = colorQuantile(viridis_pal(option = "D")(5), domain = rbind(agg_17, agg_16, agg_15)$S000),
+          values = ~ S000,
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            p = paste0(round(p * 100), '%')
+            cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+          title = "Number of All Jobs<br>in Wasco County",
+          na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2016",
-          fillColor = ~qtileS000(agg_16$S000),
+          fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_16$S000)(agg_16$S000),
           label = agg_16$S000) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2015",
-          fillColor = ~qtileS000(agg_15$S000),
+          fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_15$S000)(agg_15$S000),
           label = agg_15$S000) %>%
-        addLegend(
-          data = agg_17,
-          "bottomright",
-          pal = qtileS000,
-          values = ~ S000,
-          title = "Wasco County All Job Density",
-          opacity = 1,
-          na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("South Wasco School District"),
-          overlayGroups = c("2017", "2016", "2015"),
+          baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
         hideGroup(c("2016", "2015"))}
     #SI01 (Goods Producing industry sectors) by year -------
     else if (input$sect == "Goods"){
+      colors_SI01 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI01))
       #output$od_SI01leaf <- renderLeaflet({
       od_SI01leaf %>%
         addPolygons(
           data = st_as_sf(agg_17),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2017",
-          fillColor = ~qtileS000(agg_17$SI01),
+          fillColor = ~colors_SI01((agg_17$SI01)),
           label = agg_17$SI01) %>%
+        addLegend(
+          data = rbind(agg_17, agg_16, agg_15),
+          "bottomright",
+          pal = colors_SI01,
+          values = ~ unique(SI01),
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            p = paste0(round(p * 100), '%')
+            cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+          title = "Number of Goods Producing<br>Sector Jobs in Wasco County",
+          na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2016",
-          fillColor = ~qtileS000(agg_16$SI01),
+          fillColor = ~colors_SI01((agg_16$SI01)),
           label = agg_16$SI01) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2015",
-          fillColor = ~qtileS000(agg_15$SI01),
+          fillColor = ~colors_SI01((agg_15$SI01)),
           label = agg_15$SI01) %>%
-        addLegend(
-          data = agg_17,
-          "bottomright",
-          pal = qtileS000,
-          values = ~ S000,
-          title = "Goods Producing Industry\nJob Density",
-          opacity = 1,
-          na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("South Wasco School District"),
-          overlayGroups = c("2017", "2016", "2015"),
+          baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
         hideGroup(c("2016", "2015"))}
     #SI02 (Trade, Transportation, and Utilities industry sectors) by year --------
     else if (input$sect == "Trade"){
+      colors_SI02 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI02))
       # output$od_SI02leaf <- renderLeaflet({
       od_SI02leaf %>%
         addPolygons(
           data = st_as_sf(agg_17),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2017",
-          fillColor = ~qtileS000(agg_17$SI02),
+          fillColor = ~colors_SI02((agg_17$SI02)),
           label = agg_17$SI02) %>%
+        addLegend(
+          data = rbind(agg_17, agg_16, agg_15),
+          "bottomright",
+          pal = colors_SI02,
+          values = ~ unique(SI02),
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            p = paste0(round(p * 100), '%')
+            cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+          title = "Number of Trade, Transportation,<br>and Utilities Sector Jobs<br>in Wasco County",
+          na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2016",
-          fillColor = ~qtileS000(agg_16$SI02),
+          fillColor = ~colors_SI02((agg_16$SI02)),
           label = agg_16$SI02) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2015",
-          fillColor = ~qtileS000(agg_15$SI02),
+          fillColor = ~colors_SI02((agg_15$SI02)),
           label = agg_15$SI02) %>%
-        addLegend(
-          data = agg_17,
-          "bottomright",
-          pal = qtileS000,
-          values = ~ S000,
-          title = "Trade, Transportation,\nand Utilities Industry\nJob Density",
-          opacity = 1,
-          na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("South Wasco School District"),
-          overlayGroups = c("2017", "2016", "2015"),
+          baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
         hideGroup(c("2016", "2015"))}
     #SI03 (All Other Services industry sectors) by year ----------
     else if (input$sect == "AllOther"){
+      colors_SI03 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI03))
       # output$od_SI03leaf <- renderLeaflet({
       od_SI03leaf %>%
         addPolygons(
           data = st_as_sf(agg_17),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2017",
-          fillColor = ~qtileS000(agg_17$SI03),
+          fillColor = ~colors_SI03((agg_17$SI03)),
           label = agg_17$SI03) %>%
+        addLegend(
+          data = rbind(agg_17, agg_16, agg_15),
+          "bottomright",
+          pal = colors_SI03,
+          values = ~ unique(SI03),
+          labFormat = function(type, cuts, p) {
+            n = length(cuts)
+            p = paste0(round(p * 100), '%')
+            cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+          title = "Number of All Other Services<br>Sector Jobs in Wasco County",
+          na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2016",
-          fillColor = ~qtileS000(agg_16$SI03),
+          fillColor = ~colors_SI03((agg_16$SI03)),
           label = agg_16$SI03) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
           opacity = 0,
-          fillOpacity = 1,
+          fillOpacity = .7,
           group = "2015",
-          fillColor = ~qtileS000(agg_15$SI03),
+          fillColor = ~colors_SI03((agg_15$SI03)),
           label = agg_15$SI03) %>%
-        addLegend(
-          data = agg_17,
-          "bottomright",
-          pal = qtileS000,
-          values = ~ S000,
-          title = "All Other Services Industry\nJob Density",
-          opacity = 1,
-          na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("South Wasco School District"),
-          overlayGroups = c("2017", "2016", "2015"),
+          baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
         hideGroup(c("2016", "2015"))}
   })
@@ -1790,21 +1810,20 @@ server <- function(input, output, session) {
 ## plotlyOutput("medincomeplot") ----
 
   output$medincomeplot <- renderPlotly({
-    p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-                , aes(x=year, y=median_household_income, group = NAME, color = south_wasco,
-                      text = paste0("Region: ", NAME,
-                                    "<br>Year: ", year,
-                                    "<br>Median Household Income: $", median_household_income,
-                                    "<br>Margin of Error: $", median_household_income_moe))) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2) +
-      scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-      scale_alpha_manual(values=c(1,1,1,0.1)) +
-      theme_minimal() + ggtitle("Median Household Income 2015-2018") + ylab("Median Household Income") + xlab("Year")
-    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
-                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    ggplotly(ggplot(acs_counties, 
+                    aes(x=year, y=median_household_income, group = NAME, color = south_wasco,
+                        text = paste0("Region: ", NAME,
+                                      "<br>Year: ", year,
+                                      "<br>Median Household Income: $", median_household_income,
+                                      "<br>Margin of Error: $", median_household_income_moe))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_color_manual(name = "Region", values = c(graypal,viridis(3, option = "D")), labels=c("Oregon", "South Wasco", "Wasco", "Neighboring Counties")) +
+               theme_minimal() + ggtitle("Median Household Income 2015-2018") + 
+               ylab("Median Household Income") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian", 
+                                         "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Poverty rate -----
@@ -1907,21 +1926,18 @@ server <- function(input, output, session) {
   })
 
   output$povertyplot <- renderPlotly({
-    p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-                , aes(x=year, y=below_poverty, group = NAME, color = south_wasco,
-                      text = paste0("Region: ", NAME,
-                                    "<br>Year: ", year,
-                                    "<br>Percent Below Federal Poverty: ", below_poverty, "%",
-                                    "<br>Margin of Error: ", below_poverty_moe, "%"))) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2) +
-      scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-      scale_alpha_manual(values=c(1,1,1,0.1)) +
-      theme_minimal() + ggtitle("Percent Below Federal Poverty: 2015-2018") + ylab("Percent Below Federal Poverty") + xlab("Year")
-    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
-                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    ggplotly(ggplot(acs_counties, aes(x=year, y=below_poverty, group = NAME, color = south_wasco,
+                                      text = paste0("Region: ", NAME,
+                                                    "<br>Year: ", year,
+                                                    "<br>Percent Below Federal Poverty: ", below_poverty, "%",
+                                                    "<br>Margin of Error: ", below_poverty_moe, "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_colour_manual(name = "Region", values = c(graypal,viridis(3, option = "D"))) +
+               theme_minimal() + ggtitle("Percent Below Federal Poverty: 2015-2018") + ylab("Percent Below Federal Poverty") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE,
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Income distribution -----
@@ -1943,8 +1959,6 @@ server <- function(input, output, session) {
                                                     -year, -NAME, -geometry), 1, max, TRUE))
   income_dist_15_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                      domain = c(0, income_dist_max_perc_2015))
-
-
   output$incomedismap <- renderLeaflet({
     if (input$incomedisyear == "2018"){
       leaflet(income_dist_2018) %>%
@@ -2671,85 +2685,81 @@ server <- function(input, output, session) {
   })
 
   output$incomedisplot <- renderPlotly({
+    #stacked bar charts
     income <- acs_counties %>% select(NAME, year, contains("income"))
     income_perc <- income %>% select(!contains("moe"), -median_household_income, NAME, year)
     income_moe <- income %>% select(NAME, year, contains("moe"), -median_household_income_moe)
     income_perc <- melt(income_perc, id.vars = c("NAME", "year"), measure.vars = colnames(income_perc)[-c(1,2)])
     income_moe <- income_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colnames(income_moe)[-c(1,2)]) %>%
       rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
-    income_table <- merge(x = income_perc, y = income_moe, by=c("NAME", "variable", "year"))
-
-    ggplotly(ggplot(filter(income_table, year ==2018))+
-               geom_bar(aes(fill=variable, y=value, x=NAME), position = position_stack(reverse = TRUE), stat="identity")+
-               scale_fill_manual(name ="Income Bracket",values = viridis(10, option = "D")) +
-               # scale_fill_discrete(name = "Income Bracket", labels = c("Less than 10,000", "10,000-14,999", "15,000-24,999",
-               #                                                         "25,000-34,999", "35,000-49,999", "50,000-74,999",
-               #                                                         "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
-               ylab("% of Population") + xlab("Region") +
-               scale_colour_manual(values = viridis_pal(option = "D")(10)) +
-               ggtitle("Income Distribution for 2018") + coord_flip()) %>%
-      config(displayModeBar = "static", displaylogo = FALSE,
+    income_table <- merge(x = income_perc, y = income_moe, by=c("NAME", "variable", "year"))%>%
+      mutate(variable = recode_factor(variable,
+                                      "income_less_than_10k" =  "Less Than $10,000", "income_10k_14999" = "$10,000-$14,999",
+                                      "income_15k_24999" = "$15,000-$24,999", "income_25k_34999"="$25,000-$34,999",
+                                      "income_35K_49999" = "$35,000-$49,999", "income_50K_74999" ="$50,000-$74,999",
+                                      "income_75K_99999" = "$75,000-$99,999", "income_100K_149999" = "$100,000-$149,999",
+                                      "income_150K_199999" = "$150,000-$199,999", "income_200K_more" = "Above $200,000"))
+    
+    ggplotly(ggplot(filter(income_table, year ==input$incomedisyear))+
+               geom_bar(aes(fill=variable, y=value, x=NAME,
+                            text = paste0("Region: ", NAME,
+                                          "<br>Year: ", year,
+                                          "<br>Percent of Population: ", value, "%",
+                                          "<br>Margin of Error: ", moe, "%")), 
+                        position = position_stack(reverse = TRUE), stat="identity")+ 
+               scale_fill_manual(name ="Income Bracket",
+                                 values = viridis(10, option = "D")) +
+               ylab("% of Population") + xlab("") + theme_minimal() +
+               ggtitle(paste0("Income Distribution for ", input$incomedisyear)) + coord_flip(), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                         "hoverCompareCartesian","resetScale2d"), tooltip = "text")
+                                         "hoverCompareCartesian","resetScale2d")) 
   })
 
 ## SERVER: PANEL - Affordable housing -----
 ## plotlyOutput("housingplot") ------
 
   output$housingplot <- renderPlotly({
-    p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"),
-                                                                other_level = "Neighboring Counties"))
-                , aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
-                      text = paste0("Region: ", NAME,
-                                    "<br>Year: ", year,
-                                    "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%"))) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2) +
-      scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal))  +
-      theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") + xlab("Year")
-    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
-                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    ggplotly(ggplot(acs_counties, aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
+                                      text = paste0("Region: ", NAME,
+                                                    "<br>Year: ", year,
+                                                    "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
+                                                    "<br>Margin of Error: ", round(affordable_housing_all_perc_moe, digits = 1), "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
+               theme_minimal() + ggtitle("Affordable Housing 2015-2018",subtitle = "Occupied households where monthly costs are less than 30% of houshold income") + 
+               ylab("Affordable Housing") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    
   })
 
 ## SERVER: PANEL - Rent vs own -----
 ## plotlyOutput("rentownplot") -----
 
   output$rentownplot <- renderPlotly({
-    housing <- select(acs_counties, NAME, year, contains("affordable_housing"))
-    housing_rent_own_perc <- housing %>% select(NAME, year, affordable_housing_own_perc, affordable_housing_rent_perc)
-    housing_rent_own_moe <- housing %>% select(NAME, year, affordable_housing_own_perc_moe, affordable_housing_rent_perc_moe)
-    housing_rent_own_perc <- melt(housing_rent_own_perc, id.vars = c("NAME", "year"),measure.vars = colnames(housing_rent_own_perc)[-c(1,2)])
-    housing_rent_own_moe <- melt(housing_rent_own_moe, id.vars = c("NAME", "year"),measure.vars = colnames(housing_rent_own_moe)[-c(1,2)]) %>%
-      rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
-    housing_rent_own_table <- merge(x = housing_rent_own_perc, y = housing_rent_own_moe, by=c("NAME", "variable", "year"))
-
-
-    #grouped bar chart for own and rent occupancy
-    ggplotly(ggplot(filter(housing_rent_own_table, year == 2018),aes(x = NAME, y = value, fill = variable),
-                    text = paste0("Region: ", NAME,
-                                  "<br>Year: ", year,
-                                  "<br>Affordable Housing: ", round(value, digits = 1), "%")) +
-               geom_col(position = "dodge") +
-               scale_fill_discrete(name = "Housing Ownership", labels = c("Own", "Rent")) +
-               #theme_minimal() + theme(axis.text.x = element_text(angle=30)) +
-               ylab("% of Occupied housing units") + xlab("Region") + coord_flip() + theme_minimal() +
-               ggtitle("Affordable Housing 2015-2018", subtitle = "Occupied households where monthly costs are less than 30% of houshold income"), tooltip = "text")
+    ggplotly(ggplot(acs_counties, aes(x=year, y=owner_occupied_housing_perc, group = NAME, color = south_wasco,
+                                      text = paste0("Region: ", NAME,
+                                                    "<br>Year: ", year,
+                                                    "<br>Percent of Owner Occupied Homes: ", round(owner_occupied_housing_perc, digits = 1), "%",
+                                                    "<br>Margin of Error: ", round(owner_occupied_housing_perc_moe, digits = 1), "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
+               theme_minimal() + ggtitle("Owner Occupied Housing 2015-2018") + ylab("Percent of Owners (%)") + 
+               xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    
   })
 
 ## SERVER: PANEL - Race -----
 ## plotlyOutput("raceplot") ----
 ## leafletOutput("racemap") -----
   # add years filter
-  race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
-  race_div <- select(race_div, !contains("moe"))
-  race_div_2018 <- filter(race_div, year == 2018)
-  race_div_2017 <- filter(race_div, year == 2017)
-  race_div_2016 <- filter(race_div, year == 2016)
-  race_div_2015 <- filter(race_div, year == 2015)
-  race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
-    select(!contains("total"))
   race_div_white_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                      domain = race_div$race_white)
   race_div_black_pal <- colorNumeric(viridis_pal(option = "D")(3),
@@ -2766,7 +2776,6 @@ server <- function(input, output, session) {
                                    domain = race_div$race_other)
   race_div_multi_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                      domain = race_div$race_two_more)
-
   output$racemap <- renderLeaflet({
     if (input$raceyears == "2018") {
       leaflet(race_div_2018) %>%
@@ -2969,6 +2978,7 @@ server <- function(input, output, session) {
           opacity = 1,
           fillOpacity= 0) %>%
         addLayersControl(
+          position = "topleft",
           overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
                             "Hispanic", "Other", "Multiple Groups"),
           options = layersControlOptions(collapsed = T)) %>%
@@ -3178,6 +3188,7 @@ server <- function(input, output, session) {
           fillOpacity= 0,
           group = "Basemap") %>%
         addLayersControl(
+          position = "topleft",
           overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
                             "Hispanic", "Other", "Multiple Groups"),
           options = layersControlOptions(collapsed = T)) %>%
@@ -3387,6 +3398,7 @@ server <- function(input, output, session) {
           fillOpacity= 0,
           group = "Basemap") %>%
         addLayersControl(
+          position = "topleft",
           overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
                             "Hispanic", "Other", "Multiple Groups"),
           options = layersControlOptions(collapsed = T)) %>%
@@ -3596,6 +3608,7 @@ server <- function(input, output, session) {
           fillOpacity= 0,
           group = "Basemap") %>%
         addLayersControl(
+          position = "topleft",
           overlayGroups = c("White", "Black", "Native American", "Asian", "Native Hawaiian",
                             "Hispanic", "Other", "Multiple Groups"),
           options = layersControlOptions(collapsed = T)) %>%
@@ -3611,30 +3624,33 @@ server <- function(input, output, session) {
       rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
     race <- race %>% select(!contains("moe"), NAME, year)
     race <- melt(race, id.vars = c("NAME", "year"),measure.vars = colnames(race)[-c(1,2)])
-    race_table <- merge(x = race, y = race_moe, by=c("NAME", "variable", "year"))
-
+    race_table <- merge(x = race, y = race_moe, by=c("NAME", "variable", "year")) %>%
+      mutate(variable = recode(variable, "race_american_indian" = "American Indian or Alaskan Native",
+                               "race_asian" ="Asian", "race_black"="Black or African American",
+                               "race_hispanic" = "Hispanic or Latino of any race", 
+                               "race_native_hawaiian" = "Native Hawaiian or Other Pacific Islander",
+                               "race_other" = "Some Other Race",
+                               "race_two_more" ="Two or More Races", "race_white"="Whte"))
+    
     #plot all races onto one large set of grouped bars for every county.
-    ggplotly(ggplot(filter(race_table, year == 2018)) +
-               geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge")+
-               #geom_errorbar(aes(x = as.factor(NAME), ymin=value-moe, ymax=value+moe), width=.2,position="dodge") +
-               scale_fill_manual(values = viridis(8, option="D"),name="Groups",labels = c("White", "Black or African American", "American Indian or Alaskan Native",
-                                                                                          "Asian", "Native Hawaiian or Pacific Islander", "Hispanic or Latino",
-                                                                                          "Two or More","Other")) +
-               #theme_minimal() + theme(axis.text.x = element_text(angle=45)) +
-               ylab("% of Population") + xlab("Region") + coord_flip() + theme_minimal() +
-               ggtitle("% Racial and Ethnic Diversity"))
+    ggplotly(ggplot(filter(race_table, year == input$raceyears), aes(x = NAME, y = value, fill = variable,
+                                                          text = paste0("Region: ", NAME,
+                                                                        "<br>Year: ", year,
+                                                                        "<br>Percent of Population: ", round(value, digits = 1), "%",
+                                                                        "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
+               geom_col(position = "dodge") + 
+               scale_fill_manual(values = viridis(8, option="D"), name="Groups") +
+               ylab("% of Population") + xlab("") + coord_flip() + theme_minimal() +
+               ggtitle(paste0("% Racial and Ethnic Diversity: ", input$raceyears)), tooltip="text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                         "hoverCompareCartesian","resetScale2d")) 
   })
 
 ## SERVER: PANEL - Family -----
 ## plotlyOutput("familyplot") ----
 ## leafletOutput("familymap") ----
-  fam_stab <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry)
-  fam_stab <- select(fam_stab, !contains("moe")) %>% select(!contains("total"))
-  fam_stab_2018 <- filter(fam_stab, year == 2018)
-  fam_stab_2017 <- filter(fam_stab, year == 2017)
-  fam_stab_2016 <- filter(fam_stab, year == 2016)
-  fam_stab_2015 <- filter(fam_stab, year == 2015)
-  fam_stab_moe <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry) %>% select(!contains("total"))
+
   fam_stab_max_perc_2018 <- max(apply(X = select(data_frame(fam_stab_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
   fam_stab_2018_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                     domain = c(0, fam_stab_max_perc_2018))
@@ -3671,16 +3687,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2018_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2018_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2018$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2018$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2018)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Unmarried: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2018)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2018_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2018$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2018$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2018)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3720,7 +3753,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2018)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3746,16 +3779,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2017_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2017_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2017$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2017$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2017)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Married: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2017)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2017_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2017$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2017$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2017)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3795,7 +3845,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2017)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3821,16 +3871,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2016_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2016_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2016$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2016$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2016)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Married: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2016)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2016_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2016$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2016$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2016)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3870,7 +3937,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2016)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3896,16 +3963,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2015_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2015_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2015$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2015$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2015)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Married: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2015)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2015_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2015$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2015$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2015)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3945,7 +4029,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2015)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3953,45 +4037,57 @@ server <- function(input, output, session) {
 
   output$familyplot <- renderPlotly({
     family <- select(filter(acs_counties_neighbors), NAME, year,contains("family"))
-    family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_perc,
-                                     family_children_nonfamily_perc, family_nonfamily_household_perc,
-                                     family_nonfamily_household_perc)
-    family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_perc_moe,
-                                    family_children_nonfamily_perc_moe, family_nonfamily_household_perc_moe,
-                                    family_nonfamily_household_perc_moe)
-    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>%
+    family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_female_perc,
+                                     family_single_parent_male_perc, family_children_nonfamily_perc)
+    family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_female_perc_moe,
+                                    family_single_parent_male_perc_moe,
+                                    family_children_nonfamily_perc_moe)
+    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
       rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
     family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
-    family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year"))
+    family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year")) %>%
+      mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents", 
+                                      "family_single_parent_perc" = "Single Parent",
+                                      "family_single_parent_female_perc" = "Single Mother",
+                                      "family_single_parent_male_perc" = "Single Father",
+                                      "family_children_nonfamily_perc" ="Living with Nonfamily"))
     #grouped bar chart for family type
-    ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fill = variable),
-                    text = paste0("Region: ", NAME,
-                                  "<br>Year: ", year,
-                                  "<br>% Children: ", round(value, digits = 1), "%")) +
-               geom_col(position = "dodge") +
+    ggplotly(ggplot(filter(family_table, year == input$familyyears), aes(x = NAME, y = value, fill = variable, 
+                                                            text = paste0("Region: ", NAME,
+                                                                          "<br>Year: ", year,
+                                                                          "<br>Percent of Children: ", round(value, digits = 1), "%",
+                                                                          "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
+               geom_bar(position = position_stack(reverse = TRUE), stat="identity") + 
                scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
-               ylab("% of children") + xlab("Region") + coord_flip()+ theme_minimal() +
-               ggtitle("Family Structure for Children under 18-2018"))
+               ylab("% of children")+xlab("") + coord_flip()+ theme_minimal() +
+               ggtitle(paste0("Family Structure for Children Under 18 <br>", input$familyyears)), tooltip = "text")%>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                         "hoverCompareCartesian","resetScale2d")) 
   })
 
 ## SERVER: PANEL - Education attainment -----
 ## plotlyOutput("degreeplot") -----
 ## leafletOutput("degreemap") ----
-  # add years filter
-  edu_attain_max_perc_2018 <- max(apply(X = select(data_frame(edu_attain_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+
+  edu_attain_max_perc_2018 <- max(apply(X = select(data_frame(edu_attain_2018),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
   edu_attain_2018_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                       domain = c(0, edu_attain_max_perc_2018))
-  edu_attain_max_perc_2017 <- max(apply(X = select(data_frame(edu_attain_2017), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+  edu_attain_max_perc_2017 <- max(apply(X = select(data_frame(edu_attain_2017),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
   edu_attain_2017_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                       domain = c(0, edu_attain_max_perc_2017))
-  edu_attain_max_perc_2016 <- max(apply(X = select(data_frame(edu_attain_2016), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+  edu_attain_max_perc_2016 <- max(apply(X = select(data_frame(edu_attain_2016),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
   edu_attain_2016_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                       domain = c(0, edu_attain_max_perc_2016))
-  edu_attain_max_perc_2015 <- max(apply(X = select(data_frame(edu_attain_2015), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
+  edu_attain_max_perc_2015 <- max(apply(X = select(data_frame(edu_attain_2015),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
   edu_attain_2015_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                       domain = c(0, edu_attain_max_perc_2015))
 
-  output$degressmap <- renderLeaflet({
+  output$degreemap <- renderLeaflet({
     if (input$degreeyears == "2018"){
       leaflet(edu_attain_2018) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
@@ -3999,7 +4095,7 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "2018",
+          group = "Less than High School",
           fillColor = ~edu_attain_2018_pal(education_less_hs),
           label = ~lapply(paste(sep = "",
                                 substr(edu_attain_2018$NAME, 20, 60), "<br/>",
@@ -4081,14 +4177,14 @@ server <- function(input, output, session) {
                          "Associates or Some College", "Bachelors or Higher"),
           options = layersControlOptions(collapsed = T))
     }
-    else if (input$degreeyears == "2017"){
+    else if (input$incomedisyear == "2017"){
       leaflet(edu_attain_2017) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "2018",
+          group = "2017",
           fillColor = ~edu_attain_2017_pal(education_less_hs),
           label = ~lapply(paste(sep = "",
                                 substr(edu_attain_2017$NAME, 20, 60), "<br/>",
@@ -4170,14 +4266,14 @@ server <- function(input, output, session) {
                          "Associates or Some College", "Bachelors or Higher"),
           options = layersControlOptions(collapsed = T))
     }
-    else if (input$degreeyears == "2016"){
+    else if (input$incomedisyear == "2016"){
       leaflet(edu_attain_2016) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "2018",
+          group = "Less than High School",
           fillColor = ~edu_attain_2016_pal(education_less_hs),
           label = ~lapply(paste(sep = "",
                                 substr(edu_attain_2016$NAME, 20, 60), "<br/>",
@@ -4259,18 +4355,18 @@ server <- function(input, output, session) {
                          "Associates or Some College", "Bachelors or Higher"),
           options = layersControlOptions(collapsed = T))
     }
-    else if (input$degreeyears == "2015"){
+    else if (input$incomedisyear == "2015"){
       leaflet(edu_attain_2015) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "2018",
+          group = "Less than High School",
           fillColor = ~edu_attain_2015_pal(education_less_hs),
           label = ~lapply(paste(sep = "",
-                                substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                                substr(edu_attain_2015$NAME, 1, 17),
+                                substr(NAME, 20, 60), "<br/>",
+                                substr(NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(edu_attain_moe,
                                              year == 2015)$education_less_hs_moe, 1), "%<br/>",
@@ -4284,8 +4380,8 @@ server <- function(input, output, session) {
           group = "High School Graduate",
           fillColor = ~edu_attain_2015_pal(education_hs_grad),
           label = ~lapply(paste(sep = "",
-                                substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                                substr(edu_attain_2015$NAME, 1, 17),
+                                substr(NAME, 20, 60), "<br/>",
+                                substr(NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(edu_attain_moe,
                                              year == 2015)$education_hs_grad_moe, 1), "%<br/>",
@@ -4299,8 +4395,8 @@ server <- function(input, output, session) {
           group = "Associates or Some College",
           fillColor = ~edu_attain_2015_pal(education_assoc_some_college),
           label = ~lapply(paste(sep = "",
-                                substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                                substr(edu_attain_2015$NAME, 1, 17),
+                                substr(NAME, 20, 60), "<br/>",
+                                substr(NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(edu_attain_moe,
                                              year == 2015)$education_assoc_some_college_moe, 1), "%<br/>",
@@ -4314,8 +4410,8 @@ server <- function(input, output, session) {
           group = "Bachelors or Higher",
           fillColor = ~edu_attain_2015_pal(education_bachelors_or_higher),
           label = ~lapply(paste(sep = "",
-                                substr(edu_attain_2015$NAME, 20, 60), "<br/>",
-                                substr(edu_attain_2015$NAME, 1, 17),
+                                substr(NAME, 20, 60), "<br/>",
+                                substr(NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(edu_attain_moe,
                                              year == 2015)$education_bachelors_or_higher_moe, 1), "%<br/>",
@@ -4348,28 +4444,41 @@ server <- function(input, output, session) {
                          "Associates or Some College", "Bachelors or Higher"),
           options = layersControlOptions(collapsed = T))
     }
-
   })
+
+
   output$degreeplot <- renderPlotly({
     ed <- select(filter(acs_counties_neighbors), NAME, year, contains("education"))
     ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
-    ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe,
+    ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe, 
                             education_assoc_some_college_moe, education_bachelors_or_higher_moe)
-    ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>%
+    ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>% 
       rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
     ed_perc <- melt(ed_perc, id.vars = c("NAME", "year"), measure.vars = colnames(ed_perc)[-c(1,2)])
-    ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year"))
+    ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year")) %>% 
+      mutate(value = round(value,1), moe = round(moe,1),
+             variable = recode_factor(variable, "education_less_hs" ="Less than High School", 
+                                      "education_hs_grad" = "High School Graduate or Equivalent (GED)",
+                                      "education_assoc_some_college" ="Associates Degree or Some College",
+                                      "education_bachelors_or_higher" ="Bachelors or Higher"))
+    
     #grouped bar chart for own and rent occupancy
-    ggplotly(ggplot(filter(ed_table, year == 2018)) +
-               geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge") +
+    ggplotly(ggplot(filter(ed_table, year == input$degreeyears)) +
+               geom_bar(aes(x = NAME, y = value, fill = variable,
+                            text = paste0("Region: ", NAME,
+                                          "<br>Year: ", year,
+                                          "<br>Percent of Adults 25 and Older: ", value, "%",
+                                          "<br>Margin of Error: ", moe, "%")),
+                        position = position_stack(reverse = TRUE), stat="identity") +
                scale_fill_manual(values = viridis(4, option = "D"),
-                                 name = "Educational Attainment",
-                                 breaks = c("education_less_hs","education_hs_grad","education_assoc_some_college", "education_bachelors_or_higher"),
-                                 labels = c("Less than High School", "High School Graduate or Equivalent (GED)","Associates Degree or Some College", "Bachelors or Higher")) +
-               #theme_minimal() + theme(axis.text.x = element_text(angle=30)) +
-               ylab("% of Adults 25 and Older") + xlab("Region") +
+                                 name = "Educational Attainment") +
+               #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
+               ylab("% of Adults 25 and Older") + xlab("") + 
                coord_flip()+ theme_minimal() +
-               ggtitle("Educational Attainment for Adults 25 and older-2018"))
+               ggtitle(paste("Educational Attainment for Adults 25 and Older",input$degreeyears, sep = " ")), tooltip = "text")%>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                         "hoverCompareCartesian","resetScale2d")) 
   })
 
 

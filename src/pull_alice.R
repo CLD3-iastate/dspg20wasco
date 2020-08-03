@@ -19,6 +19,13 @@ alice_zipcode <- openxlsx::read.xlsx("https://www.unitedforalice.org/Attachments
 
 
 
+
+
+
+
+
+
+
 ######## ALICE Household Budget #########
 # reading from pdf :o
 # following this tutorial: https://rstudio-pubs-static.s3.amazonaws.com/415060_553527fd13ed4f30aae0f1e4483aa970.html
@@ -28,6 +35,3 @@ alice_zipcode <- openxlsx::read.xlsx("https://www.unitedforalice.org/Attachments
 
 PDF <- pdf_text("oregon_grass_and_legume_seed_crops_preliminary_estimates_2017.pdf") %>%
   readr::read_lines() #open the PDF inside your project folder
-
-########## Test visualizing #######
-wasco

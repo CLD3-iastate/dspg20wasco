@@ -18,39 +18,54 @@ library(here);library(viridis)
 
 ```{r echo=FALSE, results='hide', fig.keep='all', message = FALSE}
 #read in combined dataset
-acs_data <- fread(here("/data/acs/combined_acs.csv")) 
-acs_data$GEOID <- as.character(acs_data$GEOID)
-acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
-                         NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
-                         NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
-                         NAME == "Multnomah County, Oregon" | NAME == "Clackamas County, Oregon" |
-                         NAME == "Marion County, Oregon" | NAME == "Washington County, Oregon" |
-                         NAME == "Deschutes County, Oregon" | NAME == "Lane County, Oregon" | 
-                         NAME == "Umatilla County, Oregon" |
-                         NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
-                         NAME == "Oregon")  
-acs_counties_neighbors <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" | 
-                         NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
-                         NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
-                         NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" | 
+# acs_data <- fread(here("/data/acs/combined_acs.csv")) 
+# acs_data$NAME <- gsub("County, Washington", "County, WA", 
+#                       gsub("District 1, Oregon","District 1, OR",
+#                            gsub("County, Oregon","County, OR",acs_data$NAME)))
+# acs_data$GEOID <- as.character(acs_data$GEOID)
+
+acs_counties <- readRDS(here("/data/acs_counties.Rds"))
+acs_counties <- acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, OR",
+                                                            "Wasco County, OR", "Oregon"), 
+                                             other_level = "Neighboring Counties"),
+                     #### To get the south wasco lines to be most visible, order the factor levels
+                     #### so that south wasco is drawn last (drawn over the rest)
+                     #### Plotly eliminates transparency of lines
+                     south_wasco = factor(south_wasco , levels= c("Neighboring Counties",
+                                                                  "Oregon","Wasco County, OR", 
+                                                                  "South Wasco County School District 1, OR")))
+acs_counties_neighbors <- filter(acs_counties, NAME == "South Wasco County School District 1, OR" | 
+                         NAME == "Wasco County, OR"| NAME == "Hood River County, OR" |
+                         NAME == "Sherman County, OR" | NAME == "Jefferson County, OR" |
+                         NAME == "Skamania County, WA" | NAME == "Klickitat County, WA" | 
                          NAME == "Oregon")  
 
 #get tract level geography
-or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "Jefferson"),
-                       cb = TRUE)
-wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
-                    cb = TRUE)
-tract_geo <- rbind(or_tracts, wa_tracts)
-acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
-acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")  
+# or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "Jefferson"),
+#                        cb = TRUE)
+# wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
+#                     cb = TRUE)
+# tract_geo <- rbind(or_tracts, wa_tracts)
+# acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
+# acs_tracts <- inner_join(tract_geo, acs_tracts, by = "GEOID") %>% rename("NAME" = "NAME.y")
 
 
 
-
+acs_tracts <- readRDS(here("/data/acs_tracts.Rds"))
 ######## USE THE FOLLOWING ##########
 # color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
 graypal = "#ADB5BD"
 
+
+# filter(acs_data, NAME == "South Wasco County School District 1, OR" | 
+#                          NAME == "Wasco County, OR"| NAME == "Hood River County, OR" |
+#                          NAME == "Sherman County, OR" | NAME == "Jefferson County, OR" |
+#                          NAME == "Multnomah County, OR" | NAME == "Clackamas County, OR" |
+#                          NAME == "Marion County, OR" | NAME == "Washington County, OR" |
+#                          NAME == "Deschutes County, OR" | NAME == "Lane County, OR" | 
+#                          NAME == "Umatilla County, OR" |
+#                          NAME == "Skamania County, WA" | NAME == "Klickitat County, WA" | 
+#                          NAME == "Oregon") %>% 
 ```
 
 The following plots are exploratory analysis and trial visualizations to include in the dashboard. The aesthetics and interactive capabilities are still in need of being improved. In addition, the margins of error 
@@ -97,22 +112,20 @@ Easier to see trends, but lots of colors make it quite busy. Only drawback to th
 
 Same line chart but colors are only kept for south wasco, wasco county, and the state geography.
 ```{r warning=FALSE, message=FALSE}
-p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-            , aes(x=year, y=median_household_income, group = NAME, color = south_wasco,
+ 
+#Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
+ggplotly(ggplot(acs_counties, 
+            aes(x=year, y=median_household_income, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
                                 "<br>Median Household Income: $", median_household_income,
                                 "<br>Margin of Error: $", median_household_income_moe))) +
-  geom_line(size = 1.5) + 
-  geom_point(size = 2) +
-  scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-  scale_alpha_manual(values=c(1,1,1,0.1)) +
-  theme_minimal() + ggtitle("Median Household Income 2015-2018") + ylab("Median Household Income") + xlab("Year") 
-#Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_color_manual(name = "Region", values = c(graypal,viridis(3, option = "D")), labels=c("Oregon", "South Wasco", "Wasco", "Neighboring Counties")) +
+  theme_minimal() + ggtitle("Median Household Income 2015-2018") + ylab("Median Household Income") + xlab("Year"), tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
                                          modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                                                      "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-#n
 ```
 
 Much cleaner looking plot! It's obvious where south wasco ranks in relation to the rest of the counties and geographies. We see that South wasco has the lowest median houshold income, but is very similar to that of Sherman county. Generally, the state of Oregon is seeing a steading increase in median household income, however, south wasco's growth pattern has just started increasing from 2016 to now.
@@ -132,8 +145,6 @@ ggplotly(ggplot(income)+
   # scale_fill_discrete(name = "Income Bracket", labels = c("Less than 10,000", "10,000-14,999", "15,000-24,999",
   #                                                         "25,000-34,999", "35,000-49,999", "50,000-74,999", 
   #                                                         "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
-  #scale_colour_manual(name = "Income Bracket", values = dspgpal) +
-  #theme_minimal()+theme(axis.text.x = element_text(angle=30)) +
   ylab("% of Population") + xlab("Region") +
   ggtitle("Income Distribution for 2018") + coord_flip())
 ```
@@ -150,24 +161,53 @@ income_moe <- income %>% select(NAME, year, contains("moe"), -median_household_i
 income_perc <- melt(income_perc, id.vars = c("NAME", "year"), measure.vars = colnames(income_perc)[-c(1,2)])
 income_moe <- income_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colnames(income_moe)[-c(1,2)]) %>%
   rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
-income_table <- merge(x = income_perc, y = income_moe, by=c("NAME", "variable", "year"))
+income_table <- merge(x = income_perc, y = income_moe, by=c("NAME", "variable", "year"))%>%
+  mutate(variable = recode_factor(variable,
+                                  "income_less_than_10k" =  "Less Than $10,000", "income_10k_14999" = "$10,000-$14,999",
+                                  "income_15k_24999" = "$15,000-$24,999", "income_25k_34999"="$25,000-$34,999",
+                                  "income_35K_49999" = "$35,000-$49,999", "income_50K_74999" ="$50,000-$74,999",
+                                  "income_75K_99999" = "$75,000-$99,999", "income_100K_149999" = "$100,000-$149,999",
+                                  "income_150K_199999" = "$150,000-$199,999", "income_200K_more" = "Above $200,000"))
 
 ggplotly(ggplot(filter(income_table, year ==2018))+
-           geom_bar(aes(fill=variable, y=value, x=NAME), position = position_stack(reverse = TRUE), stat="identity")+ 
-           scale_fill_manual(name ="Income Bracket",values = viridis(10, option = "D")) +
-           # scale_fill_discrete(name = "Income Bracket", labels = c("Less than 10,000", "10,000-14,999", "15,000-24,999",
-           #                                                         "25,000-34,999", "35,000-49,999", "50,000-74,999", 
-           #                                                         "75,000-99,999","100,000-149,999", "150,000-199,999", "above 200,000")) +
-           ylab("% of Population") + xlab("Region") +
-           scale_colour_manual(values = viridis_pal(option = "D")(10)) +
-           ggtitle("Income Distribution for 2018") + coord_flip()) %>% 
+           geom_bar(aes(fill=variable, y=value, x=NAME,
+                        text = paste0("Region: ", NAME,
+                                "<br>Year: ", year,
+                                "<br>Percent of Population: ", value, "%",
+                                "<br>Margin of Error: ", moe, "%")), 
+                    position = position_stack(reverse = TRUE), stat="identity")+ 
+           scale_fill_manual(name ="Income Bracket",
+                             values = viridis(10, option = "D")) +
+           ylab("% of Population") + xlab("") + theme_minimal() +
+           ggtitle(paste0("Income Distribution for ", 2018)) + coord_flip(), tooltip = "text") %>% 
   config(displayModeBar = "static", displaylogo = FALSE, 
          modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                     "hoverCompareCartesian","resetScale2d"), tooltip = "text") 
+                                     "hoverCompareCartesian","resetScale2d")) 
 
 ```
 
 This stacked bar chart condenses the busy plot of distributions from the previous grouped bar. It is easier to see where the heavier densities are at the income extremes.
+
+mock code for sf maps with tracts plots not working
+```
+income <- acs_tracts %>% select(NAME, year, contains("income"))
+income_perc <- income %>% select(!contains("moe"), -median_household_income, NAME, year)
+income_moe <- income %>% select(NAME, year, contains("moe"), -median_household_income_moe)
+income_perc <- melt(income_perc, id.vars = c("NAME", "year"), measure.vars = colnames(income_perc)[-c(1,2)])
+income_moe <- income_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colnames(income_moe)[-c(1,2)]) %>%
+  rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
+income_table_tracts <- merge(x = income_perc, y = income_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(income_table_tracts, year == 2018), aes(fill = income_200k_more)) +
+  geom_sf(fill = "transparent", color = "gray20", size = 1, 
+          data = acs_tracts %>% group_by(COUNTYFP) %>% summarise()) + theme_minimal() +
+  labs(title = paste("Percent of households with income more than $200,000 by census track in", 2018, sep=" "))
+
+```
+
+
+
 
 
 ### Poverty Rate
@@ -189,25 +229,21 @@ ggplotly(ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = below_pove
 ```
 
 ```{r warning=FALSE, message=FALSE}
-p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-            , aes(x=year, y=below_poverty, group = NAME, color = south_wasco,
+ggplotly(ggplot(acs_counties, aes(x=year, y=below_poverty, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
                                 "<br>Percent Below Federal Poverty: ", below_poverty, "%",
                                 "<br>Margin of Error: ", below_poverty_moe, "%"))) +
-  geom_line(size = 1.5) + 
-  geom_point(size = 2) +
-  scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-  scale_alpha_manual(values=c(1,1,1,0.1)) +
-  theme_minimal() + ggtitle("Percent Below Federal Poverty: 2015-2018") + ylab("Percent Below Federal Poverty") + xlab("Year") 
-#Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
-                                         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-#n
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_colour_manual(name = "Region", values = c(graypal,viridis(3, option = "D"))) +
+  theme_minimal() + ggtitle("Percent Below Federal Poverty: 2015-2018") + ylab("Percent Below Federal Poverty") + xlab("Year"), tooltip = "text") %>% 
+  config(displayModeBar = "static", displaylogo = FALSE,
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 ```
 
-
+sf map
 ```{r warning=FALSE, message=FALSE}
 ggplot() +
   geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = below_poverty)) +
@@ -236,22 +272,19 @@ ggplot(filter(acs_counties, year == 2018), aes(x = NAME, y = employment_20_to_64
 
 
 ```{r warning=FALSE, message=FALSE}
-p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-            , aes(x=year, y=employment_20_to_64, group = NAME, color = south_wasco,
+ggplotly(ggplot(acs_counties, aes(x=year, y=employment_20_to_64, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
                                 "<br>Percent Employed: ", employment_20_to_64, "%",
                                 "<br>Margin of Error: ", employment_20_to_64_moe, "%"))) +
-  geom_line(size = 1.5) + 
-  geom_point(size = 2) +
-  scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-  scale_alpha_manual(values=c(1,1,1,0.1)) +
-  theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + ylab("Employment Ratio") + xlab("Year") 
-#Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
-                                         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-#n
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
+  theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + 
+  ylab("Employment Ratio") + xlab("Year"), tooltip = "text") %>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 ```
 
 static map
@@ -267,16 +300,15 @@ ggplot() +
 
 #### Labor participation rate
 ```{r warning=FALSE, message=FALSE}
-p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-            , aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
+p <- ggplot(acs_counties, aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
                                 "<br>Labor Force Participation Rate: ", labor_force_20_to_64, "%",
                                 "<br>Margin of Error: ", labor_force_20_to_64_moe, "%"))) +
-  geom_line(size = 1.5) + 
-  geom_point(size = 2) +
-  scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-  scale_alpha_manual(values=c(1,1,1,0.1)) +
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
+  #scale_alpha_manual(values=c(1,1,1,0.1)) +
   theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year") 
 #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
 ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
@@ -286,24 +318,33 @@ ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo 
 ```
 
 
+```{r warning = FALSE, message=FALSE}
+# sf map
+ggplot() +
+  geom_sf(data = filter(acs_tracts, year == 2018), aes(fill = labor_force_20_to_64)) +
+  labs(title = "Labor Force Participation Rate for Adults 20 to 64: 2015-2018") #+ 
+
+```
+
+
 
 ## Housing
 
+### Affordable Housing
 ```{r warning=FALSE, message=FALSE}
-p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), 
-                                                            other_level = "Neighboring Counties"))
-            , aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
+ggplotly(ggplot(acs_counties, aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
-                                "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%"))) +
-  geom_line(size = 1.5) + 
-  geom_point(size = 2) +
-  scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal))  +
-  theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") + xlab("Year")
-#Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
-                                         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+                                "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
+                                "<br>Margin of Error: ", round(affordable_housing_all_perc_moe, digits = 1), "%"))) +
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
+  theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") + 
+  xlab("Year"), tooltip = "text") %>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 
 ```
 
@@ -338,7 +379,9 @@ Of the occupied housing units, South Wasco's community ranks highly in being abl
 ```{r warning=FALSE, message=FALSE}
 #divergent bar chart to split up own and rent occupancy
 housing_diverge <- housing_rent_own_table %>% mutate(value = as.numeric(ifelse(variable == "affordable_housing_own_perc",
-                                                     value, -1*value)))
+                                                     value, -1*value)),
+                                                     variable = recode(variable, "affordable_housing_own_perc"="Own",
+                                                                       "affordable_housing_rent_perc"="Rent"))
 ggplotly(ggplot(filter(housing_diverge, year == 2018),
                 aes(x = NAME, y = value, fill = variable,
                     text = paste0("Region: ", NAME,
@@ -346,9 +389,8 @@ ggplotly(ggplot(filter(housing_diverge, year == 2018),
                                   "<br>Affordable Housing: ", round(abs(value), digits = 1), "%")))+
            geom_bar(stat = "identity") + 
            scale_y_continuous(breaks = pretty(housing_diverge$value), labels = abs(pretty(housing_diverge$value))) +
-           #scale_colour_manual(name = "Housing Ownership", values = c(dspgpal[1], dspgpal[9])) +
-           scale_fill_discrete(name = "Housing Ownership", labels = c("Own", "Rent")) +
-           theme_minimal() + labs(x="Region",y="% of Occupied Housing Units") +
+           scale_fill_manual(values = viridis(2, option="D"), name = "Housing Ownership") +
+           theme(legend.position = "bottom") + theme_minimal() + labs(x="Region",y="% of Occupied Housing Units") +
            coord_flip(), tooltip = "text") %>% layout(title = list(text = paste0("Affordable Housing 2015-2018",
                                            '<br>','<sup>',
                                            "% of occupied households where monthly costs are less than 30% of houshold income",
@@ -375,6 +417,25 @@ ggplotly(ggplot(housing_by_income, aes(x = NAME, y = value, fill = variable),
            ggtitle("Affordable Housing 2015-2018", subtitle = "Occupied households where monthly costs are less than 30% of houshold income"), tooltip = "text")
 ```
 
+### Housing Ownership
+Percent of occupied houses that are homeowners 
+```{r}
+ggplotly(ggplot(acs_counties, aes(x=year, y=owner_occupied_housing_perc, group = NAME, color = south_wasco,
+                  text = paste0("Region: ", NAME,
+                                "<br>Year: ", year,
+                                "<br>Percent of Owner Occupied Houses: ", round(owner_occupied_housing_perc, digits = 1), "%",
+                                "<br>Margin of Error: ", round(owner_occupied_housing_perc_moe, digits = 1), "%"))) +
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
+  theme_minimal() + ggtitle("Owner Occupied Housing 2015-2018") + ylab("Percent of Owners (%)") + 
+  xlab("Year"), tooltip = "text") %>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+
+```
+
 
 
 ## Social
@@ -390,21 +451,65 @@ race_moe <- race_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colname
   rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
 race <- race %>% select(!contains("moe"), NAME, year)
 race <- melt(race, id.vars = c("NAME", "year"),measure.vars = colnames(race)[-c(1,2)])
-race_table <- merge(x = race, y = race_moe, by=c("NAME", "variable", "year"))
+race_table <- merge(x = race, y = race_moe, by=c("NAME", "variable", "year")) %>%
+  mutate(variable = recode(variable, "race_american_indian" = "American Indian or Alaskan Native",
+                           "race_asian" ="Asian", "race_black"="Black or African American",
+                           "race_hispanic" = "Hispanic or Latino of any race", 
+                           "race_native_hawaiian" = "Native Hawaiian or Other Pacific Islander",
+                           "race_other" = "Some Other Race",
+                           "race_two_more" ="Two or More Races", "race_white"="Whte"))
 
 #plot all races onto one large set of grouped bars for every county.
-ggplotly(ggplot(filter(race_table, year == 2018)) +
-  geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge")+ 
-  #geom_errorbar(aes(x = as.factor(NAME), ymin=value-moe, ymax=value+moe), width=.2,position="dodge") +
-  scale_fill_manual(values = viridis(8, option="D"),name="Groups",labels = c("White", "Black or African American", "American Indian or Alaskan Native",
-                                 "Asian", "Native Hawaiian or Pacific Islander", "Hispanic or Latino", 
-                                 "Two or More","Other")) +
-  #theme_minimal() + theme(axis.text.x = element_text(angle=45)) + 
-  ylab("% of Population") + xlab("Region") + coord_flip() + theme_minimal() +
-  ggtitle("% Racial and Ethnic Diversity"))
+ggplotly(ggplot(filter(race_table, year == 2018), aes(x = NAME, y = value, fill = variable,
+                text = paste0("Region: ", NAME,
+                              "<br>Year: ", year,
+                              "<br>Percent of Population: ", round(value, digits = 1), "%",
+                              "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
+  geom_col(position = "dodge") + 
+  scale_fill_manual(values = viridis(8, option="D"), name="Groups") +
+  ylab("% of Population") + xlab("") + coord_flip() + theme_minimal() +
+  ggtitle("% Racial and Ethnic Diversity"), tooltip="text") %>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
 ```
 
 This plot is not yet interactive, and needs some work on ordering of the grouped bars. But generally, south wasco, and its surrounding neighbors are majority a white puplation. The second most populus racial group are Hispanic or Latino group.
+
+
+
+
+Try some horizontal dot charts for multiple categories: http://www.rebeccabarter.com/blog/2018-05-29_getting_fancy_ggplot2/
+https://edav.info/cleveland.html
+```{r}
+ggplotly(ggplot(filter(race_table,year ==2018), aes(value, NAME, color = variable)) +
+  geom_point(size = 5) +
+  ggtitle("Racial/Ethnic Diversity per Region") + ylab("") + 
+    xlab("Percent of Population") +theme_minimal() +
+  scale_color_manual(values= viridis(8, option = "D"), name = "Racial or Ethnic Group", 
+                       labels = c("American Indian or Alaskan Native","Asian", "Black or African American", 
+                                  "Hispanic or Latino of any race","Native Hawaiian or Other Pacific Islander", 
+                                  "Some Other Race", "Two or More Races", "Whte")))
+```
+looks cleaner, big downside is that all the points below 25% are overlapping one another
+
+
+mock code for sf maps with tracts plots not working
+```
+race <- acs_tracts %>% select(GEOID,NAME, year, contains("race")) # select appropriate variables
+race_moe <- race %>% select(NAME,year, contains("moe")) #separate moe estimates
+race_moe <- race_moe %>% melt(id.vars = c("NAME","year"), measure.vars = colnames(race_moe)[-c(1,2)]) %>%
+  rename(moe = value)  %>% mutate(variable =gsub("_moe", "", variable))
+race <- race %>% select(!contains("moe"), NAME, year)
+race <- melt(race, id.vars = c("NAME", "year"),measure.vars = colnames(race)[-c(1,2)])
+race_table_tracts <- merge(x = race, y = race_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(race_table_tracts, year == 2018), aes(fill = race_hispanic)) +
+  labs(title = "Racial Diversity by Tract"") #+ 
+
+```
+
 
 
 
@@ -414,6 +519,75 @@ customizable tool tip and legend not working
 ```{r warning=FALSE, message=FALSE}
 family <- select(filter(acs_counties_neighbors), NAME, year,contains("family"))
 family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_perc, 
+                                 family_children_nonfamily_perc)
+family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_perc_moe,
+                               family_children_nonfamily_perc_moe)
+family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
+  rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
+family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
+family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year")) %>%
+  mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents", 
+                                  "family_single_parent_perc" = "Single Parent",
+                                  "family_children_nonfamily_perc" ="Living with Nonfamily"))
+#grouped bar chart for family type
+ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fill = variable, 
+                text = paste0("Region: ", NAME,
+                              "<br>Year: ", year,
+                              "<br>Percent of Children: ", round(value, digits = 1), "%",
+                              "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
+           geom_col(position = "dodge") + 
+           scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
+           ylab("% of children")+xlab("") + coord_flip()+ theme_minimal() +
+           ggtitle(paste0("Family Structure for Children Under 18 <br>", 2018)), tooltip = "text")%>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
+```
+
+Compared to its immediate neighbors, South Wasco has the highest percentage of children who are in a household with no family members. South Wasco also has the highest percentage of people living alone or with non family members.
+
+
+
+Stacked bar chart
+```{r warning=FALSE, message=FALSE}
+family <- select(filter(acs_counties_neighbors), NAME, year,contains("family"))
+family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_female_perc,
+                                 family_single_parent_male_perc, family_children_nonfamily_perc)
+family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_female_perc_moe,
+                                 family_single_parent_male_perc_moe,
+                               family_children_nonfamily_perc_moe)
+family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
+  rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
+family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
+family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year")) %>%
+  mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents", 
+                                  "family_single_parent_perc" = "Single Parent",
+                                  "family_single_parent_female_perc" = "Single Mother",
+                                  "family_single_parent_male_perc" = "Single Father",
+                                  "family_children_nonfamily_perc" ="Living with Nonfamily"))
+#grouped bar chart for family type
+ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fill = variable, 
+                text = paste0("Region: ", NAME,
+                              "<br>Year: ", year,
+                              "<br>Percent of Children: ", round(value, digits = 1), "%",
+                              "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
+           geom_bar(position = position_stack(reverse = TRUE), stat="identity") + 
+           scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
+           ylab("% of children")+xlab("") + coord_flip()+ theme_minimal() +
+           ggtitle(paste0("Family Structure for Children Under 18 <br>", 2018)), tooltip = "text")%>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
+```
+
+
+
+
+
+mock code for sf maps with tracts plots not working
+```
+family <- select(filter(acs_tracts), NAME, year,contains("family"))
+family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_perc, 
                                  family_children_nonfamily_perc, family_nonfamily_household_perc,
                                  family_nonfamily_household_perc)
 family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_perc_moe,
@@ -422,24 +596,21 @@ family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, fami
 family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
   rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
 family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
-family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year"))
-#grouped bar chart for family type
-ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fill = variable), 
-                text = paste0("Region: ", NAME,
-                              "<br>Year: ", year,
-                              "<br>% Children: ", round(value, digits = 1), "%")) +
-           geom_col(position = "dodge") + 
-           scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
-           ylab("% of children") + xlab("Region") + coord_flip()+ theme_minimal() +
-           ggtitle("Family Structure for Children under 18-2018"))
+family_table_tracts <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(family_table_tracts, year == 2018), aes(fill = family_single_parent_perc)) +
+  labs(title = "Family Stability by Tract - Single Parent 2018") #+ 
+
 ```
 
-Compared to its immediate neighbors, South Wasco has the highest percentage of children who are in a household with no family members. South Wasco also has the highest percentage of people living alone or with non family members.
+
+
 
 ### Educational Attainment
 
 
-grouped bar charts, legend won't adjust :(
+grouped bar charts
 ```{r warning=FALSE, message=FALSE}
 ed <- select(filter(acs_counties_neighbors), NAME, year, contains("education"))
 ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
@@ -448,22 +619,107 @@ ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe
 ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>% 
   rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
 ed_perc <- melt(ed_perc, id.vars = c("NAME", "year"), measure.vars = colnames(ed_perc)[-c(1,2)])
-ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year"))
+ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year")) %>% 
+  mutate(value = round(value,1), moe = round(moe,1),
+         variable = recode_factor(variable, "education_less_hs" ="Less than High School", 
+                                  "education_hs_grad" = "High School Graduate or Equivalent (GED)",
+                                  "education_assoc_some_college" ="Associates Degree or Some College",
+                                  "education_bachelors_or_higher" ="Bachelors or Higher"))
+
 #grouped bar chart for own and rent occupancy
 ggplotly(ggplot(filter(ed_table, year == 2018)) +
-           geom_col(aes(x = NAME, y = value, fill = variable), position = "dodge") +
+           geom_col(aes(x = NAME, y = value, fill = variable,
+                        text = paste0("Region: ", NAME,
+                                "<br>Year: ", year,
+                                "<br>Percent of Adults 25 and Older: ", value, "%",
+                                "<br>Margin of Error: ", moe, "%")), position = "dodge") +
            scale_fill_manual(values = viridis(4, option = "D"),
-                             name = "Educational Attainment",
-                             breaks = c("education_less_hs","education_hs_grad","education_assoc_some_college", "education_bachelors_or_higher"),
-                             labels = c("Less than High School", "High School Graduate or Equivalent (GED)","Associates Degree or Some College", "Bachelors or Higher")) +
+                             name = "Educational Attainment") +
            #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
            ylab("% of Adults 25 and Older") + xlab("Region") + 
            coord_flip()+ theme_minimal() +
-           ggtitle("Educational Attainment for Adults 25 and older-2018"))
+           ggtitle(paste("Educational Attainment for Adults 25 and Older",2018, sep = " ")), tooltip = "text")%>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
 ```
 
 
 Generally, South Wasco has a large percentage of adults that are high school graduates and have some higher education. However, It has some of the lowest percentages of adults that havea bachelors degree or higher. Hood river has the highest educated population.
+
+
+Stacked bar
+```{r warning=FALSE, message=FALSE}
+ed <- select(filter(acs_counties_neighbors), NAME, year, contains("education"))
+ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
+ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe, 
+                        education_assoc_some_college_moe, education_bachelors_or_higher_moe)
+ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>% 
+  rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
+ed_perc <- melt(ed_perc, id.vars = c("NAME", "year"), measure.vars = colnames(ed_perc)[-c(1,2)])
+ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year")) %>% 
+  mutate(value = round(value,1), moe = round(moe,1),
+         variable = recode_factor(variable, "education_less_hs" ="Less than High School", 
+                                  "education_hs_grad" = "High School Graduate or Equivalent (GED)",
+                                  "education_assoc_some_college" ="Associates Degree or Some College",
+                                  "education_bachelors_or_higher" ="Bachelors or Higher"))
+
+#grouped bar chart for own and rent occupancy
+ggplotly(ggplot(filter(ed_table, year == 2018)) +
+           geom_bar(aes(x = NAME, y = value, fill = variable,
+                        text = paste0("Region: ", NAME,
+                                "<br>Year: ", year,
+                                "<br>Percent of Adults 25 and Older: ", value, "%",
+                                "<br>Margin of Error: ", moe, "%")),
+                    position = position_stack(reverse = TRUE), stat="identity") +
+           scale_fill_manual(values = viridis(4, option = "D"),
+                             name = "Educational Attainment") +
+           #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
+           ylab("% of Adults 25 and Older") + xlab("") + 
+           coord_flip()+ theme_minimal() +
+           ggtitle(paste("Educational Attainment for Adults 25 and Older",2018, sep = " ")), tooltip = "text")%>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
+```
+
+
+
+this will work well with the horizontal dotplot
+```{r}
+ggplotly(ggplot(filter(ed_table,year ==2018), aes(value, NAME, color = variable)) +
+  geom_point(size = 5) +
+  ggtitle("Highest Educational Attainment") + ylab("") + 
+    xlab("ercent of Adults 25 and Older") +theme_minimal() +
+  scale_color_manual(values = viridis(4, option = "D"), name = "Educational Attainment", 
+                       labels = c("Less than High School", "High School Graduate or Equivalent (GED)",
+                                        "Associates Degree or Some College", "Bachelors or Higher")) +
+  theme(legend.position = "bottom")) %>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
+```
+
+
+
+
+
+mock code for sf maps with tracts plots not working
+```
+ed <- select(filter(acs_tracts), NAME, year, contains("education"))
+ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
+ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe, 
+                        education_assoc_some_college_moe, education_bachelors_or_higher_moe)
+ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>% 
+  rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
+ed_perc <- melt(ed_perc, id.vars = c("NAME", "year"), measure.vars = colnames(ed_perc)[-c(1,2)])
+ed_table_tracts <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year"))
+
+ggplot() +
+  geom_sf(data = filter(ed_table_tracts, year == 2018), aes(fill = education_hs_grad)) +
+  labs(title = "Educational Attainment by Tract - High School Grad 2018") #+ 
+
+```
 
 
  

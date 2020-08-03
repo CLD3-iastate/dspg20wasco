@@ -306,9 +306,11 @@ combined_acs <- combined_acs %>%
 
           family_children_total = B09005_001E, family_children_total_moe = B09005_001M,
           family_married_parent_perc = B09005_003E/B09005_001E*100, family_married_parent_perc_moe = B09005_003M/B09005_001E*100,
+          family_single_parent_male_perc = B09005_004E/B09005_001E*100, family_single_parent_male_perc_moe = B09005_004M/B09005_001E*100,
+          family_single_parent_female_perc = B09005_005E/B09005_001E*100, family_single_parent_female_perc_moe = B09005_005M/B09005_001E*100,
           family_single_parent_perc = (B09005_004E + B09005_005E)/B09005_001E*100, family_single_parent_perc_moe = (B09005_004M + B09005_005M)/B09005_001E*100,
           family_children_nonfamily_perc = B09005_006E/B09005_001E*100,family_children_nonfamily_perc_moe = B09005_006M/B09005_001E*100,
-          family_nonfamily_household_perc = B09019_024E/B09019_002E*100, family_nonfamily_household_perc_moe = B09019_024M/B09019_002E*100,
+          household_single_or_nonfamily_perc = B09019_024E/B09019_002E*100, household_single_or_nonfamily_perc_moe = B09019_024M/B09019_002E*100,
           
           #Education Attainment (for population over 25)
           education_less_hs = (S1501_C01_007E + S1501_C01_008E) / S1501_C01_006E * 100, education_less_hs_moe = (S1501_C01_007M + S1501_C01_008M) / S1501_C01_006E * 100,
@@ -354,7 +356,9 @@ combined_acs <- combined_acs %>%
           affordable_housing_more_75k = (B25106_020E + B25106_021E + B25106_042E + B25106_043E)/ (B25106_019E + B25106_041E) * 100
           
   )
-
+combined_acs$NAME <- gsub("County, Washington", "County, WA", 
+                          gsub("District 1, Oregon","District 1, OR",
+                               gsub("County, Oregon","County, OR",combined_acs$NAME))) 
 #remove geometry variable since list cannot be exported
 library(here)
 #fwrite(combined_acs,here("/data/acs/combined_acs.csv"), sep = ",")
@@ -363,22 +367,15 @@ library(tigris)
 #write files into separate county and tracts .Rds files for easier shiny app handling
 acs_data <- fread(here("/data/acs/combined_acs.csv")) 
 acs_data$GEOID <- as.character(acs_data$GEOID)
-acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, Oregon" |
-                         NAME == "Wasco County, Oregon"| NAME == "Hood River County, Oregon" |
-                         NAME == "Sherman County, Oregon" | NAME == "Jefferson County, Oregon" |
-                         NAME == "Multnomah County, Oregon" | NAME == "Clackamas County, Oregon" |
-                         NAME == "Marion County, Oregon" | NAME == "Washington County, Oregon" |
-                         NAME == "Deschutes County, Oregon" | NAME == "Lane County, Oregon" | NAME == "Umatilla County, Oregon" |
-                         NAME == "Skamania County, Washington" | NAME == "Klickitat County, Washington" |
+acs_counties <- filter(acs_data, NAME == "South Wasco County School District 1, OR" | 
+                         NAME == "Wasco County, OR"| NAME == "Hood River County, OR" |
+                         NAME == "Sherman County, OR" | NAME == "Jefferson County, OR" |
+                         NAME == "Multnomah County, OR" | NAME == "Clackamas County, OR" |
+                         NAME == "Marion County, OR" | NAME == "Washington County, OR" |
+                         NAME == "Deschutes County, OR" | NAME == "Lane County, OR" | 
+                         NAME == "Umatilla County, OR" |
+                         NAME == "Skamania County, WA" | NAME == "Klickitat County, WA" | 
                          NAME == "Oregon")
-or_counties <- counties(state = "OR",  cb = TRUE) %>% 
-  filter(NAME == "Wasco" | NAME == "Hood River"| NAME == "Sherman"| NAME == "Jefferson"| 
-           NAME == "Multnoma"| NAME == "Clackamas"| NAME == "Marion"| NAME == "Washington"| 
-           NAME == "Deschutes"| NAME == "Lane"| NAME == "Umtilla")
-wa_counties <- counties(state = "WA", #county = c("Skamania", "Klickitat"),
-                    cb = TRUE) %>% filter(NAME == "Skamania" | NAME =="Klickitat")
-counties_geo <- rbind(or_counties, wa_counties)
-acs_counties <- geo_join(counties_geo, acs_counties, by = "GEOID")
 #saveRDS(acs_counties, file = here("/data/acs_counties.Rds"))
 
 
@@ -387,8 +384,8 @@ or_tracts <- tracts(state = "OR", county = c("Wasco", "Hood River", "Sherman", "
 wa_tracts <- tracts(state = "WA", county = c("Skamania", "Klickitat"),
                     cb = TRUE)
 tract_geo <- rbind(or_tracts, wa_tracts)
-acs_tracts <- acs_data %>% filter(grepl("Tract",NAME))
-acs_tracts <- geo_join(tract_geo, acs_tracts, by = "GEOID")
+acs_tracts <- acs_data %>% filter(grepl("Tract",NAME)) 
+acs_tracts <- inner_join(tract_geo, acs_tracts, by = "GEOID") %>% rename("NAME" = "NAME.y")
 #saveRDS(acs_tracts, file = here("/data/acs_tracts.Rds"))
 
 ####### PRACTICE CODE #######

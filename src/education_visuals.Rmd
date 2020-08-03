@@ -1,0 +1,206 @@
+---
+title: "education_visuals"
+author: "Mary Solomon"
+date: "8/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(here)
+library(tidyverse)
+library(viridis)
+library(plyr)
+```
+
+Read in the data
+```{r}
+#normal data
+ed <- fread(here::here("data/education/combined_education.csv")) %>% 
+  mutate(year = factor(year))
+ed$year <- revalue(ed$year,c("1415" = "2014-2015", "1516" = "2015-2016", "1617" = "2016-2017",
+          "1718" = "2017-2018", "1819" = "2018-2019"))
+ed <- ed %>% filter(District.Name == "South Wasco County SD 1" |
+           District.Name == "Jefferson County SD 509J" |
+           District.Name == "North Wasco County SD 21" |
+           District.Name == "Sherman County SD" |
+           District.Name == "Dufur SD 29" |
+           District.Name == "Hood River County SD") %>% 
+  select(-c("District.ID" ,"Student.Group","Fall.Membership", "Free.Reduced.Priced.Lunch","Percent.Regular.Attenders" ))
+
+
+
+#scaling the data within each measure to standardize the values.
+#con: suppresses the minor differences in variables that have a smaller range
+ed.scaled <- ed %>% mutate(Percent.ELA.Proficient.Change = scale(Percent.ELA.Proficient.Change),
+                                  Percent.Chronically.Absent = scale(Percent.Chronically.Absent),
+                                  Percent.Economically.Disadvantaged = scale(Percent.Economically.Disadvantaged),
+                                  Teacher.Experience.Pct = scale(Teacher.Experience.Pct),
+                                  Dropout.Rate = scale(Dropout.Rate),
+                                  On.Time.Grad.Rate = scale(On.Time.Grad.Rate))
+ed.scaled <- ed.scaled %>% filter(District.Name == "South Wasco County SD 1" |
+                      District.Name == "Jefferson County SD 509J" |
+                      District.Name == "North Wasco County SD 21" |
+                      District.Name == "Sherman County SD" |
+                      District.Name == "Dufur SD 29" |
+                      District.Name == "Hood River County SD")
+```
+
+
+prepare table to make a heatmap
+```{r}
+## for all the education data with original values
+ed.melt = melt(ed, id.vars = c("year", "District.Name"),
+             measure.vars = c("On.Time.Grad.Rate", "Dropout.Rate" , 
+                              "Percent.ELA.Proficient.Change", "Teacher.Experience.Pct", "Percent.Chronically.Absent",
+                              "Percent.Economically.Disadvantaged"))
+
+## for the education data with scaled values
+ed.melt.scaled = melt(ed.scaled, id.vars = c("year", "District.Name"),
+               measure.vars = c("On.Time.Grad.Rate", "Dropout.Rate" , 
+                                "Percent.ELA.Proficient.Change", "Teacher.Experience.Pct", "Percent.Chronically.Absent",
+                                "Percent.Economically.Disadvantaged")) 
+```
+
+
+try making divergent red, white and blue color palette
+```
+img <- function(obj, nam) {
+  image(1:length(obj), 1, as.matrix(1:length(obj)), col=obj, 
+        main = nam, ylab = "", xaxt = "n", yaxt = "n",  bty = "n")
+}
+rwb <- colorRampPalette(colors = c("red", "white", "blue"))
+img(rwb(100), "red-white-blue")
+```
+
+
+### Heat Maps 
+
+#### Original Scale
+
+for south wasco alone:
+```{r fig.width=12, fig.height=8}
+sw <- filter(ed.melt, District.Name == "South Wasco County SD 1")
+ggplot(sw, aes(y = variable, x = factor(year), fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  scale_fill_viridis() +
+  coord_equal()
+```
+
+Facet wrap to show all schools
+```{r fig.width=12, fig.height=8}
+ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + facet_wrap(~District.Name) +
+  #scale_fill_viridis(n=25, option = "D",breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
+  scale_fill_viridis(option = "D") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("School Year")
+```
+
+
+
+get everything absolutely on one plot (not faceted)
+```{r fig.width=12, fig.height=8}
+ed.melt2 <- ed.melt %>% mutate(indicator = paste(variable, District.Name, sep= "-"),
+                               indicator = factor(indicator, 
+                                                  levels=c("On.Time.Grad.Rate-South Wasco County SD 1",
+                                                           "On.Time.Grad.Rate-North Wasco County SD 21",
+                                                           "On.Time.Grad.Rate-Dufur SD 29",
+                                                           "On.Time.Grad.Rate-Hood River County SD" ,
+                                                           "On.Time.Grad.Rate-Sherman County SD",
+                                                           "On.Time.Grad.Rate-Jefferson County SD 509J",
+                                                           
+                                                           "Dropout.Rate-South Wasco County SD 1",
+                                                           "Dropout.Rate-North Wasco County SD 21",
+                                                           "Dropout.Rate-Dufur SD 29",
+                                                           "Dropout.Rate-Hood River County SD" ,
+                                                           "Dropout.Rate-Sherman County SD",
+                                                           "Dropout.Rate-Jefferson County SD 509J",
+                                                           
+                                                           "Percent.ELA.Proficient.Change-South Wasco County SD 1",
+                                                           "Percent.ELA.Proficient.Change-North Wasco County SD 21",
+                                                           "Percent.ELA.Proficient.Change-Dufur SD 29",
+                                                           "Percent.ELA.Proficient.Change-Hood River County SD" ,
+                                                           "Percent.ELA.Proficient.Change-Sherman County SD",
+                                                           "Percent.ELA.Proficient.Change-Jefferson County SD 509J",
+                                                           
+                                                           "Teacher.Experience.Pct-South Wasco County SD 1",
+                                                           "Teacher.Experience.Pct-North Wasco County SD 21",
+                                                           "Teacher.Experience.Pct-Dufur SD 29",
+                                                           "Teacher.Experience.Pct-Hood River County SD" ,
+                                                           "Teacher.Experience.Pct-Sherman County SD",
+                                                           "Teacher.Experience.Pct-Jefferson County SD 509J",
+                                                           
+                                                           "Percent.Chronically.Absent-South Wasco County SD 1",
+                                                           "Percent.Chronically.Absent-North Wasco County SD 21",
+                                                           "Percent.Chronically.Absent-Dufur SD 29",
+                                                           "Percent.Chronically.Absent-Hood River County SD" ,
+                                                           "Percent.Chronically.Absent-Sherman County SD",
+                                                           "Percent.Chronically.Absent-Jefferson County SD 509J",
+                                                           
+                                                           "Percent.Economically.Disadvantaged-South Wasco County SD 1",
+                                                           "Percent.Economically.Disadvantaged-North Wasco County SD 21",
+                                                           "Percent.Economically.Disadvantaged-Dufur SD 29",
+                                                           "Percent.Economically.Disadvantaged-Hood River County SD" ,
+                                                           "Percent.Economically.Disadvantaged-Sherman County SD",
+                                                           "Percent.Economically.Disadvantaged-Jefferson County SD 509J")))
+  
+ggplot(ed.melt2, aes(y = indicator, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  #geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + 
+  #scale_fill_viridis(n=25, option = "D",breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
+  scale_fill_viridis(option = "D") + 
+  # Horizontal lines to section off domains
+  geom_hline(yintercept = 6.5, color = "white", lwd = 4) + 
+  geom_hline(yintercept = 12.5, color = "white", lwd = 4) +
+  geom_hline(yintercept = 18.5, color = "white", lwd = 4) +
+  geom_hline(yintercept = 24.5, color = "white", lwd = 4) +
+  geom_hline(yintercept = 30.5, color = "white", lwd = 4) +
+  geom_hline(yintercept = 36.5, color = "white", lwd = 4) +
+  # Title of variables
+  annotate("text", x=2, y=6.5,label="Dropout", fontface=2, size = 2, color="black") +
+  annotate("text", x=2, y=12.5,label="On Time Graduation", fontface=2, size = 2, color="black") +
+  annotate("text", x=2, y=18.5,label="Chronic Absenteeism", fontface=2, size = 2, color="black") +
+  annotate("text", x=2, y=24.5,label="Economically Disadvantaged", fontface=2, size = 2, color="black") +
+  annotate("text", x=2, y=30.5,label="ELA Proficiency Change 8th-3rd Grade", fontface=2, size = 2, color="black") +
+  annotate("text", x=2, y=36.5,label="Teacher Experience", fontface=2, size = 2, color="black") +
+  
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("School Year")
+```
+
+Makes it alot easier to do direct comparisons of schools and years for one variable. but interpretability is still weak.
+
+
+Trying with rwb divergent palette: not working 
+```
+ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + facet_wrap(~District.Name) +
+  #scale_fill_viridis(breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
+  scale_fill_manual(values = rwb(25), breaks = c(-60, -20, -10, -5, seq(0,100,5))) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("School Year")
+```
+
+
+
+
+##### Standardized measures
+Facet wrap but with scaled/standardized measures
+```{r fig.width=12, fig.height=8}
+ggplot(ed.melt.scaled, aes(y = variable, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") + 
+  coord_equal() + facet_wrap(~District.Name) +
+  #scale_fill_viridis(breaks = c(-60, -20, -10, -5, seq(0,100,5))) + 
+  scale_fill_viridis() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("School Year")
+```
+

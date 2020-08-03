@@ -257,6 +257,7 @@ ggplot() +
 
 ## Employment
 
+### Employment Ratio
 static bar chart
 ```{r warning=FALSE, message=FALSE}
 # bar graphs
@@ -281,7 +282,7 @@ ggplotly(ggplot(acs_counties, aes(x=year, y=employment_20_to_64, group = NAME, c
   geom_point(size = 1.5) +
   scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
   theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + 
-  ylab("Employment Ratio") + xlab("Year"), tooltip = "text") %>% 
+  ylab("Employment Ratio (%)") + xlab("Year"), tooltip = "text") %>% 
   config(displayModeBar = "static", displaylogo = FALSE, 
          modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                      "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
@@ -298,9 +299,9 @@ ggplot() +
 
 
 
-#### Labor participation rate
+### Labor participation rate
 ```{r warning=FALSE, message=FALSE}
-p <- ggplot(acs_counties, aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
+ggplotly(ggplot(acs_counties, aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
                                 "<br>Labor Force Participation Rate: ", labor_force_20_to_64, "%",
@@ -309,11 +310,10 @@ p <- ggplot(acs_counties, aes(x=year, y=labor_force_20_to_64, group = NAME, colo
   geom_point(size = 1.5) +
   scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
   #scale_alpha_manual(values=c(1,1,1,0.1)) +
-  theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year") 
-#Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
-                                         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+  theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year"), tooltip = "text") %>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 #n
 ```
 

@@ -52,7 +52,6 @@ acs_counties_neighbors <- filter(acs_counties, NAME == "South Wasco County Schoo
 acs_tracts <- readRDS(here("/data/acs_tracts.Rds"))
 acs_tracts$NAME.x <- NULL
 
-graypal = "#ADB5BD"
 or_county_lines <- counties(state = "OR")
 wa_county_lines <- counties(state = "WA")
 county_lines <- rbind(filter(or_county_lines, NAME %in%
@@ -94,22 +93,22 @@ race_div_2015 <- filter(race_div, year == 2015)
 # color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
 graypal = "#ADB5BD"
 ## Loading in LODES
-top_10_in <- read_csv("Data/app_10_inflows_wasco.csv")
-top_10_out <- read_csv("Data/app_10_outflows_wasco.csv")
+top_12_in <- data.table(read_csv("Data/app_12_inflows_wasco.csv"))
+top_12_out <- data.table(read_csv("Data/app_12_outflows_wasco.csv"))
 agg_17 <- readRDS("Data/app_lodes_od_agg_2017.Rds")
 agg_16 <- readRDS("Data/app_lodes_od_agg_2016.Rds")
 agg_15 <- readRDS("Data/app_lodes_od_agg_2015.Rds")
 #wasco_points <- blocks("OR", county = "Wasco")
 #wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("Data/shps/swsd")
-water_use_by_sector_t <- readRDS("Data/app_usgs_water_use.Rds")
+water_use_by_sector_t <- data.table(readRDS("Data/app_usgs_water_use.Rds"))
 acres_17 <- readRDS("Data/app_acres_17.Rds")
 acres_16 <- readRDS("Data/app_acres_16.Rds")
 acres_15 <- readRDS("Data/app_acres_15.Rds")
 
 # Color palettes -----
-dspgpal <- c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
-            "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
+# dspgpal <- c("#232D4B", "#2C4F6B", "#0E879C", "#60999A", "#D1E0BF",
+#             "#D9E12B", "#E6CE3A", "#E6A01D", "#E57200", "#ADB5BD")
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
 
@@ -360,7 +359,7 @@ ui <- dashboardPagePlus(
                     front_title = "What is water use like in Wasco?",
                     back_title = "Data",
                     "",
-                    plotOutput("waterplot"),
+                    plotlyOutput("waterplot"),
                     back_content = tagList(
                       column(
                         width = 12,
@@ -479,7 +478,7 @@ conditionalPanel(
                             front_title = "How do workers flow in and out of South Wasco?",
                             selectInput("flows", "Inflows or Outflows?",
                                         c("Inflows", "Outflows")),
-                            plotOutput("flows"),
+                            plotlyOutput("flowsplot"),
                             back_title = "Flows Data",
                             # Full back with table and indicator snippet
                             "",
@@ -1372,20 +1371,36 @@ server <- function(input, output, session) {
 
 ## SERVER: TAB - Infrastructure cluster ----
 ## SERVER: PANEL - Water ----
-## plotOutput("waterplot") ----
+## plotlyOutput("waterplot") ----
 
-  output$waterplot <- renderPlot({
-    water_use_plot <- ggplot(data = water_use_by_sector_t, aes(x = year, group = 1)) +
-      ggtitle("Water Use in Wasco County by Sector (1985-2015)") +
-      labs(x = "Year", y = "Millions of Gallons per Day", color = NULL) +
-      geom_line(aes(y = `Aquaculture Water Use (mGal/D)`, color = "Aquaculture Water Use")) +
-      geom_line(aes(y = `Commercial Water Use (mGal/D)`, color = "Commercial Water Use")) +
-      geom_line(aes(y = `Domestic Water Use (mGal/D)`, color = "Domestic Water Use")) +
-      geom_line(aes(y = `Industrial Water Use (mGal/D)`, color = "Industrial Water Use")) +
-      geom_line(aes(y = `Livestock Water Use (mGal/D)`, color = "Livestock Water Use")) +
-      geom_line(aes(y = `Mining Water Use (mGal/D)`, color = "Mining Water Use")) +
-      geom_line(aes(y = `Total Water supplied to Public (mGal/D)`, color = "Resident Water Use")) +
-      geom_line(aes(y = `Wastewater Treatment (mGal/D)`, color = "Wastewater Treatment"))
+  output$waterplot <- renderPlotly({
+    
+    water_use_melt <- melt(data = water_use_by_sector_t, id.vars = c("year"), 
+                                                         measure.vars = colnames(water_use_by_sector_t)[-length(water_use_by_sector_t)]) %>%
+    rename(c("sector" = "variable", "gallons" = "value"))
+  water_use_melt$sector <- recode(water_use_melt$sector, "Aquaculture Water Use (mGal/D)" = "Aquaculture",
+                                  "Commercial Water Use (mGal/D)" = "Commercial",
+                                  "Domestic Water Use (mGal/D)" ="Domestic",
+                                  "Industrial Water Use (mGal/D)" = "Industrial",
+                                  "Irrigation Water Use (mGal/D)" = "Irrigation",
+                                  "Livestock Water Use (mGal/D)" = "Livestock",
+                                  "Mining Water Use (mGal/D)" = "Mining",
+                                  "Total Water supplied to Public (mGal/D)"= "Total Water supplied to Public",
+                                  "Wastewater Treatment (mGal/D)" = "Wastewater Treatment")
+  
+  ggplotly(ggplot(water_use_melt, aes(x=year, y=gallons, group = sector, color = sector,
+                                      text = paste0("Sector: ", sector,
+                                                    "<br>Year: ", year,
+                                                    "<br>Water Use: ", gallons, " (mGal/D)"))) +
+             geom_line(size = 1) + 
+             geom_point(size = 1.5) +
+             scale_colour_manual(name = "Sector", values = viridis(9, option = "D")) +
+             theme_minimal() + ggtitle("Water Use in Wasco County by Sector (1985-2015)") + 
+             ylab("Millions of Gallons per Day (mGal/D)") + xlab("Year"), tooltip = "text") %>% 
+    config(displayModeBar = "static", displaylogo = FALSE, 
+           modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                       "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+  
   })
 
 ## SERVER: TAB - Learn and earn driver ----
@@ -1489,78 +1504,83 @@ server <- function(input, output, session) {
   })
 
   output$empratioplot <- renderPlotly({
-    p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-                , aes(x=year, y=employment_20_to_64, group = NAME, color = south_wasco,
-                      text = paste0("Region: ", NAME,
-                                    "<br>Year: ", year,
-                                    "<br>Percent Employed: ", employment_20_to_64, "%",
-                                    "<br>Margin of Error: ", employment_20_to_64_moe, "%"))) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2) +
-      scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-      scale_alpha_manual(values=c(1,1,1,0.1)) +
-      theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + ylab("Employment Ratio") + xlab("Year")
-    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
-                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    ggplotly(ggplot(acs_counties, aes(x=year, y=employment_20_to_64, group = NAME, color = south_wasco,
+                                      text = paste0("Region: ", NAME,
+                                                    "<br>Year: ", year,
+                                                    "<br>Percent Employed: ", employment_20_to_64, "%",
+                                                    "<br>Margin of Error: ", employment_20_to_64_moe, "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
+               theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + 
+               ylab("Employment Ratio (%)") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Labor force participation ----
 ## plotlyOutput("laborforceplot") ------
 
   output$laborforceplot <- renderPlotly({
-    p <- ggplot(acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, Oregon", "Wasco County, Oregon", "Oregon"), other_level = "Neighboring Counties"))
-                , aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
-                      text = paste0("Region: ", NAME,
-                                    "<br>Year: ", year,
-                                    "<br>Labor Force Participation Rate: ", labor_force_20_to_64, "%",
-                                    "<br>Margin of Error: ", labor_force_20_to_64_moe, "%"))) +
-      geom_line(size = 1.5) +
-      geom_point(size = 2) +
-      scale_colour_manual(name = "Region", values = c(viridis(3, option = "D"), graypal)) +
-      scale_alpha_manual(values=c(1,1,1,0.1)) +
-      theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year")
-    #Note: Wasco and south wasco are from ACS5 year estimates. Moving averages.
-    ggplotly(p, tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE,
-                                             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
-                                                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+    ggplotly(ggplot(acs_counties, aes(x=year, y=labor_force_20_to_64, group = NAME, color = south_wasco,
+                                      text = paste0("Region: ", NAME,
+                                                    "<br>Year: ", year,
+                                                    "<br>Labor Force Participation Rate: ", labor_force_20_to_64, "%",
+                                                    "<br>Margin of Error: ", labor_force_20_to_64_moe, "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
+               #scale_alpha_manual(values=c(1,1,1,0.1)) +
+               theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Job flows ----
-## plotOutput("flows") ------
+## plotlyOutput("flows") ------
 
-  output$flows <- renderPlot({
+  output$flowsplot <- renderPlotly({
     if (input$flows == "Inflows"){
-      ggplot(top_10_in, aes(x = year)) +
-        ggtitle("Number of jobs flowing into Wasco County\nfrom other counties in Oregon from\n2015-2017") +
-        labs(x = "Year", y = "Number of Jobs", colour = "County") +
-        geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) +
-        geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) +
-        geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) +
-        geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) +
-        geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) +
-        geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) +
-        geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) +
-        geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) +
-        geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) +
-        geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+      top_12_in_melt <- melt(data = top_12_in, id.vars = c("year"), 
+                             measure.vars = colnames(top_12_in)[-length(top_12_in)]) %>%
+        rename(c("county" = "variable", "jobs" = "value"))
+      
+      ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = county,
+                                          text = paste0("County: ", county,
+                                                        "<br>Year: ", year,
+                                                        "<br>Number of Jobs: ", jobs))) +
+                 geom_line(size = 1) + 
+                 geom_point(size = 1.5) +
+                 scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+                 scale_x_continuous(breaks = 0:2100) +
+                 theme_minimal() + ggtitle("Number of jobs flowing into Wasco County (2015-2017)") + 
+                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 
+        config(displayModeBar = "static", displaylogo = FALSE, 
+               modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                           "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 
     }
     else if (input$flows == "Outflows"){
-      ggplot(top_10_out, aes(x = year)) +
-        ggtitle("Number of jobs flowing from Wasco County\ninto other counties in Oregon from\n2015-2017") +
-        labs(x = "Year", y = "Number of Jobs", colour = "County") +
-        geom_line(aes(y = `Hood River County, OR`, color = "Hood River County, OR")) +
-        geom_line(aes(y = `Multnomah County, OR`, color = "Multnomah County, OR")) +
-        geom_line(aes(y = `Clackamas County, OR`, color = "Clackamas County, OR")) +
-        geom_line(aes(y = `Deschutes County, OR`, color = "Deschutes County, OR")) +
-        geom_line(aes(y = `Washington County, OR`, color = "Washington County, OR")) +
-        geom_line(aes(y = `Marion County, OR`, color = "Marion County, OR")) +
-        geom_line(aes(y = `Jefferson County, OR`, color = "Jefferson County, OR")) +
-        geom_line(aes(y = `Umatilla County, OR`, color = "Umatilla County, OR")) +
-        geom_line(aes(y = `Lane County, OR`, color = "Lane County, OR")) +
-        geom_line(aes(y = `Sherman County, OR`, color = "Sherman County, OR"))
+      top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"), 
+                              measure.vars = colnames(top_12_out)[-length(top_12_out)]) %>%
+        rename(c("county" = "variable", "jobs" = "value"))
+      
+      ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = county,
+                                           text = paste0("County: ", county,
+                                                         "<br>Year: ", year,
+                                                         "<br>Number of Jobs: ", jobs))) +
+                 geom_line(size = 1) + 
+                 geom_point(size = 1.5) +
+                 scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+                 scale_x_continuous(breaks = 0:2100) +
+                 theme_minimal() + ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") + 
+                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 
+        config(displayModeBar = "static", displaylogo = FALSE, 
+               modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                           "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+      
     }
   })
 

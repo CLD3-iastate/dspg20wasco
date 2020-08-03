@@ -553,6 +553,7 @@ conditionalPanel(
                         header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
                         front_title = "What is the median income in South Wasco?",
                         # Median income only here, poverty, income brackets are the questions
+                        leafletOutput("medincomemap"),
                         plotlyOutput("medincomeplot"),
                         back_title = "Data",
                         "",
@@ -1523,7 +1524,7 @@ server <- function(input, output, session) {
   })
 
 ## SERVER: PANEL - Labor force participation ----
-## plotlyOutput("laborforcemap")WORKING ON ------
+## plotlyOutput("laborforcemap")------
   output$laborforcemap <- renderLeaflet({
     lfpr_pal <- colorQuantile(viridis_pal(option = "D")(3), domain = acs_tracts$labor_force_20_to_64)
     lfpr_leaf <- leaflet() %>%
@@ -1957,6 +1958,103 @@ server <- function(input, output, session) {
 
 ## SERVER: TAB - Quality standard of living driver ----
 ## SERVER: PANEL - Median income -----
+## plotlyOutput("medincomemap") -----
+  output$medincomemap <- renderLeaflet({
+    med_inc_pal <- colorQuantile(viridis_pal(option = "D")(3),
+                                 domain = acs_tracts$median_household_income)
+    options(scipen=999)
+    med_inc_leaf <- leaflet() %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2018),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2018",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2017),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2017",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2016),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2016",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2015),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2015",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolylines(
+        data = south_wasco_points,
+        color = "#5e4b6b",
+        weight = 2,
+        opacity = 1,
+        fillOpacity= 0,
+        group = "Basemap",
+        label = "South Wasco County Region") %>%
+      addPolylines(
+        data = county_lines,
+        color = "#8d9fcc",
+        weight = 2,
+        opacity = 1,
+        fillOpacity= 0,
+        group = "Basemap") %>%
+      addLegend(
+        data = acs_tracts,
+        "bottomright",
+        pal = med_inc_pal,
+        values = ~ median_household_income,
+        labFormat = function(type, cuts, p) {
+          n = length(cuts)
+          p = paste0(round(p * 100), '%')
+          cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+        title = "Median Household Income by Census Tract",
+        na.label = "NA") %>%
+      addLayersControl(
+        baseGroups = c("2018", "2017", "2016", "2015"),
+        options = layersControlOptions(collapsed = FALSE))
+  })
 ## plotlyOutput("medincomeplot") ----
 
   output$medincomeplot <- renderPlotly({

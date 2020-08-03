@@ -102,6 +102,7 @@ agg_15 <- readRDS("Data/app_lodes_od_agg_2015.Rds")
 #wasco_points <- blocks("OR", county = "Wasco")
 #wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("Data/shps/swsd")
+wasco_geo_points <- st_read("Data/shps/county")
 water_use_by_sector_t <- data.table(readRDS("Data/app_usgs_water_use.Rds"))
 acres_17 <- readRDS("Data/app_acres_17.Rds")
 acres_16 <- readRDS("Data/app_acres_16.Rds")
@@ -1590,15 +1591,11 @@ server <- function(input, output, session) {
   od_S000leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
-      data = south_wasco_points,
-      color = "purple",
-      weight = 2,
-      opacity = 1,
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
       group = "Basemap",
-      label = "South Wasco Region")
-
-  od_SI01leaf <-leaflet() %>%
-    addProviderTiles(providers$CartoDB.Positron) %>%
+      label = "Wasco County") %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
@@ -1607,8 +1604,30 @@ server <- function(input, output, session) {
       group = "Basemap",
       label = "South Wasco Region")
 
-  od_SI02leaf <-leaflet() %>%
+  od_SI01leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolylines(
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
+      group = "Basemap",
+      label = "Wasco County") %>%
+    addPolylines(
+      data = south_wasco_points,
+      color = "purple",
+      weight = 2,
+      opacity = 1,
+      group = "Basemap",
+      label = "South Wasco Region")
+
+  od_SI02leaf <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolylines(
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
+      group = "Basemap",
+      label = "Wasco County") %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
@@ -1620,6 +1639,12 @@ server <- function(input, output, session) {
   od_SI03leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
+      group = "Basemap",
+      label = "Wasco County") %>%
+    addPolylines(
       data = south_wasco_points,
       color = "purple",
       weight = 2,
@@ -1630,7 +1655,7 @@ server <- function(input, output, session) {
   output$odleaf <- renderLeaflet({
     if (input$sect == "All"){
       #S000 (all jobs) by year -------
-      od_S000leaf %>%
+      od_S000leaf  %>%
         addPolygons(
           data = st_as_sf(agg_17),
           weight = 1,
@@ -1638,7 +1663,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_17$S000)(agg_17$S000),
-          label = agg_17$S000) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of All Jobs: <strong>",
+                                agg_17$S000), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1648,7 +1675,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of All Jobs<br>in Wasco County",
+          title = "Number of All Jobs<br>by Census Tract<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1657,7 +1684,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_16$S000)(agg_16$S000),
-          label = agg_16$S000) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of All Jobs: <strong>",
+                                agg_16$S000), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1665,11 +1694,14 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_15$S000)(agg_15$S000),
-          label = agg_15$S000) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of All Jobs: <strong>",
+                                agg_15$S000), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
     #SI01 (Goods Producing industry sectors) by year -------
     else if (input$sect == "Goods"){
       colors_SI01 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI01))
@@ -1682,7 +1714,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colors_SI01((agg_17$SI01)),
-          label = agg_17$SI01) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Goods Producing Jobs: <strong>",
+                                agg_17$SI01), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1692,7 +1726,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of Goods Producing<br>Sector Jobs in Wasco County",
+          title = "Number of Goods Producing<br> Jobs by Census Tract<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1701,7 +1735,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colors_SI01((agg_16$SI01)),
-          label = agg_16$SI01) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Goods Producing Jobs: <strong>",
+                                agg_16$SI01), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1709,11 +1745,14 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colors_SI01((agg_15$SI01)),
-          label = agg_15$SI01) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Goods Producing Jobs: <strong>",
+                                agg_15$SI01), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
     #SI02 (Trade, Transportation, and Utilities industry sectors) by year --------
     else if (input$sect == "Trade"){
       colors_SI02 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI02))
@@ -1726,7 +1765,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colors_SI02((agg_17$SI02)),
-          label = agg_17$SI02) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Utility Jobs: <strong>",
+                                agg_17$SI02), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1736,7 +1777,8 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of Trade, Transportation,<br>and Utilities Sector Jobs<br>in Wasco County",
+          title = "Number of Trade, Transportation,<br>and Utilities Jobs<br>by Census Tract in<br>
+          Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1745,7 +1787,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colors_SI02((agg_16$SI02)),
-          label = agg_16$SI02) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Utility Jobs: <strong>",
+                                agg_16$SI02), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1753,11 +1797,14 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colors_SI02((agg_15$SI02)),
-          label = agg_15$SI02) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Utility Jobs: <strong>",
+                                agg_15$SI02), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
     #SI03 (All Other Services industry sectors) by year ----------
     else if (input$sect == "AllOther"){
       colors_SI03 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI03))
@@ -1770,7 +1817,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colors_SI03((agg_17$SI03)),
-          label = agg_17$SI03) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Other Service Jobs: <strong>",
+                                agg_17$SI03), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1780,7 +1829,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of All Other Services<br>Sector Jobs in Wasco County",
+          title = "Number of All Other Services<br>Sector Jobs by Census Tract<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1789,7 +1838,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colors_SI03((agg_16$SI03)),
-          label = agg_16$SI03) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Other Service Jobs: <strong>",
+                                agg_16$SI03), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1797,11 +1848,14 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colors_SI03((agg_15$SI03)),
-          label = agg_15$SI03) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Other Service Jobs: <strong>",
+                                agg_15$SI03), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
   })
 
 
@@ -2135,6 +2189,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2018)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),
@@ -2315,6 +2370,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2017)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),
@@ -2495,6 +2551,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2016)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),
@@ -2676,6 +2733,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2015)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),

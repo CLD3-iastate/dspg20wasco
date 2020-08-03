@@ -330,6 +330,7 @@ ggplot() +
 
 ## Housing
 
+### Affordable Housing
 ```{r warning=FALSE, message=FALSE}
 ggplotly(ggplot(acs_counties, aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,

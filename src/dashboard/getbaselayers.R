@@ -7,6 +7,7 @@ library(esri2sf)
 library(osmdata)
 library(sf)
 library(tidygeocoder)
+library(stringr)
 
 ### Base layers ---------------
 
@@ -52,3 +53,15 @@ unincorporated <- st_as_sf(unincorporated)
 url = "https://public.co.wasco.or.us/gisserver/rest/services/WascoCountyBoundary/MapServer/0"
 countyline <- esri2sf(url)
 countyline <- st_as_sf(countyline)
+
+# Other county lines
+oregon <- counties("Oregon", cb = FALSE)
+washington <- counties("Washington", cb = FALSE)
+oregon <- st_as_sf(oregon)
+washington <- st_as_sf(washington)
+or_counties <- c("Hood River", "Sherman", "Jefferson")
+wa_counties <- c("Klickitat", "Skamania")
+oregon <- oregon %>% dplyr::filter(NAME %in% or_counties)
+washington <- washington %>% dplyr::filter(NAME %in% wa_counties)
+neighboring_counties <- rbind(oregon, washington)
+st_write(neighboring_counties, "neighboring_counties.shp")

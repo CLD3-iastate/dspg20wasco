@@ -14,10 +14,10 @@ library(readr)
 library(ggplot2)
 library(sf)
 library(leaflet)
-library(mapview)
 library(reshape2)
 library(raster)
 library(tigris)
+library(viridis)
 ```
 
 ```{r}
@@ -59,29 +59,65 @@ raster_sqm_to_acres <- function(raster_list) {
 }
  
 # READ RASTER FILE
-file_path <- "~/git/dspg20wasco/data/lodes/raster/CDL_2017_41065.tif"
-raster_2017 <- raster::raster(file_path)
+raster_2017 <- raster::raster("~/git/dspg20wasco/data/raster/CDL_2017_41065.tif")
+raster_2016 <- raster::raster("~/git/dspg20wasco/data/raster/CDL_2016_41065.tif")
+raster_2015 <- raster::raster("~/git/dspg20wasco/data/raster/CDL_2015_41065.tif")
 # GET SPATIAL GEORGAPHIES (sf file)
 #sf <- sf::st_as_sf(tigris::tracts("OR", "Wasco County"))
 sf <- sf::st_as_sf(tigris::block_groups("OR", "Wasco County"))
 # CREATE A SEPARATE RASTER FOR EACH SPATIAL OBJECT
-list_of_geo_rasters <- crop_mask_raster_to_spatial(raster_2017, sf)
+list_of_geo_rasters_17 <- crop_mask_raster_to_spatial(raster_2017, sf)
+list_of_geo_rasters_16 <- crop_mask_raster_to_spatial(raster_2016, sf)
+list_of_geo_rasters_15 <- crop_mask_raster_to_spatial(raster_2015, sf)
+
 # GET ACRES PER LAND COVER ITEM PER SPATIAL OBJECT
-crop_acres_per_geo <- raster_sqm_to_acres(list_of_geo_rasters)
+crop_acres_per_geo_17 <- raster_sqm_to_acres(list_of_geo_rasters_17)
+crop_acres_per_geo_16 <- raster_sqm_to_acres(list_of_geo_rasters_16)
+crop_acres_per_geo_15 <- raster_sqm_to_acres(list_of_geo_rasters_15)
+
 # ADD YEAR
-yr <- stringr::str_match(file_path, "_(\\d\\d\\d\\d)")[,2]
-crop_acres_per_geo$year <- yr
+yr17 <- stringr::str_match("~/git/dspg20wasco/data/raster/CDL_2017_41065.tif", "_(\\d\\d\\d\\d)")[,2]
+yr16 <- stringr::str_match("~/git/dspg20wasco/data/raster/CDL_2016_41065.tif", "_(\\d\\d\\d\\d)")[,2]
+yr15 <- stringr::str_match("~/git/dspg20wasco/data/raster/CDL_2015_41065.tif", "_(\\d\\d\\d\\d)")[,2]
+crop_acres_per_geo_17$year <- yr17
+crop_acres_per_geo_16$year <- yr16
+crop_acres_per_geo_15$year <- yr15
 # CONVERT CODES TO LAND COVER/CROP NAMES
-crop_acres_per_geo$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo$class)
- 
+crop_acres_per_geo_17$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo_17$class)
+crop_acres_per_geo_16$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo_16$class)
+crop_acres_per_geo_15$desc <- cdlTools::updateNamesCDL(crop_acres_per_geo_15$class)
+
 # MERGE SPATIAL GEOGRAPHIES WITH THE CROP ACREAGE DATA
-sf_acres <- merge(sf, crop_acres_per_geo, by.x = "GEOID", by.y = "geoid")
+acres_17 <- merge(sf, crop_acres_per_geo_17, by.x = "GEOID", by.y = "geoid")
+acres_16 <- merge(sf, crop_acres_per_geo_16, by.x = "GEOID", by.y = "geoid")
+acres_15 <- merge(sf, crop_acres_per_geo_15, by.x = "GEOID", by.y = "geoid")
 # ASSIGN A CRS
-sf_acres <- sf::st_set_crs(sf_acres, 4269)
+acres_17 <- sf::st_set_crs(acres_17, 4269)
+acres_16 <- sf::st_set_crs(acres_16, 4269)
+acres_15 <- sf::st_set_crs(acres_15, 4269)
+
+```
+
+saving data
+```{r}
+saveRDS(acres_17, "../data/app_acres_17.Rds")
+saveRDS(acres_16, "../data/app_acres_16.Rds")
+saveRDS(acres_15, "../data/app_acres_15.Rds")
 ```
 
 ```{r}
-cdl_2017 <- leaflet() %>%
+acres_17
+```
+
+
+Winter Wheat
+```{r}
+colors_ww <- colorQuantile(viridis_pal(option = "D")(3), 
+                             domain = rbind(acres_17[acres_17$desc == "Winter Wheat", ],
+                                            acres_16[acres_16$desc == "Winter Wheat", ],
+                                            acres_15[acres_15$desc == "Winter Wheat", ])$acres)
+
+cdl_ww <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
     data = south_wasco_points,
@@ -90,46 +126,264 @@ cdl_2017 <- leaflet() %>%
     opacity = .7,
     group = "Basemap",
     label = "South Wasco Region") %>%
-  addPolygons(data = sf_acres[sf_acres$desc == "Winter Wheat", ],
+  addPolygons(data = acres_17[acres_17$desc == "Winter Wheat", ],
               weight = .3,
               opacity = 1,
               fillOpacity = .7,
-              group = "Winter Wheat Acreage",
-              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
-                                    domain = sf_acres[sf_acres$desc == "Winter Wheat", ]$acres, 4)
-              (sf_acres[sf_acres$desc == "Winter Wheat", ]$acres),
-              label = sf_acres[sf_acres$desc == "Winter Wheat", ]$acres) %>%
-  addPolygons(data = sf_acres[sf_acres$desc == "Barley", ],
+              group = "2017",
+              fillColor = ~ colors_ww(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Winter Wheat", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Winter Wheat", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addLegend(
+    data = rbind(acres_17[acres_17$desc == "Winter Wheat", ],
+                 acres_16[acres_16$desc == "Winter Wheat", ],
+                 acres_15[acres_15$desc == "Winter Wheat", ]),
+    "bottomright",
+    pal = colors_ww,
+    values = ~ acres,
+    labFormat = function(type, cuts, p) {
+      n = length(cuts)
+      p = paste0(round(p * 100), '%')
+      cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+    title = "Number of Acres of Winter Wheat<br>by Block Group",
+    opacity = .7,
+    na.label = "NA") %>%
+  addPolygons(data = acres_16[acres_16$desc == "Winter Wheat", ],
               weight = .3,
               opacity = 1,
               fillOpacity = .7,
-              group = "Barley Acreage",
-              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
-                                    domain = sf_acres[sf_acres$desc == "Barley", ]$acres, 4)
-              (sf_acres[sf_acres$desc == "Barley", ]$acres),
-              label = sf_acres[sf_acres$desc == "Barley", ]$acres) %>%
-  addPolygons(data = sf_acres[sf_acres$desc == "Alfalfa", ],
+              group = "2016",
+              fillColor = ~ colors_ww(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Winter Wheat", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Winter Wheat", ]$acres), 0),
+                              htmltools::HTML)) %>% 
+  addPolygons(data = acres_15[acres_15$desc == "Winter Wheat", ],
               weight = .3,
               opacity = 1,
               fillOpacity = .7,
-              group = "Alfalfa Acreage",
-              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
-                                    domain = sf_acres[sf_acres$desc == "Alfalfa", ]$acres, 4)
-              (sf_acres[sf_acres$desc == "Alfalfa", ]$acres),
-              label = sf_acres[sf_acres$desc == "Alfalfa", ]$acres) %>%
-  addPolygons(data = sf_acres[sf_acres$desc == "Cherries", ],
-              weight = .3,
-              opacity = 1,
-              fillOpacity = .7,
-              group = "Cherries Acreage",
-              fillColor =  colorBin(c('#D1E0BF', '#E57200'), 
-                                    domain = sf_acres[sf_acres$desc == "Cherries", ]$acres, 4)
-              (sf_acres[sf_acres$desc == "Cherries", ]$acres),
-              label = sf_acres[sf_acres$desc == "Cherries", ]$acres) %>%
+              group = "2015",
+              fillColor = ~ colors_ww(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Winter Wheat", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Winter Wheat", ]$acres), 0),
+                              htmltools::HTML)) %>% 
   addLayersControl(
-    baseGroups = c("Winter Wheat Acreage", "Barley Acreage", 
-                      "Alfalfa Acreage", "Cherries Acreage"),
-    options = layersControlOptions(collapsed = F)) %>%
-  hideGroup(c("Barley Acreage", "Alfalfa Acreage", "Cherries Acreage"))
-cdl_2017
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE))
 ```
+
+
+```{r}
+colors_bar <- colorQuantile(viridis_pal(option = "D")(3), 
+                             domain = rbind(acres_17[acres_17$desc == "Barley", ],
+                                            acres_16[acres_16$desc == "Barley", ],
+                                            acres_15[acres_15$desc == "Barley", ])$acres)
+cdl_barley <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "red",
+    weight = 2,
+    opacity = .7,
+    group = "Basemap",
+    label = "South Wasco Region") %>%
+  addPolygons(data = acres_17[acres_17$desc == "Barley", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2017",
+              fillColor = ~ colors_bar(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Barley", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Barley", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addLegend(
+    data = rbind(acres_17[acres_17$desc == "Barley", ],
+                          acres_16[acres_16$desc == "Barley", ],
+                          acres_15[acres_15$desc == "Barley", ]),
+    "bottomright",
+    pal = colors_bar,
+    values = ~ acres,
+    labFormat = function(type, cuts, p) {
+      n = length(cuts)
+      p = paste0(round(p * 100), '%')
+      cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+    title = "Number of Acres of Barley<br>by Block Group",
+    opacity = .7,
+    na.label = "NA") %>%
+  addPolygons(data = acres_16[acres_16$desc == "Barley", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2016",
+              fillColor = ~ colors_bar(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Barley", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Barley", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addPolygons(data = acres_15[acres_15$desc == "Barley", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2015",
+              fillColor = ~ colors_bar(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Barley", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Barley", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addLayersControl(
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE))
+```
+
+
+```{r}
+colors_alf <- colorQuantile(viridis_pal(option = "D")(3), 
+                             domain = rbind(acres_17[acres_17$desc == "Alfalfa", ],
+                                            acres_16[acres_16$desc == "Alfalfa", ],
+                                            acres_15[acres_15$desc == "Alfalfa", ])$acres)
+cdl_alfalfa <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "red",
+    weight = 2,
+    opacity = .7,
+    group = "Basemap",
+    label = "South Wasco Region") %>%
+  addPolygons(data = acres_17[acres_17$desc == "Alfalfa", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2017",
+              fillColor = ~ colors_alf(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Alfalfa", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Alfalfa", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addLegend(
+    data = rbind(acres_17[acres_17$desc == "Alfalfa", ],
+                 acres_16[acres_16$desc == "Alfalfa", ],
+                 acres_15[acres_15$desc == "Alfalfa", ]),
+    "bottomright",
+    pal = colors_alf,
+    values = ~ acres,
+    labFormat = function(type, cuts, p) {
+      n = length(cuts)
+      p = paste0(round(p * 100), '%')
+      cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+    title = "Number of Acres of Alfalfa<br>by Block Group",
+    opacity = .7,
+    na.label = "NA") %>%
+  addPolygons(data = acres_16[acres_16$desc == "Alfalfa", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2016",
+              fillColor = ~ colors_alf(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Alfalfa", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Alfalfa", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addPolygons(data = acres_15[acres_15$desc == "Alfalfa", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2015",
+              fillColor = ~ colors_alf(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Alfalfa", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Alfalfa", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addLayersControl(
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE))
+```
+
+
+```{r}
+colors_cher <- colorQuantile(viridis_pal(option = "D")(3), 
+                             domain = rbind(acres_17[acres_17$desc == "Cherries", ],
+                                            acres_16[acres_16$desc == "Cherries", ],
+                                            acres_15[acres_15$desc == "Cherries", ])$acres)
+cdl_cherries <- leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = south_wasco_points,
+    color = "red",
+    weight = 2,
+    opacity = .7,
+    group = "Basemap",
+    label = "South Wasco Region") %>%
+  addPolygons(data = acres_17[acres_17$desc == "Cherries", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2017",
+              fillColor = ~ colors_cher(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_17[acres_17$desc == "Cherries", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_17[acres_17$desc == "Cherries", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addLegend(
+    data = rbind(acres_17[acres_17$desc == "Cherries", ], 
+                 acres_16[acres_16$desc == "Cherries", ],
+                 acres_15[acres_15$desc == "Cherries", ]),
+    "bottomright",
+    pal = colors_cher,
+    values = ~acres,
+    labFormat = function(type, cuts, p) {
+      n = length(cuts)
+      p = paste0(round(p * 100), '%')
+      cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+    title = "Number of Acres of Cherries<br>by Block Group",
+    opacity = .7,
+    na.label = "NA") %>%
+  addPolygons(data = acres_16[acres_16$desc == "Cherries", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2016",
+              fillColor = ~ colors_cher(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_16[acres_16$desc == "Cherries", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_16[acres_16$desc == "Cherries", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addPolygons(data = acres_15[acres_15$desc == "Cherries", ],
+              weight = .3,
+              opacity = 1,
+              fillOpacity = .7,
+              group = "2015",
+              fillColor = ~ colors_cher(acres),
+              label = ~lapply(paste(sep = "", "Census Tract: ", 
+                                    acres_15[acres_15$desc == "Cherries", ]$TRACTCE, "<br/>",
+                                    "<strong> Number of Acres: <strong>",
+                                    round(acres_15[acres_15$desc == "Cherries", ]$acres), 0),
+                              htmltools::HTML)) %>%
+  addLayersControl(
+    baseGroups = c("2017", "2016", "2015"),
+    options = layersControlOptions(collapsed = FALSE))
+```
+
+
+```{r}
+cdl_ww
+cdl_barley
+cdl_alfalfa
+cdl_cherries
+```
+

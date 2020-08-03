@@ -87,7 +87,8 @@ race_div_2018 <- filter(race_div, year == 2018)
 race_div_2017 <- filter(race_div, year == 2017)
 race_div_2016 <- filter(race_div, year == 2016)
 race_div_2015 <- filter(race_div, year == 2015)
-
+race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
+  select(!contains("total"))
 
 ######## USE THE FOLLOWING ##########
 # color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
@@ -1385,7 +1386,7 @@ server <- function(input, output, session) {
                                   "Irrigation Water Use (mGal/D)" = "Irrigation",
                                   "Livestock Water Use (mGal/D)" = "Livestock",
                                   "Mining Water Use (mGal/D)" = "Mining",
-                                  "Total Water supplied to Public (mGal/D)"= "Total Water supplied to Public",
+                                  "Total Water supplied to Public (mGal/D)"= "Total Water Supplied to Public",
                                   "Wastewater Treatment (mGal/D)" = "Wastewater Treatment")
   
   ggplotly(ggplot(water_use_melt, aes(x=year, y=gallons, group = sector, color = sector,

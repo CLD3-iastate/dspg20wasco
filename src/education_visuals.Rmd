@@ -65,7 +65,7 @@ ed.melt.scaled = melt(ed.scaled, id.vars = c("year", "District.Name"),
 
 
 try making divergent red, white and blue color palette
-```
+```{r}
 img <- function(obj, nam) {
   image(1:length(obj), 1, as.matrix(1:length(obj)), col=obj, 
         main = nam, ylab = "", xaxt = "n", yaxt = "n",  bty = "n")
@@ -74,13 +74,17 @@ rwb <- colorRampPalette(colors = c("red", "white", "blue"))
 img(rwb(100), "red-white-blue")
 ```
 
+```{r}
+colorRampPalette(c("red", "blue"))(25)
+```
+
 
 ### Heat Maps 
 
 #### Original Scale
 
 for south wasco alone:
-```{r fig.width=12, fig.height=8}
+```{ fig.width=12, fig.height=8}
 sw <- filter(ed.melt, District.Name == "South Wasco County SD 1")
 ggplot(sw, aes(y = variable, x = factor(year), fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
@@ -99,6 +103,24 @@ ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   xlab("School Year")
 ```
+
+
+
+Trying with rwb divergent palette: not working 
+```
+interval <- c(-60, -20, -10, -5, seq(0,100,5))
+data.values <- as.vector(na.omit(ed.melt$value))
+color_rwb <- cut(data.values, breaks=interval, labels = rwb(24))
+ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + facet_wrap(~District.Name) +
+  #scale_fill_viridis(breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
+  scale_fill_manual(values = colorRampPalette(c("red", "blue"))(25)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("School Year")
+```
+
 
 
 
@@ -176,17 +198,7 @@ ggplot(ed.melt2, aes(y = indicator, x = year, fill = value)) +
 Makes it alot easier to do direct comparisons of schools and years for one variable. but interpretability is still weak.
 
 
-Trying with rwb divergent palette: not working 
-```
-ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
-  geom_tile(color = "#ADB5BD") + #gray
-  geom_text(aes(label = round(value,1)), color = "black") +
-  coord_equal() + facet_wrap(~District.Name) +
-  #scale_fill_viridis(breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
-  scale_fill_manual(values = rwb(25), breaks = c(-60, -20, -10, -5, seq(0,100,5))) + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  xlab("School Year")
-```
+
 
 
 

@@ -80,7 +80,14 @@ edu_attain_2017 <- filter(edu_attain, year == 2017)
 edu_attain_2016 <- filter(edu_attain, year == 2016)
 edu_attain_2015 <- filter(edu_attain, year == 2015)
 edu_attain_moe <- dplyr::select(acs_tracts, NAME, year, contains("education"), geometry) %>% select(!contains("total"))
-print(colnames(acs_tracts))
+
+fam_stab <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry)
+fam_stab <- select(fam_stab, !contains("moe")) %>% select(!contains("total"))
+fam_stab_2018 <- filter(fam_stab, year == 2018)
+fam_stab_2017 <- filter(fam_stab, year == 2017)
+fam_stab_2016 <- filter(fam_stab, year == 2016)
+fam_stab_2015 <- filter(fam_stab, year == 2015)
+fam_stab_moe <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry) %>% select(!contains("total"))
 
 race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
 race_div <- select(race_div, !contains("moe"))
@@ -88,24 +95,7 @@ race_div_2018 <- filter(race_div, year == 2018)
 race_div_2017 <- filter(race_div, year == 2017)
 race_div_2016 <- filter(race_div, year == 2016)
 race_div_2015 <- filter(race_div, year == 2015)
-race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
-  select(!contains("total"))
-race_div_white_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_white)
-race_div_black_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_black)
-race_div_na_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                domain = race_div$race_american_indian)
-race_div_asian_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_asian)
-race_div_nh_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                domain = race_div$race_native_hawaiian)
-race_div_hisp_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                  domain = race_div$race_hispanic)
-race_div_oth_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                 domain = race_div$race_other)
-race_div_multi_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                   domain = race_div$race_two_more)
+
 
 ######## USE THE FOLLOWING ##########
 # color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
@@ -688,7 +678,7 @@ conditionalPanel(
       list(" " = " ",
         "What is the racial diversity of South Wasco?" = "Race",
            "What types of familiy structures are in South Wasco?" = "Family",
-           "What is the highest educational achievement of people in South Wasco?" = "Education"),
+           "What is the educational background of people in South Wasco?" = "Education"),
       width = "300px", selected = NULL
     ))),
 # UI: PANEL - Race  --------
@@ -755,7 +745,7 @@ conditionalPanel(
                     id = 18,
                     main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
                     header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the highest educational achievement of people in South Wasco?",
+                    front_title = "What is the educational background of people in South Wasco?",
                     selectInput("degreeyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
                     leafletOutput("degreemap"),
@@ -2756,14 +2746,6 @@ server <- function(input, output, session) {
 ## plotlyOutput("raceplot") ----
 ## leafletOutput("racemap") -----
   # add years filter
-  race_div <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry)
-  race_div <- select(race_div, !contains("moe"))
-  race_div_2018 <- filter(race_div, year == 2018)
-  race_div_2017 <- filter(race_div, year == 2017)
-  race_div_2016 <- filter(race_div, year == 2016)
-  race_div_2015 <- filter(race_div, year == 2015)
-  race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
-    select(!contains("total"))
   race_div_white_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                      domain = race_div$race_white)
   race_div_black_pal <- colorNumeric(viridis_pal(option = "D")(3),
@@ -2780,7 +2762,6 @@ server <- function(input, output, session) {
                                    domain = race_div$race_other)
   race_div_multi_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                      domain = race_div$race_two_more)
-
   output$racemap <- renderLeaflet({
     if (input$raceyears == "2018") {
       leaflet(race_div_2018) %>%
@@ -3646,13 +3627,7 @@ server <- function(input, output, session) {
 ## SERVER: PANEL - Family -----
 ## plotlyOutput("familyplot") ----
 ## leafletOutput("familymap") ----
-  fam_stab <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry)
-  fam_stab <- select(fam_stab, !contains("moe")) %>% select(!contains("total"))
-  fam_stab_2018 <- filter(fam_stab, year == 2018)
-  fam_stab_2017 <- filter(fam_stab, year == 2017)
-  fam_stab_2016 <- filter(fam_stab, year == 2016)
-  fam_stab_2015 <- filter(fam_stab, year == 2015)
-  fam_stab_moe <- dplyr::select(acs_tracts, NAME, year, contains("family"), geometry) %>% select(!contains("total"))
+
   fam_stab_max_perc_2018 <- max(apply(X = select(data_frame(fam_stab_2018), -year, -NAME, -geometry), MARGIN = 1, FUN = max, na.rm = TRUE))
   fam_stab_2018_pal <- colorNumeric(viridis_pal(option = "D")(3),
                                     domain = c(0, fam_stab_max_perc_2018))
@@ -3689,16 +3664,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2018_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2018_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2018$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2018$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2018)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Unmarried: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2018)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2018_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2018$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2018$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2018)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3738,7 +3730,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2018)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3764,16 +3756,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2017_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2017_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2017$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2017$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2017)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Married: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2017)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2017_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2017$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2017$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2017)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3813,7 +3822,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2017)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3839,16 +3848,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2016_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2016_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2016$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2016$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2016)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Married: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2016)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2016_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2016$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2016$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2016)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3888,7 +3914,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2016)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3914,16 +3940,33 @@ server <- function(input, output, session) {
           weight = 1,
           opacity = 0,
           fillOpacity = .7,
-          group = "% of Parents who are Unmarried",
-          fillColor = ~fam_stab_2015_pal(family_single_parent_perc),
+          group = "% of Single Fathers",
+          fillColor = ~fam_stab_2015_pal(family_single_parent_male_perc),
           label = ~lapply(paste(sep = "",
                                 substr(fam_stab_2015$NAME, 20, 60), "<br/>",
                                 substr(fam_stab_2015$NAME, 1, 17),
                                 "<br/>Margins of error: ",
                                 round(filter(fam_stab_moe,
-                                             year == 2015)$family_single_parent_perc_moe, 1), "%<br/>",
-                                "<strong> Percent Married: <strong>",
-                                round(family_single_parent_perc, 1), "<strong>%"),
+                                             year == 2015)$family_single_parent_male_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Fathers: <strong>",
+                                round(family_single_parent_male_perc, 1), "<strong>%"),
+                          htmltools::HTML)) %>%
+        addPolygons(
+          weight = 1,
+          opacity = 0,
+          fillOpacity = .7,
+          group = "% of Single Mothers",
+          fillColor = ~fam_stab_2015_pal(family_single_parent_female_perc),
+          label = ~lapply(paste(sep = "",
+                                substr(fam_stab_2015$NAME, 20, 60), "<br/>",
+                                substr(fam_stab_2015$NAME, 1, 17),
+                                "<br/>Margins of error: ",
+                                round(filter(fam_stab_moe,
+                                             year == 2015)$family_single_parent_female_perc_moe, 1),
+                                "%<br/>",
+                                "<strong> Percent of Single Mothers: <strong>",
+                                round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
         addPolygons(
           weight = 1,
@@ -3963,7 +4006,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2015)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Parents who are Unmarried",
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
@@ -3995,22 +4038,23 @@ server <- function(input, output, session) {
 ## SERVER: PANEL - Education attainment -----
 ## plotlyOutput("degreeplot") -----
 ## leafletOutput("degreemap") ----
-  income_dist_max_perc_2018 <- max(apply(X = select(data_frame(income_dist_2018),
-                                                    -year, -NAME, -geometry), 1, max, TRUE))
-  income_dist_18_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                     domain = c(0, income_dist_max_perc_2018))
-  income_dist_max_perc_2017 <- max(apply(X = select(data_frame(income_dist_2017),
-                                                    -year, -NAME, -geometry), 1, max, TRUE))
-  income_dist_17_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                     domain = c(0, income_dist_max_perc_2017))
-  income_dist_max_perc_2016 <- max(apply(X = select(data_frame(income_dist_2016),
-                                                    -year, -NAME, -geometry), 1, max, TRUE))
-  income_dist_16_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                     domain = c(0, income_dist_max_perc_2016))
-  income_dist_max_perc_2015 <- max(apply(X = select(data_frame(income_dist_2015),
-                                                    -year, -NAME, -geometry), 1, max, TRUE))
-  income_dist_15_pal <- colorNumeric(viridis_pal(option = "D")(3),
-                                     domain = c(0, income_dist_max_perc_2015))
+
+  edu_attain_max_perc_2018 <- max(apply(X = select(data_frame(edu_attain_2018),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
+  edu_attain_2018_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2018))
+  edu_attain_max_perc_2017 <- max(apply(X = select(data_frame(edu_attain_2017),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
+  edu_attain_2017_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2017))
+  edu_attain_max_perc_2016 <- max(apply(X = select(data_frame(edu_attain_2016),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
+  edu_attain_2016_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2016))
+  edu_attain_max_perc_2015 <- max(apply(X = select(data_frame(edu_attain_2015),
+                                                   -year, -NAME, -geometry), 1, max, TRUE))
+  edu_attain_2015_pal <- colorNumeric(viridis_pal(option = "D")(3),
+                                      domain = c(0, edu_attain_max_perc_2015))
 
   output$degreemap <- renderLeaflet({
     if (input$degreeyears == "2018"){

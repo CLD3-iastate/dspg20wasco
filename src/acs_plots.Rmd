@@ -334,7 +334,8 @@ ggplot() +
 ggplotly(ggplot(acs_counties, aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
-                                "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%"))) +
+                                "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
+                                "<br>Margin of Error: ", round(affordable_housing_all_perc_moe, digits = 1), "%"))) +
   geom_line(size = 1) + 
   geom_point(size = 1.5) +
   scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +

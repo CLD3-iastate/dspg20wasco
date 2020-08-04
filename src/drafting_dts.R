@@ -4,6 +4,11 @@ food_systems <- read_excel("Data/Indicators.xlsx", sheet = 2, skip = 1)
 learn_earn <- read_excel("Data/Indicators.xlsx", sheet = 3, skip = 1)
 living <- read_excel("Data/Indicators.xlsx", sheet = 4, skip = 1)
 
+datatable(infrastructure[,1:9], rownames = FALSE)
+datatable(food_systems[,1:9], rownames = FALSE)
+datatable(learn_earn[,1:9], rownames = FALSE)
+datatable(living[,1:9], rownames = FALSE)
+
 ## Food systems map
 datatable(food_systems[c(1,4:5),], rownames = FALSE)
 

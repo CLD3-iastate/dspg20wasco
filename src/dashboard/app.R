@@ -207,6 +207,7 @@ menuItem(
 ## UI: TAB - Overview --------
         tabItem(tabName = "overview",
                 fluidRow(
+                  
                   boxPlus(
                     title = "Project overview",
                     closable = FALSE,
@@ -238,88 +239,65 @@ menuItem(
                       "How accessible is healthy and affordable food in South Wasco?" = "Foodmap",
                       "What is the food insecurity rate in South Wasco?" = "Insecurity",
                       "What local crops are grown in South Wasco?" = "Crops"),
-                    width = "300px", selected = NULL
-                  )),
+                    width = "500px", selected = "Foodmap"
+                  ),
 ## UI: PANEL - Food systems map  ------
                 conditionalPanel(
                   condition = "input.foodselect == 'Foodmap'",
-                  # Add selection for domain, theme questions
-                  # Leaflet map for food insecurity data or line chart
-                  # Free and reduced price lunch data (?)
-                  # Crop maps in here, major agricultural crops
-                  flipBox(
+                  h2("Interactive food systems map"),
+                  tabBox(
                     id = 1,
-                    main_img = "https://image.flaticon.com/icons/svg/1445/1445611.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/3175/3175193.svg",
-                    front_title = "How accessible is healthy and affordable food in South Wasco?",
-                    back_title = "Data",
-                    h2("Interactive food systems map"),
-#                    "Explore the different types of stores available for people #living in South Wasco to purchase food. The legend indicates whether stores #accept payment from federal food assistance programs and WIC. Use the Show #driving time tool to show 30 minute and 1 hour driving time areas from stores.",
-                    # Fix the symbology (Aaron),
-                    # Fix the driving time legend
-                    # See why some points don't have names
-                    leafletOutput("mymap"),
-                    selectInput("iso", "Show driving time for...",
-                                choices = isochrones$name,
-                                selectize = TRUE,
-                                multiple = TRUE,
-                                width = "300px"),
-                    "Explore the data...",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center",
-                        h2("Methods: Clusters of Innovation"),
-                        #img(src="FoodSystems.png", align = "center", width = 60),
-                       # "Data for this map is from here",
-                        # Remove the cluster
-                        # Add indicator table snippet
-                        # Add the data table for this
-                        DTOutput("foodDT"))))),
+                    side = "left", 
+                    height = "250px",
+                    width = "12",
+                    selected = "Food Map",
+                    tabPanel("Food Map", 
+                             img(src="food_bkgrnd.png", width = "100%"),
+                             leafletOutput("mymap")
+                    ),
+                    tabPanel("Data", 
+                             DTOutput("foodDT"))
+                  )
+
+                  ),
 ## UI: PANEL - Food insecurity  ----
                 conditionalPanel(
                   condition = "input.foodselect == 'Insecurity'",
-                  flipBox(
+                  tabBox(
                     id = 2,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the food insecurity rate in South Wasco?",
-                    selectInput("ratetype", "Which Food Insecurity Rate?",
-                                c("Overall", "Childhood")),
-                    leafletOutput("foodinsecuritymap"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Indicator table snippet,
-                      #DTOutput("insecurityDT")
-                    ))
-                  )),
+                    side = "left", 
+                    height = "250px",
+                    width = "12",
+                    selected = "Food Insecurity",
+                    tabPanel("Food Insecurity", 
+                             img(src="food_bkgrnd.png", width = "100%"),
+                             selectInput("ratetype", "Which Food Insecurity Rate?",
+                                         c("Overall", "Childhood")),
+                             leafletOutput("foodinsecuritymap")
+                    ),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                  ),
 ## UI: PANEL - Local crops panel -----
                 conditionalPanel(
                   condition = "input.foodselect == 'Crops'",
-                  flipBox(
+                  tabBox(
                     id = 4,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What local crops are grown in South Wasco?",
-                    selectInput("crops", "Which crop?",
-                                c("Winter Wheat", "Barley",
-                                  "Alfalfa", "Cherries")),
-                    leafletOutput("cropmap"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Indicator table snippet,
-                      #DTOutput("cropDT")
-                    ))
-                  ))
-        ), # END OF FOOD SYSTEMS CLUSTER
+                    side = "left", 
+                    height = "250px",
+                    width = "12",
+                    selected = "Crop Map",
+                    tabPanel("Crop Map", 
+                             img(src="food_bkgrnd.png", width = "100%"),
+                             selectInput("crops", "Which crop?",
+                                         c("Winter Wheat", "Barley",
+                                           "Alfalfa", "Cherries")),
+                             leafletOutput("cropmap")
+                    ),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                  )
+        )), # END OF FOOD SYSTEMS CLUSTER
 
 ## UI: TAB - Infrastructure cluster -----------------------------
         tabItem(tabName = "infrastructure",
@@ -337,7 +315,7 @@ menuItem(
                     "What is access to broadband like and why is it important?" = "Broadband",
                     "What is water use like in Wasco?" = "Water",
                     "What is the transit system like in South Wasco?" = "Transit"),
-                  width = "300px", selected = NULL
+                  width = "500px", selected = "WindSolar"
                 )),
 ## UI: PANEL - Wind and solar -------
                 conditionalPanel(

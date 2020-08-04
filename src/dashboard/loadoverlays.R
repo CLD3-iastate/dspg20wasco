@@ -3,6 +3,7 @@ library(sp)
 library(tidyverse)
 library(here)
 library(dplyr)
+library(formattable)
 
 ### loading overlay data, check file names
 ## food points
@@ -28,6 +29,24 @@ food_insecurity_counties$FIPS <- as.character(food_insecurity_counties$FIPS)
 
 names(food_insecurity_counties) <- abbreviate(names(food_insecurity_counties))
 food_insecurity_counties <- food_insecurity_counties %>% rename("GEOID" = "FIPS")
+
+food_insecurity_counties$popup_text <-
+  paste0(food_insecurity_counties$`Cn,S`, "<br/>",
+         food_insecurity_counties$Year, "<br/>",
+         "<strong> Food Insecurity Rate:", "<br/>",
+         round(food_insecurity_counties$FdIR, 3)*100, "% </strong> <br/>",
+         "Annual Food Budget Shortfall", "<br/>",
+         "$", comma(food_insecurity_counties$WAFBS)) %>%
+  lapply(htmltools::HTML)
+
+food_insecurity_counties$popup_text_child <-
+  paste0(food_insecurity_counties$`Cn,S`, "<br/>",
+         food_insecurity_counties$Year, "<br/>",
+         "<strong> Childhood Food Insecurity Rate:", "<br/>",
+         round(food_insecurity_counties$Cfir, 3)*100,  "% </strong> <br/>",
+         "Annual Food Budget Shortfall", "<br/>",
+         "$", comma(food_insecurity_counties$WAFBS)) %>%
+  lapply(htmltools::HTML)
 
 or_county_lines <- counties(state = "OR")
 wa_county_lines <- counties(state = "WA")

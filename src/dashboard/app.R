@@ -35,19 +35,19 @@ acs_data <- fread(("Data/combined_acs.csv"))
 acs_data$GEOID <- as.character(acs_data$GEOID)
 acs_counties <- readRDS(here("/data/acs_counties.Rds"))
 acs_counties <- acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, OR",
-                                                                               "Wasco County, OR", "Oregon"), 
+                                                                               "Wasco County, OR", "Oregon"),
                                                                 other_level = "Neighboring Counties"),
                                         #### To get the south wasco lines to be most visible, order the factor levels
                                         #### so that south wasco is drawn last (drawn over the rest)
                                         #### Plotly eliminates transparency of lines
                                         south_wasco = factor(south_wasco , levels= c("Neighboring Counties",
-                                                                                     "Oregon","Wasco County, OR", 
+                                                                                     "Oregon","Wasco County, OR",
                                                                                      "South Wasco County School District 1, OR")))
-acs_counties_neighbors <- filter(acs_counties, NAME == "South Wasco County School District 1, OR" | 
+acs_counties_neighbors <- filter(acs_counties, NAME == "South Wasco County School District 1, OR" |
                                    NAME == "Wasco County, OR"| NAME == "Hood River County, OR" |
                                    NAME == "Sherman County, OR" | NAME == "Jefferson County, OR" |
-                                   NAME == "Skamania County, WA" | NAME == "Klickitat County, WA" | 
-                                   NAME == "Oregon")  
+                                   NAME == "Skamania County, WA" | NAME == "Klickitat County, WA" |
+                                   NAME == "Oregon")
 #get tract level geography
 acs_tracts <- readRDS(here("/data/acs_tracts.Rds"))
 acs_tracts$NAME.x <- NULL
@@ -126,7 +126,7 @@ ui <- dashboardPagePlus(
 
 ## UI: Dashboard sidebar --------
   dashboardSidebar(
-    width = 300,
+    width = 320,
     sidebarMenu(
       id = "tabs",
       menuItem(
@@ -146,31 +146,47 @@ ui <- dashboardPagePlus(
         text = "Findings",
         icon = icon("chart-pie"),
 ## UI: Findings menu subitems (clusters and drivers) ---------
-        menuSubItem(
-          tabName = "food",
-          text = "Cluster: Food Systems",
-          icon = icon("utensils")
-        ),
-        menuSubItem(
-          tabName = "infrastructure",
-          text = "Cluster: Infrastructure",
-          icon = icon("truck-pickup")
-        ),
-        menuSubItem(
-          tabName = "learnearn",
-          text = "Driver: Opportunities to Learn and Earn",
-          icon = icon("graduation-cap")
-        ),
-        menuSubItem(
-          tabName = "living",
-          text = "Driver: Quality Standard of Living",
-          icon = icon("laugh-beam")
-        )),
-      menuItem(
-        tabName = "team",
-        text = "Team",
-        icon = icon("user-friends")
-      ))),
+menuItem(
+  tabName = "food",
+  text = "Cluster: Food Systems",
+  icon = icon("utensils")
+),
+menuItem(
+  tabName = "infrastructure",
+  text = "Cluster: Infrastructure",
+  icon = icon("truck-pickup")
+),
+menuItem(
+  tabName = "learnearn",
+  text = "Driver: Opportunities to Learn and Earn",
+  icon = icon("graduation-cap"),
+  menuSubItem(tabName = "learn",
+              text = "Education",
+              icon = icon("school")),
+  menuSubItem(tabName = "earn",
+              text = "Employment",
+              icon = icon("briefcase"))),
+menuItem(
+  tabName = "living",
+  text = "Driver: Quality Standard of Living",
+  icon = icon("laugh-beam"),
+  menuSubItem(tabName = "financial",
+              text = "Financial",
+              icon = icon("money-bill-wave")),
+  menuSubItem(tabName = "housing",
+              text = "Housing",
+              icon = icon("home")),
+  menuSubItem(tabName = "social",
+              text = "Social",
+              icon = icon("users"))
+)),
+# Team menu
+menuItem(
+  tabName = "team",
+  text = "Team",
+  icon = icon("users")
+)
+)),
 
 ## UI: Dashboard body -------
   dashboardBody(
@@ -210,7 +226,6 @@ ui <- dashboardPagePlus(
                     choices = list(" " = " ",
                       "How accessible is healthy and affordable food in South Wasco?" = "Foodmap",
                       "What is the food insecurity rate in South Wasco?" = "Insecurity",
-                      "How many students in South Wasco are ellgible for Free and Reduced Price Lunch?" = "Lunch",
                       "What local crops are grown in South Wasco?" = "Crops"),
                     width = "300px", selected = NULL
                   )),
@@ -271,24 +286,6 @@ ui <- dashboardPagePlus(
                       #DTOutput("insecurityDT")
                     ))
                   )),
-## UI: PANEL - Free and reduced lunch ------
-                conditionalPanel(
-                  condition = "input.foodselect == 'Lunch'",
-                  flipBox(
-                    id = 3,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "How many students in South Wasco are ellgible for Free and Reduced Price Lunch?",
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Indicator table snippet,
-                      #DTOutput("lunchDT")
-                    ))
-                  )),
 ## UI: PANEL - Local crops panel -----
                 conditionalPanel(
                   condition = "input.foodselect == 'Crops'",
@@ -325,7 +322,7 @@ ui <- dashboardPagePlus(
                   inputId = "infrastructureselect",
                   label = "I'm wondering...",
                   list(" " = " ",
-                    "What is the importance of wind & wolar projects to South Wasco?" = "WindSolar",
+                    "What is the importance of wind & solar projects to South Wasco?" = "WindSolar",
                     "What is access to broadband like and why is it important?" = "Broadband",
                     "What is water use like in Wasco?" = "Water",
                     "What is the transit system like in South Wasco?" = "Transit"),
@@ -334,9 +331,8 @@ ui <- dashboardPagePlus(
 ## UI: PANEL - Wind and solar -------
                 conditionalPanel(
                   condition = "input.infrastructureselect == 'WindSolar'",
-                  boxPlus(
-                   title = "What is the importance of wind & wolar projects to South Wasco?",
-                   width = 4,
+                  fluidRow(
+                   h1("What is the importance of wind & solar projects to South Wasco?"),
                     #img of wind solar infocard,
                    HTML('<div class="canva-embed" data-design-id="DAEDe8MzN7A" data-height-ratio="2.5000" style="padding:250.0000% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAEDe8MzN7A&#x2F;view?utm_content=DAEDe8MzN7A&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Wind &amp; Solar Projects in Wasco</a>')
                    )
@@ -344,9 +340,8 @@ ui <- dashboardPagePlus(
 ## UI: PANEL - Broadband -------
                 conditionalPanel(
                   condition = "input.infrastructureselect == 'Broadband'",
-                  boxPlus(
-                  title = "What is access to broadband like and why is it important?",
-                  width = 4,
+                  fluidRow(
+                  h1("What is access to broadband like and why is it important?"),
                   #img of broadband infocard
                   HTML('<div class="canva-embed" data-design-id="DAEDhGP13C4" data-height-ratio="2.5000" style="padding:250.0000% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAEDhGP13C4&#x2F;view?utm_content=DAEDhGP13C4&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Broadband Access</a> by Owen Hart')
                   )),
@@ -372,28 +367,29 @@ ui <- dashboardPagePlus(
 ## UI: PANEL - Transit -------
                conditionalPanel(
                  condition = "input.infrastructureselect == 'Transit'",
-                 boxPlus(
-                   title = "What is the transit system like in South Wasco?",
-                   width = 4,
+                 fluidRow(
+                   h1("What is the transit system like in South Wasco?"),
                   # img of transit infocard
                    HTML('<div class="canva-embed" data-design-id="DAEDgP5Krv8" data-height-ratio="2.5000" style="padding:250.0000% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAEDgP5Krv8&#x2F;view?utm_content=DAEDgP5Krv8&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Transportation in Wasco County</a> by Owen Hart')
                 ))), # END OF INFRASTRUCTURE
 
 
 ## UI: TAB -  Learn and earn driver -----------
-        tabItem(tabName = "learnearn",
-                fluidRow(
-                  selectInput(
-                    inputId = "learnearnselect",
-                    label = "Select domain",
-                    list(" " = " ",
-                      "Education" = "Education",
-                      "Employment" = "Employment"),
-                    width = "300px", selected = NULL
-                  )),
+       # tabItem(tabName = "learnearn",
+       #         fluidRow(
+       #           selectInput(
+       #             inputId = "learnearnselect",
+       #             label = "Select domain",
+       #             list(" " = " ",
+       #               "Education" = "Education",
+       #               "Employment" = "Employment"),
+       #             width = "300px", selected = NULL
+       #           )),
 ## UI: PANEL - Education composite -------
-                conditionalPanel(
-                  condition = "input.learnearnselect == 'Education'",
+tabItem(tabName = "learn",
+        fluidRow(
+                #conditionalPanel(
+                  #condition = "input.learnearnselect == 'Education'",
                   # How are we visualizing this? State and school district, line chart, maybe map?
                   # Back will have data and indicator snippet/sources
                   flipBox(
@@ -413,11 +409,12 @@ ui <- dashboardPagePlus(
                       #DTOutput("educationDT")
                     ))
                   )
-                ),
+                )), # END OF EDUCATION
 # Employment select panel
-                conditionalPanel(
-                  condition = "input.learnearnselect == 'Employment'",
-                  # We are missing access to jobs that pay a living wage
+tabItem(tabName = "earn",
+                #conditionalPanel(
+                #  condition = "input.learnearnselect == 'Employment'",
+                #  # We are missing access to jobs that pay a living wage
                   fluidRow(
                     selectInput(
                       inputId = "employmentselect",
@@ -428,7 +425,7 @@ ui <- dashboardPagePlus(
                         "How do workers flow in and out of South Wasco?" = "Flows",
                         "What types of jobs are in South Wasco?" = "Sectors"),
                       width = "300px", selected = NULL
-                    ))),
+                    )),
 # UI: PANEL - Employment ratio  -------
 conditionalPanel(
   condition = "input.employmentselect == 'EmpRatio'",
@@ -513,26 +510,27 @@ conditionalPanel(
                         #DTOutput("sectorsDT")
                       )))
                   )
-        ), ## END OF LEARN EARN TAB
+        ), ## END OF EMPLOYMENT
 
 ## UI: TAB - Quality standard of living driver -----------
-        tabItem(tabName = "living",
-                fluidRow(
-                    # Remove dropdown button
-                    # Select domain, then select question
-                      selectInput(
-                        inputId = "livingdomainselect",
-                        label = "Select domain",
-                        list(" " = " ",
-                          "Financial" = "Financial",
-                          "Housing" = "Housing",
-                          "Social" = "Social"),
-                        width = "300px", selected = NULL
-                      )),
+       # tabItem(tabName = "living",
+       #         fluidRow(
+       #             # Remove dropdown button
+       #             # Select domain, then select question
+       #               selectInput(
+       #                 inputId = "livingdomainselect",
+       #                 label = "Select domain",
+       #                 list(" " = " ",
+       #                   "Financial" = "Financial",
+       #                   "Housing" = "Housing",
+       #                   "Social" = "Social"),
+       #                 width = "300px", selected = NULL
+       #               )),
 # Financial select question
-                conditionalPanel(
-                  condition = "input.livingdomainselect == 'Financial'",
-                  fluidRow(
+      #          conditionalPanel(
+      #            condition = "input.livingdomainselect == 'Financial'",
+tabItem(tabName = "financial",
+fluidRow(
                     selectInput(
                       inputId = "financialselect",
                       label = "I'm wondering...",
@@ -541,7 +539,7 @@ conditionalPanel(
                         "What is the poverty rate in South Wasco?" = "Poverty",
                         "What is the income distribution in South Wasco" = "DisIncome"),
                       width = "300px", selected = NULL
-                    ))),
+                    )),
 ## UI: PANEL - Median income  ------
                     conditionalPanel(
                       condition = "input.financialselect == 'MedIncome'",
@@ -604,10 +602,12 @@ conditionalPanel(
                       # Indicator table snippet
                       # DTOutput("acs_counties")
                     ))
-                  )),
+                  ))
+), # END FINANCIAL
 # Housing select question
-conditionalPanel(
-  condition = "input.livingdomainselect == 'Housing'",
+tabItem(tabName = "housing",
+#conditionalPanel(
+#  condition = "input.livingdomainselect == 'Housing'",
   fluidRow(
     selectInput(
       inputId = "housingselect",
@@ -616,7 +616,7 @@ conditionalPanel(
         "How much affordable housing is in South Wasco?" = "Housing",
            "What is the home ownership rate in South Wasco?" = "RentOwn"),
       width = "300px", selected = NULL
-    ))),
+    )),
 ## UI: PANEL - Affordable housing -----
                   conditionalPanel(
                     condition = "input.housingselect == 'Housing'",
@@ -660,10 +660,12 @@ conditionalPanel(
                       # DTOutput("acs_counties")
                     ))
                   )
-                ),
+                )
+), # END HOUSING
 # Social select question
-conditionalPanel(
-  condition = "input.livingdomainselect == 'Social'",
+tabItem(tabName = "social",
+#conditionalPanel(
+#  condition = "input.livingdomainselect == 'Social'",
   fluidRow(
     selectInput(
       inputId = "socialselect",
@@ -673,7 +675,7 @@ conditionalPanel(
            "What types of familiy structures are in South Wasco?" = "Family",
            "What is the educational background of people in South Wasco?" = "Education"),
       width = "300px", selected = NULL
-    ))),
+    )),
 # UI: PANEL - Race  --------
                 conditionalPanel(
                   condition = "input.socialselect == 'Race'",
@@ -753,7 +755,7 @@ conditionalPanel(
                       # DTOutput("acs_counties")
                     ))
                   )
-                )), # END OF QUALITY STANDARD OF LIVING TAB
+                )), # END SOCIAL TAB
 
 
 ## UI: TAB - Data and Methods ----------
@@ -859,23 +861,27 @@ server <- function(input, output, session) {
 ## SERVER: DATA TABLE - Food systems map -----
   output$foodDT <- renderDT({
     datatable(food_points,
-                        extensions = c("FixedColumns", "FixedHeader", "Scroller"),
+                        extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
                         options = list(
-                          # dom = 't',
-                          # deferRender = TRUE,
+                          dom = 'Bfrtip',
                           searching = TRUE,
                           autoWidth = TRUE,
-                          # scrollCollapse = TRUE,
                           rownames = FALSE,
                           scroller = TRUE,
                           scrollX = TRUE,
                           scrollY = "500px",
                           fixedHeader = TRUE,
                           class = 'cell-border stripe',
-                          fixedColumns = list(
-                            leftColumns = 3,
-                            heightMatch = 'none'
-                          )))
+                          buttons =
+                            list("copy", list(
+                              extend = "collection"
+                              , buttons = c("csv", "excel", "pdf")
+                              , text = "Download"
+                            ))
+                          #fixedColumns = list(
+                            #leftColumns = 3,
+                            #heightMatch = 'none')
+                          ))
   })
 ## SERVER: DATA TABLE - Industry sectors -----
   output$sectorsDT <- renderDT({
@@ -1031,6 +1037,9 @@ server <- function(input, output, session) {
 ## SERVER: PANEL - Food insecurity ----
 ## SERVER: PANEL - Free and reduced price lunch ----
 ## leafletOutput("foodinsecuritymap") ------
+
+
+
   output$foodinsecuritymap <- renderLeaflet({
   food_counties_pal <- colorNumeric(viridis_pal(option = "D")(3), domain = food_insecurity_counties$FdIR)
   food_counties_pal_c <- colorNumeric(viridis_pal(option = "D")(3), domain = food_insecurity_counties$Cfir)
@@ -1042,7 +1051,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text,
         fillColor = ~food_counties_pal(FdIR),
         group = "2014") %>%
       addPolygons(
@@ -1050,7 +1059,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text,
         fillColor = ~food_counties_pal(FdIR),
         group = "2015") %>%
       addPolygons(
@@ -1058,7 +1067,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text,
         fillColor = ~food_counties_pal(FdIR),
         group = "2016") %>%
       addPolygons(
@@ -1066,7 +1075,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text,
         fillColor = ~food_counties_pal(FdIR),
         group = "2017") %>%
       addPolylines(
@@ -1096,7 +1105,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text_child,
         fillColor = ~food_counties_pal_c(Cfir),
         group = "2014") %>%
       addPolygons(
@@ -1104,7 +1113,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text_child,
         fillColor = ~food_counties_pal_c(Cfir),
         group = "2015") %>%
       addPolygons(
@@ -1112,7 +1121,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text_child,
         fillColor = ~food_counties_pal_c(Cfir),
         group = "2016") %>%
       addPolygons(
@@ -1120,7 +1129,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0,
         fillOpacity = .7,
-        label = ~`WAFBS`,
+        label = ~popup_text_child,
         fillColor = ~food_counties_pal_c(Cfir),
         group = "2017") %>%
       addPolylines(
@@ -1375,8 +1384,8 @@ server <- function(input, output, session) {
 ## plotlyOutput("waterplot") ----
 
   output$waterplot <- renderPlotly({
-    
-    water_use_melt <- melt(data = water_use_by_sector_t, id.vars = c("year"), 
+
+    water_use_melt <- melt(data = water_use_by_sector_t, id.vars = c("year"),
                                                          measure.vars = colnames(water_use_by_sector_t)[-length(water_use_by_sector_t)]) %>%
     rename(c("sector" = "variable", "gallons" = "value"))
   water_use_melt$sector <- recode(water_use_melt$sector, "Aquaculture Water Use (mGal/D)" = "Aquaculture",
@@ -1388,20 +1397,20 @@ server <- function(input, output, session) {
                                   "Mining Water Use (mGal/D)" = "Mining",
                                   "Total Water supplied to Public (mGal/D)"= "Total Water Supplied to Public",
                                   "Wastewater Treatment (mGal/D)" = "Wastewater Treatment")
-  
+
   ggplotly(ggplot(water_use_melt, aes(x=year, y=gallons, group = sector, color = sector,
                                       text = paste0("Sector: ", sector,
                                                     "<br>Year: ", year,
                                                     "<br>Water Use: ", gallons, " (mGal/D)"))) +
-             geom_line(size = 1) + 
+             geom_line(size = 1) +
              geom_point(size = 1.5) +
              scale_colour_manual(name = "Sector", values = viridis(9, option = "D")) +
-             theme_minimal() + ggtitle("Water Use in Wasco County by Sector (1985-2015)") + 
-             ylab("Millions of Gallons per Day (mGal/D)") + xlab("Year"), tooltip = "text") %>% 
-    config(displayModeBar = "static", displaylogo = FALSE, 
+             theme_minimal() + ggtitle("Water Use in Wasco County by Sector (1985-2015)") +
+             ylab("Millions of Gallons per Day (mGal/D)") + xlab("Year"), tooltip = "text") %>%
+    config(displayModeBar = "static", displaylogo = FALSE,
            modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                        "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-  
+
   })
 
 ## SERVER: TAB - Learn and earn driver ----
@@ -1510,12 +1519,12 @@ server <- function(input, output, session) {
                                                     "<br>Year: ", year,
                                                     "<br>Percent Employed: ", employment_20_to_64, "%",
                                                     "<br>Margin of Error: ", employment_20_to_64_moe, "%"))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
-               theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") + 
-               ylab("Employment Ratio (%)") + xlab("Year"), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") +
+               ylab("Employment Ratio (%)") + xlab("Year"), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
@@ -1529,12 +1538,12 @@ server <- function(input, output, session) {
                                                     "<br>Year: ", year,
                                                     "<br>Labor Force Participation Rate: ", labor_force_20_to_64, "%",
                                                     "<br>Margin of Error: ", labor_force_20_to_64_moe, "%"))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
                #scale_alpha_manual(values=c(1,1,1,0.1)) +
-               theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year"), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               theme_minimal() + ggtitle("Labor Force Participation Rate for Adults 20 to 64: 2015-2018") + ylab("Labor Force Participation Rate") + xlab("Year"), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
@@ -1544,44 +1553,44 @@ server <- function(input, output, session) {
 
   output$flowsplot <- renderPlotly({
     if (input$flows == "Inflows"){
-      top_12_in_melt <- melt(data = top_12_in, id.vars = c("year"), 
+      top_12_in_melt <- melt(data = top_12_in, id.vars = c("year"),
                              measure.vars = colnames(top_12_in)[-length(top_12_in)]) %>%
         rename(c("county" = "variable", "jobs" = "value"))
-      
+
       ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = county,
                                           text = paste0("County: ", county,
                                                         "<br>Year: ", year,
                                                         "<br>Number of Jobs: ", jobs))) +
-                 geom_line(size = 1) + 
+                 geom_line(size = 1) +
                  geom_point(size = 1.5) +
                  scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
                  scale_x_continuous(breaks = 0:2100) +
-                 theme_minimal() + ggtitle("Number of jobs flowing into Wasco County (2015-2017)") + 
-                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 
-        config(displayModeBar = "static", displaylogo = FALSE, 
+                 theme_minimal() + ggtitle("Number of jobs flowing into Wasco County (2015-2017)") +
+                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>%
+        config(displayModeBar = "static", displaylogo = FALSE,
                modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                            "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 
     }
     else if (input$flows == "Outflows"){
-      top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"), 
+      top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"),
                               measure.vars = colnames(top_12_out)[-length(top_12_out)]) %>%
         rename(c("county" = "variable", "jobs" = "value"))
-      
+
       ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = county,
                                            text = paste0("County: ", county,
                                                          "<br>Year: ", year,
                                                          "<br>Number of Jobs: ", jobs))) +
-                 geom_line(size = 1) + 
+                 geom_line(size = 1) +
                  geom_point(size = 1.5) +
                  scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
                  scale_x_continuous(breaks = 0:2100) +
-                 theme_minimal() + ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") + 
-                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 
-        config(displayModeBar = "static", displaylogo = FALSE, 
+                 theme_minimal() + ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") +
+                 ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>%
+        config(displayModeBar = "static", displaylogo = FALSE,
                modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                            "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-      
+
     }
   })
 
@@ -1810,19 +1819,19 @@ server <- function(input, output, session) {
 ## plotlyOutput("medincomeplot") ----
 
   output$medincomeplot <- renderPlotly({
-    ggplotly(ggplot(acs_counties, 
+    ggplotly(ggplot(acs_counties,
                     aes(x=year, y=median_household_income, group = NAME, color = south_wasco,
                         text = paste0("Region: ", NAME,
                                       "<br>Year: ", year,
                                       "<br>Median Household Income: $", median_household_income,
                                       "<br>Margin of Error: $", median_household_income_moe))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_color_manual(name = "Region", values = c(graypal,viridis(3, option = "D")), labels=c("Oregon", "South Wasco", "Wasco", "Neighboring Counties")) +
-               theme_minimal() + ggtitle("Median Household Income 2015-2018") + 
-               ylab("Median Household Income") + xlab("Year"), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
-             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian", 
+               theme_minimal() + ggtitle("Median Household Income 2015-2018") +
+               ylab("Median Household Income") + xlab("Year"), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
   })
 
@@ -1931,10 +1940,10 @@ server <- function(input, output, session) {
                                                     "<br>Year: ", year,
                                                     "<br>Percent Below Federal Poverty: ", below_poverty, "%",
                                                     "<br>Margin of Error: ", below_poverty_moe, "%"))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal,viridis(3, option = "D"))) +
-               theme_minimal() + ggtitle("Percent Below Federal Poverty: 2015-2018") + ylab("Percent Below Federal Poverty") + xlab("Year"), tooltip = "text") %>% 
+               theme_minimal() + ggtitle("Percent Below Federal Poverty: 2015-2018") + ylab("Percent Below Federal Poverty") + xlab("Year"), tooltip = "text") %>%
       config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
@@ -2699,21 +2708,21 @@ server <- function(input, output, session) {
                                       "income_35K_49999" = "$35,000-$49,999", "income_50K_74999" ="$50,000-$74,999",
                                       "income_75K_99999" = "$75,000-$99,999", "income_100K_149999" = "$100,000-$149,999",
                                       "income_150K_199999" = "$150,000-$199,999", "income_200K_more" = "Above $200,000"))
-    
+
     ggplotly(ggplot(filter(income_table, year ==input$incomedisyear))+
                geom_bar(aes(fill=variable, y=value, x=NAME,
                             text = paste0("Region: ", NAME,
                                           "<br>Year: ", year,
                                           "<br>Percent of Population: ", value, "%",
-                                          "<br>Margin of Error: ", moe, "%")), 
-                        position = position_stack(reverse = TRUE), stat="identity")+ 
+                                          "<br>Margin of Error: ", moe, "%")),
+                        position = position_stack(reverse = TRUE), stat="identity")+
                scale_fill_manual(name ="Income Bracket",
                                  values = viridis(10, option = "D")) +
                ylab("% of Population") + xlab("") + theme_minimal() +
-               ggtitle(paste0("Income Distribution for ", input$incomedisyear)) + coord_flip(), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               ggtitle(paste0("Income Distribution for ", input$incomedisyear)) + coord_flip(), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                         "hoverCompareCartesian","resetScale2d")) 
+                                         "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Affordable housing -----
@@ -2725,15 +2734,15 @@ server <- function(input, output, session) {
                                                     "<br>Year: ", year,
                                                     "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
                                                     "<br>Margin of Error: ", round(affordable_housing_all_perc_moe, digits = 1), "%"))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
-               theme_minimal() + ggtitle("Affordable Housing 2015-2018",subtitle = "Occupied households where monthly costs are less than 30% of houshold income") + 
-               ylab("Affordable Housing") + xlab("Year"), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               theme_minimal() + ggtitle("Affordable Housing 2015-2018",subtitle = "Occupied households where monthly costs are less than 30% of houshold income") +
+               ylab("Affordable Housing") + xlab("Year"), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-    
+
   })
 
 ## SERVER: PANEL - Rent vs own -----
@@ -2745,15 +2754,15 @@ server <- function(input, output, session) {
                                                     "<br>Year: ", year,
                                                     "<br>Percent of Owner Occupied Homes: ", round(owner_occupied_housing_perc, digits = 1), "%",
                                                     "<br>Margin of Error: ", round(owner_occupied_housing_perc_moe, digits = 1), "%"))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
-               theme_minimal() + ggtitle("Owner Occupied Housing 2015-2018") + ylab("Percent of Owners (%)") + 
-               xlab("Year"), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               theme_minimal() + ggtitle("Owner Occupied Housing 2015-2018") + ylab("Percent of Owners (%)") +
+               xlab("Year"), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-    
+
   })
 
 ## SERVER: PANEL - Race -----
@@ -3627,24 +3636,24 @@ server <- function(input, output, session) {
     race_table <- merge(x = race, y = race_moe, by=c("NAME", "variable", "year")) %>%
       mutate(variable = recode(variable, "race_american_indian" = "American Indian or Alaskan Native",
                                "race_asian" ="Asian", "race_black"="Black or African American",
-                               "race_hispanic" = "Hispanic or Latino of any race", 
+                               "race_hispanic" = "Hispanic or Latino of any race",
                                "race_native_hawaiian" = "Native Hawaiian or Other Pacific Islander",
                                "race_other" = "Some Other Race",
                                "race_two_more" ="Two or More Races", "race_white"="Whte"))
-    
+
     #plot all races onto one large set of grouped bars for every county.
     ggplotly(ggplot(filter(race_table, year == input$raceyears), aes(x = NAME, y = value, fill = variable,
                                                           text = paste0("Region: ", NAME,
                                                                         "<br>Year: ", year,
                                                                         "<br>Percent of Population: ", round(value, digits = 1), "%",
                                                                         "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
-               geom_col(position = "dodge") + 
+               geom_col(position = "dodge") +
                scale_fill_manual(values = viridis(8, option="D"), name="Groups") +
                ylab("% of Population") + xlab("") + coord_flip() + theme_minimal() +
-               ggtitle(paste0("% Racial and Ethnic Diversity: ", input$raceyears)), tooltip="text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               ggtitle(paste0("% Racial and Ethnic Diversity: ", input$raceyears)), tooltip="text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                         "hoverCompareCartesian","resetScale2d")) 
+                                         "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Family -----
@@ -4042,28 +4051,28 @@ server <- function(input, output, session) {
     family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_female_perc_moe,
                                     family_single_parent_male_perc_moe,
                                     family_children_nonfamily_perc_moe)
-    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
+    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>%
       rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
     family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
     family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year")) %>%
-      mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents", 
+      mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents",
                                       "family_single_parent_perc" = "Single Parent",
                                       "family_single_parent_female_perc" = "Single Mother",
                                       "family_single_parent_male_perc" = "Single Father",
                                       "family_children_nonfamily_perc" ="Living with Nonfamily"))
     #grouped bar chart for family type
-    ggplotly(ggplot(filter(family_table, year == input$familyyears), aes(x = NAME, y = value, fill = variable, 
+    ggplotly(ggplot(filter(family_table, year == input$familyyears), aes(x = NAME, y = value, fill = variable,
                                                             text = paste0("Region: ", NAME,
                                                                           "<br>Year: ", year,
                                                                           "<br>Percent of Children: ", round(value, digits = 1), "%",
                                                                           "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
-               geom_bar(position = position_stack(reverse = TRUE), stat="identity") + 
+               geom_bar(position = position_stack(reverse = TRUE), stat="identity") +
                scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
                ylab("% of children")+xlab("") + coord_flip()+ theme_minimal() +
-               ggtitle(paste0("Family Structure for Children Under 18 <br>", input$familyyears)), tooltip = "text")%>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               ggtitle(paste0("Family Structure for Children Under 18 <br>", input$familyyears)), tooltip = "text")%>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                         "hoverCompareCartesian","resetScale2d")) 
+                                         "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Education attainment -----
@@ -4450,18 +4459,18 @@ server <- function(input, output, session) {
   output$degreeplot <- renderPlotly({
     ed <- select(filter(acs_counties_neighbors), NAME, year, contains("education"))
     ed_perc <- ed %>% select(NAME, year,education_less_hs, education_hs_grad, education_assoc_some_college, education_bachelors_or_higher)
-    ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe, 
+    ed_moe <- ed %>% select(NAME, year, education_less_hs_moe, education_hs_grad_moe,
                             education_assoc_some_college_moe, education_bachelors_or_higher_moe)
-    ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>% 
+    ed_moe <- melt(ed_moe, id.vars = c("NAME", "year"), measure.vars = colnames(ed_moe)[-c(1,2)]) %>%
       rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
     ed_perc <- melt(ed_perc, id.vars = c("NAME", "year"), measure.vars = colnames(ed_perc)[-c(1,2)])
-    ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year")) %>% 
+    ed_table <- merge(x = ed_perc, y = ed_moe, by=c("NAME", "variable", "year")) %>%
       mutate(value = round(value,1), moe = round(moe,1),
-             variable = recode_factor(variable, "education_less_hs" ="Less than High School", 
+             variable = recode_factor(variable, "education_less_hs" ="Less than High School",
                                       "education_hs_grad" = "High School Graduate or Equivalent (GED)",
                                       "education_assoc_some_college" ="Associates Degree or Some College",
                                       "education_bachelors_or_higher" ="Bachelors or Higher"))
-    
+
     #grouped bar chart for own and rent occupancy
     ggplotly(ggplot(filter(ed_table, year == input$degreeyears)) +
                geom_bar(aes(x = NAME, y = value, fill = variable,
@@ -4472,13 +4481,13 @@ server <- function(input, output, session) {
                         position = position_stack(reverse = TRUE), stat="identity") +
                scale_fill_manual(values = viridis(4, option = "D"),
                                  name = "Educational Attainment") +
-               #theme_minimal() + theme(axis.text.x = element_text(angle=30)) + 
-               ylab("% of Adults 25 and Older") + xlab("") + 
+               #theme_minimal() + theme(axis.text.x = element_text(angle=30)) +
+               ylab("% of Adults 25 and Older") + xlab("") +
                coord_flip()+ theme_minimal() +
-               ggtitle(paste("Educational Attainment for Adults 25 and Older",input$degreeyears, sep = " ")), tooltip = "text")%>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               ggtitle(paste("Educational Attainment for Adults 25 and Older",input$degreeyears, sep = " ")), tooltip = "text")%>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                         "hoverCompareCartesian","resetScale2d")) 
+                                         "hoverCompareCartesian","resetScale2d"))
   })
 
 

@@ -1962,7 +1962,6 @@ server <- function(input, output, session) {
   output$medincomemap <- renderLeaflet({
     med_inc_pal <- colorQuantile(viridis_pal(option = "D")(3),
                                  domain = acs_tracts$median_household_income)
-    options(scipen=999)
     med_inc_leaf <- leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
       addPolygons(

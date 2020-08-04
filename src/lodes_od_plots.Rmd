@@ -21,14 +21,6 @@ library(viridis)
 library(plotly)
 ```
 
-```{r}
-
-
-leaflet()%>%
-  addPolylines()
-
-```
-
 reading in filtered lodes data with geometries
 ```{r}
 wasco17_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wasco17_od.Rds")

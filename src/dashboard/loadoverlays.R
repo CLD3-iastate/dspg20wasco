@@ -4,6 +4,7 @@ library(tidyverse)
 library(here)
 library(dplyr)
 library(formattable)
+library(readxl)
 
 ### loading overlay data, check file names
 ## food points
@@ -74,3 +75,8 @@ shp2016 <- shp2016[!rownames(shp2016) == 5, ]
 shp2017 <- shp2017 %>% filter(NAME %in% neighbors)
 shp2017 <- shp2017[!rownames(shp2017) == 5, ]
 
+## Indicators
+infrastructure <- read_excel("Data/Indicators.xlsx", sheet = 1, skip = 1)
+food_systems <- read_excel("Data/Indicators.xlsx", sheet = 2, skip = 1)
+learn_earn <- read_excel("Data/Indicators.xlsx", sheet = 3, skip = 1)
+living <- read_excel("Data/Indicators.xlsx", sheet = 4, skip = 1)

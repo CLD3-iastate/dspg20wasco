@@ -135,9 +135,19 @@ ui <- dashboardPagePlus(
         icon = icon("info circle")
       ),
       menuItem(
-        tabName = "data",
-        text = "Data & Methodology",
-        icon = icon("database")
+        tabName = "datamethods",
+        text = "Methodology & Data",
+        icon = icon("database"),
+        menuSubItem(
+          tabName = "methods",
+          text = "Methods",
+          icon = icon("database")
+        ),
+        menuSubItem(
+          tabName = "data",
+          text = "Data",
+          icon = icon("database")
+        )
       ),
 
 ## UI: Findings menu ------
@@ -757,12 +767,40 @@ tabItem(tabName = "social",
                   )
                 )), # END SOCIAL TAB
 
-
-## UI: TAB - Data and Methods ----------
+## UI: TAB - Methods ----------
+tabItem(tabName = "methods",
+        fluidRow(
+          boxPlus(
+            title = "Methodology",
+            closable = FALSE,
+            width = NULL,
+            enable_label = TRUE,
+            label_text = 1,
+            label_status = "danger",
+            status = "warning",
+            solidHeader = TRUE,
+            collapsible = TRUE,
+            h2("Methods and Frameworks"),
+            # Subheadings for clusters
+            # Dropdown menu to select cluster
+            # Description with cluster visual
+            p("Boosting Upward Mobility from Urban Institute. Multidimensional approach to economic mobility. Includes ideas for relevant metrics at the local level."),
+            # Just add more info/basics about these
+            p("Weaving in Good Rural Data from Urban Institute"),
+            # More info/basics
+            p("Rural Clusters of Innovation from Berkshires Strategy Project. Visualizes community agencies and organizations that contribute to economic mobility increasing sectors. Tailored to specific communities, narrows focus on areas of sponsor interest."),
+            selectInput("cluster", "Which cluster?",
+                        c("Food Systems", "Infrastructure", "Maupin Broadband"))
+            # Full indicators table
+            # Select input for the "sheet" of indicator cluster/driver
+            # General overview table of data sources and what they're meant for, include every "major" data source (not table necessarily)
+          )
+        )),
+## UI: TAB - Data ----------
       tabItem(tabName = "data",
               fluidRow(
                 boxPlus(
-                  title = "Data & Methodology",
+                  title = "Data",
                   closable = FALSE,
                   width = NULL,
                   enable_label = TRUE,
@@ -771,17 +809,13 @@ tabItem(tabName = "social",
                   status = "warning",
                   solidHeader = TRUE,
                   collapsible = TRUE,
-                  h2("Methods and Frameworks"),
                   # Subheadings for clusters
                   # Dropdown menu to select cluster
                   # Description with cluster visual
-                  p("Rural Clusters of Innovation from Berkshires Strategy Project. Visualizes community agencies and organizations that contribute to economic mobility increasing sectors. Tailored to specific communities, narrows focus on areas of sponsor interest."),
-                  p("Boosting Upward Mobility from Urban Institute. Multidimensional approach to economic mobility. Includes ideas for relevant metrics at the local level."),
-                  # Just add more info/basics about these
-                  p("Weaving in Good Rural Data from Urban Institute"),
-                  # More info/basics
                   h2("Data Collection and Analysis"),
-                  p("This is how we collected the data. Explore the right panel for more data information!")
+                  selectInput("indicators", "Which indicator?",
+                              c("Cluster: Food Systems", "Cluster: Infrastructure", "Driver: Opportunities to Learn and Earn", "Driver: Quality Standard of Living")),
+                  DTOutput("indicators_all_DT")
                   # Full indicators table
                   # Select input for the "sheet" of indicator cluster/driver
                   # General overview table of data sources and what they're meant for, include every "major" data source (not table necessarily)
@@ -857,6 +891,103 @@ server <- function(input, output, session) {
   graypal = "#ADB5BD"
 
 ## SERVER: INDICATOR TABLES -------
+## DTOutput("indicators_all_DT") -----
+
+    output$indicators_all_DT <- renderDT({
+    if (input$indicators == "Cluster: Food Systems"){
+      datatable(food_systems[,1:9], extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+                options = list(
+                  dom = 'Bfrtip',
+                  searching = TRUE,
+                  autoWidth = TRUE,
+                  rownames = FALSE,
+                  scroller = TRUE,
+                  scrollX = TRUE,
+                  scrollY = "500px",
+                  fixedHeader = TRUE,
+                  class = 'cell-border stripe',
+                  buttons =
+                    list("copy", list(
+                      extend = "collection"
+                      , buttons = c("csv", "excel", "pdf")
+                      , text = "Download"
+                    ))
+                  #fixedColumns = list(
+                  #leftColumns = 3,
+                  #heightMatch = 'none')
+                ))
+    }
+    else if (input$indicators == "Cluster: Infrastructure"){
+      datatable(infrastructure[,1:9], extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+                options = list(
+                  dom = 'Bfrtip',
+                  searching = TRUE,
+                  autoWidth = TRUE,
+                  rownames = FALSE,
+                  scroller = TRUE,
+                  scrollX = TRUE,
+                  scrollY = "500px",
+                  fixedHeader = TRUE,
+                  class = 'cell-border stripe',
+                  buttons =
+                    list("copy", list(
+                      extend = "collection"
+                      , buttons = c("csv", "excel", "pdf")
+                      , text = "Download"
+                    ))
+                  #fixedColumns = list(
+                  #leftColumns = 3,
+                  #heightMatch = 'none')
+                ))
+      }
+    else if (input$indicators == "Driver: Opportunities to Learn and Earn"){
+      datatable(learn_earn[,1:9], extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+                options = list(
+                  dom = 'Bfrtip',
+                  searching = TRUE,
+                  autoWidth = TRUE,
+                  rownames = FALSE,
+                  scroller = TRUE,
+                  scrollX = TRUE,
+                  scrollY = "500px",
+                  fixedHeader = TRUE,
+                  class = 'cell-border stripe',
+                  buttons =
+                    list("copy", list(
+                      extend = "collection"
+                      , buttons = c("csv", "excel", "pdf")
+                      , text = "Download"
+                    ))
+                  #fixedColumns = list(
+                  #leftColumns = 3,
+                  #heightMatch = 'none')
+                ))
+      }
+    else if (input$indicators == "Driver: Quality Standard of Living"){
+      datatable(living[,1:9], extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+                options = list(
+                  dom = 'Bfrtip',
+                  searching = TRUE,
+                  autoWidth = TRUE,
+                  rownames = FALSE,
+                  scroller = TRUE,
+                  scrollX = TRUE,
+                  scrollY = "500px",
+                  fixedHeader = TRUE,
+                  class = 'cell-border stripe',
+                  buttons =
+                    list("copy", list(
+                      extend = "collection"
+                      , buttons = c("csv", "excel", "pdf")
+                      , text = "Download"
+                    ))
+                  #fixedColumns = list(
+                  #leftColumns = 3,
+                  #heightMatch = 'none')
+                ))
+      }
+    })
+
 ## SERVER: DATA TABLES -----
 ## SERVER: DATA TABLE - Food systems map -----
   output$foodDT <- renderDT({

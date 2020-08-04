@@ -1524,7 +1524,7 @@ server <- function(input, output, session) {
   })
 
 ## SERVER: PANEL - Labor force participation ----
-## plotlyOutput("laborforcemap")------
+## leafletOutput("laborforcemap")------
   output$laborforcemap <- renderLeaflet({
     lfpr_pal <- colorQuantile(viridis_pal(option = "D")(3), domain = acs_tracts$labor_force_20_to_64)
     lfpr_leaf <- leaflet() %>%
@@ -1958,7 +1958,7 @@ server <- function(input, output, session) {
 
 ## SERVER: TAB - Quality standard of living driver ----
 ## SERVER: PANEL - Median income -----
-## plotlyOutput("medincomemap") -----
+## leafletOutput("medincomemap") -----
   output$medincomemap <- renderLeaflet({
     med_inc_pal <- colorQuantile(viridis_pal(option = "D")(3),
                                  domain = acs_tracts$median_household_income)

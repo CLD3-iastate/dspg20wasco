@@ -3,6 +3,8 @@ library(sp)
 library(tidyverse)
 library(here)
 library(dplyr)
+library(formattable)
+library(readxl)
 
 ### loading overlay data, check file names
 ## food points
@@ -28,6 +30,24 @@ food_insecurity_counties$FIPS <- as.character(food_insecurity_counties$FIPS)
 
 names(food_insecurity_counties) <- abbreviate(names(food_insecurity_counties))
 food_insecurity_counties <- food_insecurity_counties %>% rename("GEOID" = "FIPS")
+
+food_insecurity_counties$popup_text <-
+  paste0(food_insecurity_counties$`Cn,S`, "<br/>",
+         food_insecurity_counties$Year, "<br/>",
+         "<strong> Food Insecurity Rate:", "<br/>",
+         round(food_insecurity_counties$FdIR, 3)*100, "% </strong> <br/>",
+         "Annual Food Budget Shortfall", "<br/>",
+         "$", comma(food_insecurity_counties$WAFBS)) %>%
+  lapply(htmltools::HTML)
+
+food_insecurity_counties$popup_text_child <-
+  paste0(food_insecurity_counties$`Cn,S`, "<br/>",
+         food_insecurity_counties$Year, "<br/>",
+         "<strong> Childhood Food Insecurity Rate:", "<br/>",
+         round(food_insecurity_counties$Cfir, 3)*100,  "% </strong> <br/>",
+         "Annual Food Budget Shortfall", "<br/>",
+         "$", comma(food_insecurity_counties$WAFBS)) %>%
+  lapply(htmltools::HTML)
 
 or_county_lines <- counties(state = "OR")
 wa_county_lines <- counties(state = "WA")
@@ -55,3 +75,8 @@ shp2016 <- shp2016[!rownames(shp2016) == 5, ]
 shp2017 <- shp2017 %>% filter(NAME %in% neighbors)
 shp2017 <- shp2017[!rownames(shp2017) == 5, ]
 
+## Indicators
+infrastructure <- read_excel("Data/Indicators.xlsx", sheet = 1, skip = 1)
+food_systems <- read_excel("Data/Indicators.xlsx", sheet = 2, skip = 1)
+learn_earn <- read_excel("Data/Indicators.xlsx", sheet = 3, skip = 1)
+living <- read_excel("Data/Indicators.xlsx", sheet = 4, skip = 1)

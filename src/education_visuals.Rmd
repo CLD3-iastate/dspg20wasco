@@ -12,6 +12,9 @@ library(here)
 library(tidyverse)
 library(viridis)
 library(plyr)
+library(RColorBrewer);library(colorspace)
+library(plotly)
+knitr::opts_chunk$set(fig.width=12, fig.height=8)
 ```
 
 Read in the data
@@ -27,9 +30,10 @@ ed <- ed %>% filter(District.Name == "South Wasco County SD 1" |
            District.Name == "Sherman County SD" |
            District.Name == "Dufur SD 29" |
            District.Name == "Hood River County SD") %>% 
-  select(-c("District.ID" ,"Student.Group","Fall.Membership", "Free.Reduced.Priced.Lunch","Percent.Regular.Attenders" ))
+  select(-c("District.ID" ,"Student.Group","Fall.Membership", "Free.Reduced.Priced.Lunch","Percent.Regular.Attenders" )) 
 
-
+ed.increase <- ed %>% select("year" ,"District.Name","On.Time.Grad.Rate", "Teacher.Experience.Pct","Percent.ELA.Proficient.Change")
+ed.decrease <- ed %>% select("year" ,"District.Name","Percent.Economically.Disadvantaged", "Percent.Chronically.Absent","Dropout.Rate")
 
 #scaling the data within each measure to standardize the values.
 #con: suppresses the minor differences in variables that have a smaller range
@@ -61,22 +65,26 @@ ed.melt.scaled = melt(ed.scaled, id.vars = c("year", "District.Name"),
                measure.vars = c("On.Time.Grad.Rate", "Dropout.Rate" , 
                                 "Percent.ELA.Proficient.Change", "Teacher.Experience.Pct", "Percent.Chronically.Absent",
                                 "Percent.Economically.Disadvantaged")) 
+
+### increaseing variables
+ed.melt.increase = melt(ed.increase, id.vars = c("year", "District.Name"),
+               measure.vars = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
+                                "Percent.ELA.Proficient.Change")) %>%
+  mutate(variable = factor(variable, levels = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
+                                "Percent.ELA.Proficient.Change")),
+         variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
+                            "Teacher.Experience.Pct" = "Teacher Experience",
+                            "Percent.ELA.Proficient.Change" = "ELA Proficiency Change"))
+ed.melt.decrease = melt(ed.decrease, id.vars = c("year", "District.Name"),
+               measure.vars = c("Percent.Economically.Disadvantaged", "Percent.Chronically.Absent",
+                                "Dropout.Rate")) %>%
+  mutate(variable = recode(variable, "Percent.Economically.Disadvantaged" = "Economically Disadvantaged",
+                           "Percent.Chronically.Absent" = "Chronic Absenteeism",
+                           "Dropout.Rate"="Dropout Rate"))
 ```
 
 
-try making divergent red, white and blue color palette
-```{r}
-img <- function(obj, nam) {
-  image(1:length(obj), 1, as.matrix(1:length(obj)), col=obj, 
-        main = nam, ylab = "", xaxt = "n", yaxt = "n",  bty = "n")
-}
-rwb <- colorRampPalette(colors = c("red", "white", "blue"))
-img(rwb(100), "red-white-blue")
-```
 
-```{r}
-colorRampPalette(c("red", "blue"))(25)
-```
 
 
 ### Heat Maps 
@@ -98,7 +106,6 @@ ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
   geom_text(aes(label = round(value,1)), color = "black") +
   coord_equal() + facet_wrap(~District.Name) +
-  #scale_fill_viridis(n=25, option = "D",breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
   scale_fill_viridis(option = "D") + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   xlab("School Year")
@@ -106,21 +113,106 @@ ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
 
 
 
-Trying with rwb divergent palette: not working 
-```
-interval <- c(-60, -20, -10, -5, seq(0,100,5))
-data.values <- as.vector(na.omit(ed.melt$value))
-color_rwb <- cut(data.values, breaks=interval, labels = rwb(24))
+Trying with rwb divergent palette: not working - Continuous value supplied to discrete scale.
+
+continuous scale palettes: https://biostats.w.uib.no/color-scale-for-continuous-variables/
+controlling midpoint and range for color palettes: https://stackoverflow.com/questions/58718527/setting-midpoint-for-continuous-diverging-color-scale-on-a-heatmap
+
+```{r}
+# interval <- c(-60, -20, -10, -5, seq(0,100,5))
+# data.values <- as.vector(na.omit(ed.melt$value))
+# color_rwb <- cut(data.values, breaks=interval, labels = rwb(24))
+pgcol <- brewer.pal(9, "PRGn")
+pgpal <- colorRampPalette(pgcol)
 ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
   geom_text(aes(label = round(value,1)), color = "black") +
   coord_equal() + facet_wrap(~District.Name) +
-  #scale_fill_viridis(breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
-  scale_fill_manual(values = colorRampPalette(c("red", "blue"))(25)) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0)
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   xlab("School Year")
 ```
 
+
+
+### for variables where increasing is good
+```{r}
+ggplot(ed.melt.increase, aes(y = variable, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + facet_wrap(~District.Name) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent") 
+
+# and all in one instead of facet
+ed.melt.increase2 <- ed.melt.increase %>% mutate(indicator = paste(variable, District.Name, sep= "-"))
+ggplot(ed.melt.increase2, aes(y = indicator, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + 
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  
+   ## banners
+  geom_hline(yintercept = 6.5, color = "white", lwd = 5) + 
+  geom_hline(yintercept = 12.5, color = "white", lwd = 5) +
+  geom_hline(yintercept = 18.5, color = "white", lwd = 5) +
+
+  # Title of variables
+  annotate("text", x=2, y=6.5,label="ELA Proficiency Change", fontface=2, size = 3, color="black") +
+  annotate("text", x=2, y=12.5,label="On Time Graduation", fontface=2, size = 3, color="black") +
+  annotate("text", x=2, y=18.5,label="Teacher Experience", fontface=2, size = 3, color="black") +
+  
+  #scale_y_discrete(limit = rep(c("South Wasco County SD 1", "Sherman County SD" , "North Wasco County SD 21",
+                             #"Jefferson County SD 509J", "Hood River County SD","Dufur SD 29"), 3)) +
+  xlab("School Year")
+```
+
+
+### Variables where increaseing is meh
+```{r}
+ggplotly(ggplot(ed.melt.decrease, aes(y = variable, x = year, fill = value,
+                              text = paste0("School District: ", District.Name,
+                                "<br>Year: ", year,
+                                "<br>Percent ", variable, ": ", value, "%"))) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + facet_wrap(~District.Name) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_sequential(palette = "Purples 3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "Barriers to Student Success", 
+       x ="School Year", y = "", fill="Percent"), 
+  tooltip = "text")%>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
+
+# and all in one instead of facet
+ed.melt.decrease2 <- ed.melt.decrease %>% mutate(indicator = paste(variable, District.Name, sep= "-"))
+ggplot(ed.melt.decrease2, aes(y = indicator, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + 
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_sequential(palette = "Purples 3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  ## banners
+  geom_hline(yintercept = 6.5, color = "white", lwd = 5) + 
+  geom_hline(yintercept = 12.5, color = "white", lwd = 5) +
+  geom_hline(yintercept = 18.5, color = "white", lwd = 5) +
+
+  # Title of variables
+  annotate("text", x=2, y=6.5,label="Chronic Absenteeism", fontface=2, size = 3, color="black") +
+  annotate("text", x=2, y=12.5,label="Dropout", fontface=2, size = 3, color="black") +
+  annotate("text", x=2, y=18.5,label="Economically Disadvantaged", fontface=2, size = 3, color="black") +
+  
+  xlab("School Year")
+```
 
 
 

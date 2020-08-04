@@ -24,7 +24,7 @@ library(here);library(viridis)
 #                            gsub("County, Oregon","County, OR",acs_data$NAME)))
 # acs_data$GEOID <- as.character(acs_data$GEOID)
 
-acs_counties <- readRDS(here("/data/acs_counties.Rds"))
+acs_counties <- readRDS(here::here("/data/acs_counties.Rds"))
 acs_counties <- acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, OR",
                                                             "Wasco County, OR", "Oregon"), 
                                              other_level = "Neighboring Counties"),
@@ -51,7 +51,7 @@ acs_counties_neighbors <- filter(acs_counties, NAME == "South Wasco County Schoo
 
 
 
-acs_tracts <- readRDS(here("/data/acs_tracts.Rds"))
+acs_tracts <- readRDS(here::here("/data/acs_tracts.Rds"))
 ######## USE THE FOLLOWING ##########
 # color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
 graypal = "#ADB5BD"

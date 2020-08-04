@@ -21,7 +21,6 @@ library(viridis)
 library(plotly)
 ```
 
-
 reading in filtered lodes data with geometries
 ```{r}
 wasco17_od <- readRDS("~/git/dspg20wasco/data/lodes/filtered/wasco17_od.Rds")
@@ -291,6 +290,7 @@ Mapping S. Wasco
 wasco_points <- blocks("OR", county = "Wasco")
 wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("../data/shps/swsd")
+wasco_geo_points <- st_read("../data/shps/county")
 ```
 
 Reading in filtered file again
@@ -356,6 +356,12 @@ interactive maps
 od_S000leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
+    data = wasco_geo_points,
+    color = "black",
+    weight = 1,
+    group = "Basemap",
+    label = "Wasco County") %>%
+  addPolylines(
     data = south_wasco_points,
     color = "purple",
     weight = 2,
@@ -369,7 +375,9 @@ od_S000leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2017",
     fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_17$S000)(agg_17$S000),
-    label = agg_17$S000) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of All Jobs: <strong>", 
+                          agg_17$S000), htmltools::HTML)) %>%
   addLegend(
     data = rbind(agg_17, agg_16, agg_15),
     "bottomright",
@@ -379,7 +387,7 @@ od_S000leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of All Jobs<br>in Wasco County",
+    title = "Number of All Jobs<br>by Census Tract<br>in Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),
@@ -388,7 +396,9 @@ od_S000leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2016",
     fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_16$S000)(agg_16$S000),
-    label = agg_16$S000) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of All Jobs: <strong>", 
+                          agg_16$S000), htmltools::HTML)) %>%
   addPolygons(
     data = st_as_sf(agg_15),
     weight = 1,
@@ -396,7 +406,9 @@ od_S000leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2015",
     fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_15$S000)(agg_15$S000),
-    label = agg_15$S000) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of All Jobs: <strong>", 
+                          agg_15$S000), htmltools::HTML)) %>%
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
@@ -409,6 +421,12 @@ colors_SI01 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind
 
 od_SI01leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = wasco_geo_points,
+    color = "black",
+    weight = 1,
+    group = "Basemap",
+    label = "Wasco County") %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
@@ -423,7 +441,9 @@ od_SI01leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2017",
     fillColor = ~colors_SI01((agg_17$SI01)),
-    label = agg_17$SI01) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Goods Producing Jobs: <strong>", 
+                          agg_17$SI01), htmltools::HTML)) %>%
   addLegend(
     data = rbind(agg_17, agg_16, agg_15),
     "bottomright",
@@ -433,7 +453,7 @@ od_SI01leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of Goods Producing<br>Sector Jobs in Wasco County",
+    title = "Number of Goods Producing<br> Jobs by Census Tract<br>in Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),
@@ -442,7 +462,9 @@ od_SI01leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2016",
     fillColor = ~colors_SI01((agg_16$SI01)),
-    label = agg_16$SI01) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Goods Producing Jobs: <strong>", 
+                          agg_16$SI01), htmltools::HTML)) %>%
   addPolygons(
     data = st_as_sf(agg_15),
     weight = 1,
@@ -450,7 +472,9 @@ od_SI01leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2015",
     fillColor = ~colors_SI01((agg_15$SI01)),
-    label = agg_15$SI01) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Goods Producing Jobs: <strong>", 
+                          agg_15$SI01), htmltools::HTML)) %>%
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
@@ -465,6 +489,12 @@ colors_SI02 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind
 od_SI02leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
   addPolylines(
+    data = wasco_geo_points,
+    color = "black",
+    weight = 1,
+    group = "Basemap",
+    label = "Wasco County") %>%
+  addPolylines(
     data = south_wasco_points,
     color = "purple",
     weight = 2,
@@ -478,7 +508,9 @@ od_SI02leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2017",
     fillColor = ~colors_SI02((agg_17$SI02)),
-    label = agg_17$SI02) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Utility Jobs: <strong>", 
+                          agg_17$SI02), htmltools::HTML)) %>%
   addLegend(
     data = rbind(agg_17, agg_16, agg_15),
     "bottomright",
@@ -488,7 +520,8 @@ od_SI02leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of Trade, Transportation,<br>and Utilities Sector Jobs<br>in Wasco County",
+    title = "Number of Trade, Transportation,<br>and Utilities Jobs<br>by Census Tract in<br>
+    Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),
@@ -497,7 +530,9 @@ od_SI02leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2016",
     fillColor = ~colors_SI02((agg_16$SI02)),
-    label = agg_16$SI02) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Utility Jobs: <strong>", 
+                          agg_16$SI02), htmltools::HTML)) %>%
   addPolygons(
     data = st_as_sf(agg_15),
     weight = 1,
@@ -505,18 +540,27 @@ od_SI02leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2015",
     fillColor = ~colors_SI02((agg_15$SI02)),
-    label = agg_15$SI02) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Utility Jobs: <strong>", 
+                          agg_15$SI02), htmltools::HTML)) %>%
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%
   hideGroup(c("2016", "2015"))
 ```
+
 ```{r}
 #SI03 (All Other Services industry sectors) by year
 colors_SI03 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI03))
 
 od_SI03leaf <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) %>%
+  addPolylines(
+    data = wasco_geo_points,
+    color = "black",
+    weight = 1,
+    group = "Basemap",
+    label = "Wasco County") %>%
   addPolylines(
     data = south_wasco_points,
     color = "purple",
@@ -531,7 +575,9 @@ od_SI03leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2017",
     fillColor = ~colors_SI03((agg_17$SI03)),
-    label = agg_17$SI03) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Other Service Jobs: <strong>", 
+                          agg_17$SI03), htmltools::HTML)) %>%
   addLegend(
     data = rbind(agg_17, agg_16, agg_15),
     "bottomright",
@@ -541,7 +587,7 @@ od_SI03leaf <- leaflet() %>%
       n = length(cuts)
       p = paste0(round(p * 100), '%')
       cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-    title = "Number of All Other Services<br>Sector Jobs in Wasco County",
+    title = "Number of All Other Services<br>Sector Jobs by Census Tract<br>in Wasco County",
     na.label = "NA") %>%
   addPolygons(
     data = st_as_sf(agg_16),
@@ -550,7 +596,9 @@ od_SI03leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2016",
     fillColor = ~colors_SI03((agg_16$SI03)),
-    label = agg_16$SI03) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Other Service Jobs: <strong>", 
+                          agg_16$SI03), htmltools::HTML)) %>%
   addPolygons(
     data = st_as_sf(agg_15),
     weight = 1,
@@ -558,7 +606,9 @@ od_SI03leaf <- leaflet() %>%
     fillOpacity = .7,
     group = "2015",
     fillColor = ~colors_SI03((agg_15$SI03)),
-    label = agg_15$SI03) %>%
+    label = ~lapply(paste(sep = "", 
+                          "<strong> Number of Other Service Jobs: <strong>", 
+                          agg_15$SI03), htmltools::HTML)) %>%
   addLayersControl(
     baseGroups = c("2017", "2016", "2015"),
     options = layersControlOptions(collapsed = FALSE)) %>%

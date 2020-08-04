@@ -13,7 +13,7 @@ library(tidyverse)
 library(viridis)
 library(plyr)
 library(RColorBrewer);library(colorspace)
-library(plotly)
+library(plotly);library(cowplot)
 knitr::opts_chunk$set(fig.width=12, fig.height=8)
 ```
 
@@ -71,10 +71,11 @@ ed.melt.increase = melt(ed.increase, id.vars = c("year", "District.Name"),
                measure.vars = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
                                 "Percent.ELA.Proficient.Change")) %>%
   mutate(variable = factor(variable, levels = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
-                                "Percent.ELA.Proficient.Change")),
-         variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
+                                "Percent.ELA.Proficient.Change"))) %>%
+        mutate(variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
                             "Teacher.Experience.Pct" = "Teacher Experience",
                             "Percent.ELA.Proficient.Change" = "ELA Proficiency Change"))
+
 ed.melt.decrease = melt(ed.decrease, id.vars = c("year", "District.Name"),
                measure.vars = c("Percent.Economically.Disadvantaged", "Percent.Chronically.Absent",
                                 "Dropout.Rate")) %>%
@@ -101,7 +102,7 @@ ggplot(sw, aes(y = variable, x = factor(year), fill = value)) +
 ```
 
 Facet wrap to show all schools
-```{r fig.width=12, fig.height=8}
+```
 ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
   geom_text(aes(label = round(value,1)), color = "black") +
@@ -118,7 +119,7 @@ Trying with rwb divergent palette: not working - Continuous value supplied to di
 continuous scale palettes: https://biostats.w.uib.no/color-scale-for-continuous-variables/
 controlling midpoint and range for color palettes: https://stackoverflow.com/questions/58718527/setting-midpoint-for-continuous-diverging-color-scale-on-a-heatmap
 
-```{r}
+```
 # interval <- c(-60, -20, -10, -5, seq(0,100,5))
 # data.values <- as.vector(na.omit(ed.melt$value))
 # color_rwb <- cut(data.values, breaks=interval, labels = rwb(24))
@@ -136,7 +137,7 @@ ggplot(ed.melt, aes(y = variable, x = year, fill = value)) +
 
 
 
-### for variables where increasing is good
+### Facet Heat maps Benefits to Student Success
 ```{r}
 ggplot(ed.melt.increase, aes(y = variable, x = year, fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
@@ -146,8 +147,35 @@ ggplot(ed.melt.increase, aes(y = variable, x = year, fill = value)) +
   scale_fill_continuous_divergingx(palette = "PRGn", mid = 0) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent") 
+```
 
-# and all in one instead of facet
+
+### Facet Heat Maps: Barriers to Student Success
+```{r}
+ggplotly(ggplot(ed.melt.decrease, aes(y = variable, x = year, fill = value,
+                              text = paste0("School District: ", District.Name,
+                                "<br>Year: ", year,
+                                "<br>Percent ", variable, ": ", value, "%"))) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + facet_wrap(~District.Name) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_sequential(palette = "Purples 3") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "Barriers to Student Success", 
+       x ="School Year", y = "", fill="Percent"), 
+  tooltip = "text")%>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
+                                     "hoverCompareCartesian","resetScale2d")) 
+```
+
+
+
+
+
+### stacked heatmaps for Benefits to student success
+```{r}
 ed.melt.increase2 <- ed.melt.increase %>% mutate(indicator = paste(variable, District.Name, sep= "-"))
 ggplot(ed.melt.increase2, aes(y = indicator, x = year, fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
@@ -173,26 +201,84 @@ ggplot(ed.melt.increase2, aes(y = indicator, x = year, fill = value)) +
 ```
 
 
-### Variables where increaseing is meh
+Try making heatmaps with cowplot
+each variable is its own heat map with all the schools.
 ```{r}
-ggplotly(ggplot(ed.melt.decrease, aes(y = variable, x = year, fill = value,
-                              text = paste0("School District: ", District.Name,
+ed.grad <- filter(ed.melt.increase, variable == "On Time Graduation")
+ed.teach <- filter(ed.melt.increase, variable == "Teacher Experience")
+ed.ela <- filter(ed.melt.increase, variable == "ELA Proficiency Change")
+
+grad <- ggplot(ed.grad, aes(y = District.Name, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + 
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank())
+
+teach <- ggplot(ed.teach, aes(y = District.Name, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + 
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank())
+
+ela <- ggplot(ed.ela, aes(y = District.Name, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,1)), color = "black") +
+  coord_equal() + 
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+plot_grid(
+  grad, teach, ela,
+  labels = c("On Time Graduation", "Teacher Experience", "ELA Proficiency Change"), ncol = 1
+)
+```
+
+try facet by question.... 
+```{r}
+ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
+  coord_equal() + 
+  #facet_grid(rows = vars(variable)) +
+  facet_wrap(~variable, ncol=1) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0, breaks= c(-50, -25, 0, 25, 50, 75, 100), limits = c(-70, 100)) +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+        strip.background = element_rect(
+     color="black", fill="#ADB5BD", size=1, linetype="solid"),
+      strip.text.y = element_text(size = 5, color = "black", face = "bold")) +
+  labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent <br> Range: -60% to 100%")
+```
+
+
+
+plotly version
+```{r}
+ggplotly(ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value,
+                  text = paste0("School District: ", District.Name,
                                 "<br>Year: ", year,
                                 "<br>Percent ", variable, ": ", value, "%"))) +
   geom_tile(color = "#ADB5BD") + #gray
-  geom_text(aes(label = round(value,1)), color = "black") +
-  coord_equal() + facet_wrap(~District.Name) +
+  #geom_text(aes(label = round(value,0)), color = "black") +
+  coord_equal() + 
+  #facet_grid(rows = vars(variable)) +
+  facet_wrap(~variable, ncol=1) +
   #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
-  scale_fill_continuous_sequential(palette = "Purples 3") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  labs(title = "Barriers to Student Success", 
-       x ="School Year", y = "", fill="Percent"), 
-  tooltip = "text")%>% 
-  config(displayModeBar = "static", displaylogo = FALSE, 
-         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                     "hoverCompareCartesian","resetScale2d")) 
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0) +
+  theme(axis.text.x = element_text(angle = 20, vjust = 0.5, hjust=1)) +
+  labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent"), tooltip="text")
+```
 
-# and all in one instead of facet
+
+### Stacked Barriers to student success
+```{r}
 ed.melt.decrease2 <- ed.melt.decrease %>% mutate(indicator = paste(variable, District.Name, sep= "-"))
 ggplot(ed.melt.decrease2, aes(y = indicator, x = year, fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
@@ -216,95 +302,24 @@ ggplot(ed.melt.decrease2, aes(y = indicator, x = year, fill = value)) +
 
 
 
-get everything absolutely on one plot (not faceted)
-```{r fig.width=12, fig.height=8}
-ed.melt2 <- ed.melt %>% mutate(indicator = paste(variable, District.Name, sep= "-"),
-                               indicator = factor(indicator, 
-                                                  levels=c("On.Time.Grad.Rate-South Wasco County SD 1",
-                                                           "On.Time.Grad.Rate-North Wasco County SD 21",
-                                                           "On.Time.Grad.Rate-Dufur SD 29",
-                                                           "On.Time.Grad.Rate-Hood River County SD" ,
-                                                           "On.Time.Grad.Rate-Sherman County SD",
-                                                           "On.Time.Grad.Rate-Jefferson County SD 509J",
-                                                           
-                                                           "Dropout.Rate-South Wasco County SD 1",
-                                                           "Dropout.Rate-North Wasco County SD 21",
-                                                           "Dropout.Rate-Dufur SD 29",
-                                                           "Dropout.Rate-Hood River County SD" ,
-                                                           "Dropout.Rate-Sherman County SD",
-                                                           "Dropout.Rate-Jefferson County SD 509J",
-                                                           
-                                                           "Percent.ELA.Proficient.Change-South Wasco County SD 1",
-                                                           "Percent.ELA.Proficient.Change-North Wasco County SD 21",
-                                                           "Percent.ELA.Proficient.Change-Dufur SD 29",
-                                                           "Percent.ELA.Proficient.Change-Hood River County SD" ,
-                                                           "Percent.ELA.Proficient.Change-Sherman County SD",
-                                                           "Percent.ELA.Proficient.Change-Jefferson County SD 509J",
-                                                           
-                                                           "Teacher.Experience.Pct-South Wasco County SD 1",
-                                                           "Teacher.Experience.Pct-North Wasco County SD 21",
-                                                           "Teacher.Experience.Pct-Dufur SD 29",
-                                                           "Teacher.Experience.Pct-Hood River County SD" ,
-                                                           "Teacher.Experience.Pct-Sherman County SD",
-                                                           "Teacher.Experience.Pct-Jefferson County SD 509J",
-                                                           
-                                                           "Percent.Chronically.Absent-South Wasco County SD 1",
-                                                           "Percent.Chronically.Absent-North Wasco County SD 21",
-                                                           "Percent.Chronically.Absent-Dufur SD 29",
-                                                           "Percent.Chronically.Absent-Hood River County SD" ,
-                                                           "Percent.Chronically.Absent-Sherman County SD",
-                                                           "Percent.Chronically.Absent-Jefferson County SD 509J",
-                                                           
-                                                           "Percent.Economically.Disadvantaged-South Wasco County SD 1",
-                                                           "Percent.Economically.Disadvantaged-North Wasco County SD 21",
-                                                           "Percent.Economically.Disadvantaged-Dufur SD 29",
-                                                           "Percent.Economically.Disadvantaged-Hood River County SD" ,
-                                                           "Percent.Economically.Disadvantaged-Sherman County SD",
-                                                           "Percent.Economically.Disadvantaged-Jefferson County SD 509J")))
-  
-ggplot(ed.melt2, aes(y = indicator, x = year, fill = value)) +
+try facet by question  
+```{r}
+ggplot(ed.melt.decrease, aes(y = District.Name, x = year, fill = value)) +
   geom_tile(color = "#ADB5BD") + #gray
-  #geom_text(aes(label = round(value,1)), color = "black") +
+  geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
   coord_equal() + 
-  #scale_fill_viridis(n=25, option = "D",breaks = c(-60, -20, -10, -5, seq(0,100,5))) +
-  scale_fill_viridis(option = "D") + 
-  # Horizontal lines to section off domains
-  geom_hline(yintercept = 6.5, color = "white", lwd = 4) + 
-  geom_hline(yintercept = 12.5, color = "white", lwd = 4) +
-  geom_hline(yintercept = 18.5, color = "white", lwd = 4) +
-  geom_hline(yintercept = 24.5, color = "white", lwd = 4) +
-  geom_hline(yintercept = 30.5, color = "white", lwd = 4) +
-  geom_hline(yintercept = 36.5, color = "white", lwd = 4) +
-  # Title of variables
-  annotate("text", x=2, y=6.5,label="Dropout", fontface=2, size = 2, color="black") +
-  annotate("text", x=2, y=12.5,label="On Time Graduation", fontface=2, size = 2, color="black") +
-  annotate("text", x=2, y=18.5,label="Chronic Absenteeism", fontface=2, size = 2, color="black") +
-  annotate("text", x=2, y=24.5,label="Economically Disadvantaged", fontface=2, size = 2, color="black") +
-  annotate("text", x=2, y=30.5,label="ELA Proficiency Change 8th-3rd Grade", fontface=2, size = 2, color="black") +
-  annotate("text", x=2, y=36.5,label="Teacher Experience", fontface=2, size = 2, color="black") +
-  
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  xlab("School Year")
+  #facet_grid(rows = vars(variable)) +
+  facet_wrap(~variable, ncol=1) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_sequential(palette = "Purples 3") +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+        strip.background = element_rect(
+     color="black", fill="#ADB5BD", size=1, linetype="solid"),
+      strip.text.y = element_text(size = 5, color = "black", face = "bold")) +
+  labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
 ```
 
-Makes it alot easier to do direct comparisons of schools and years for one variable. but interpretability is still weak.
 
 
 
-
-
-
-
-##### Standardized measures
-Facet wrap but with scaled/standardized measures
-```{r fig.width=12, fig.height=8}
-ggplot(ed.melt.scaled, aes(y = variable, x = year, fill = value)) +
-  geom_tile(color = "#ADB5BD") + #gray
-  geom_text(aes(label = round(value,1)), color = "black") + 
-  coord_equal() + facet_wrap(~District.Name) +
-  #scale_fill_viridis(breaks = c(-60, -20, -10, -5, seq(0,100,5))) + 
-  scale_fill_viridis() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  xlab("School Year")
-```
 

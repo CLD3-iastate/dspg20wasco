@@ -1,0 +1,31 @@
+year,District.Name,Percent.ELA.Proficient.Change,Percent.Chronically.Absent,Percent.Economically.Disadvantaged,Dropout.Rate,Teacher.Experience.Pct,On.Time.Grad.Rate
+2014-2015,Hood River County SD,16.5,19,59.8,3.46,99.9,83.3
+2014-2015,Jefferson County SD 509J,6.8,27.8,99.3,8.35,99.5,56.7
+2014-2015,Sherman County SD,-35.9,18.8,43.7,5.19,92.7,72
+2014-2015,South Wasco County SD 1,-16.7,30.7,100,1.33,100,90.5
+2014-2015,Dufur SD 29,-24.2,23.2,51.4,5.62,100,75
+2014-2015,North Wasco County SD 21,12,21.6,82.8,5.56,98.9,60.7
+2015-2016,Hood River County SD,15.7,13.6,57.5,2.85,98.9,81.3
+2015-2016,Jefferson County SD 509J,12.2,24.9,99.4,5.71,89,60.3
+2015-2016,Sherman County SD,-4.6,15.6,49.4,2.67,100,80
+2015-2016,South Wasco County SD 1,31.4,31.1,100,1.28,98.4,88.2
+2015-2016,Dufur SD 29,9.7,17.1,54.4,0,97.9,89.5
+2015-2016,North Wasco County SD 21,-9.40000000000001,22.8,82.1,6.4,98.6,73.5
+2016-2017,Hood River County SD,21.5,14.6,56.2,2.87,,81
+2016-2017,Jefferson County SD 509J,5.2,28.9,99.3,6.71,,69
+2016-2017,Sherman County SD,-9.3,17.8,50.6,0,,67
+2016-2017,South Wasco County SD 1,-9.7,25.9,100,3.85,,59
+2016-2017,Dufur SD 29,30,21.6,53.1,4.26,,87
+2016-2017,North Wasco County SD 21,5.6,25.7,83.1,4.84,,67
+2017-2018,Hood River County SD,8.6,14.3,54.6,2.04,,83
+2017-2018,Jefferson County SD 509J,-4.3,24.5,99.4,5,,72
+2017-2018,Sherman County SD,-57.6,18.8,49.2,4.11,,73
+2017-2018,South Wasco County SD 1,32.5,29.8,100,3.95,,64
+2017-2018,Dufur SD 29,-16.1,21.7,100,5.94,,96
+2017-2018,North Wasco County SD 21,2.8,21,81.9,3.58,,73
+2018-2019,Hood River County SD,17.6,13.7,54.8,2.65,90,86
+2018-2019,Jefferson County SD 509J,-0.5,27.4,99.5,5.3,76,78
+2018-2019,Sherman County SD,6.5,25.8,50.8,0,67,88
+2018-2019,South Wasco County SD 1,0.600000000000001,34.8,100,5.19,93,70
+2018-2019,Dufur SD 29,-6.90000000000001,23.7,100,2.75,81,74
+2018-2019,North Wasco County SD 21,5.8,21.6,82.4,4.03,74,75

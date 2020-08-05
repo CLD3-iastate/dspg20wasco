@@ -22,6 +22,7 @@ library(dplyr)
 library(readr)
 library(DT)
 library(viridis)
+library(colorspace)
 
 # DATA: Sourcing theme, shp files ------
 source("theme.R")
@@ -90,7 +91,22 @@ race_div_2015 <- filter(race_div, year == 2015)
 race_div_moe <- dplyr::select(acs_tracts, NAME, year, contains("race"), geometry) %>%
   select(!contains("total"))
 
-######## USE THE FOLLOWING ##########
+ed <- fread("Data/education_dash.csv")
+ed.increase <- ed %>% select("year" ,"District.Name","On.Time.Grad.Rate", "Teacher.Experience.Pct","Percent.ELA.Proficient.Change")
+ed.decrease <- ed %>% select("year" ,"District.Name","Percent.Economically.Disadvantaged", "Percent.Chronically.Absent","Dropout.Rate")
+
+alice_counties <- fread("Data/alice_counties.csv") %>%
+  mutate(County = paste0(County, " County, " ,State_Abbr),
+         Wasco = fct_other(County, keep = c("Wasco County, OR", "Hood River County, OR", 
+                                            "Klickitat County, WA", "Jefferson County, OR", 
+                                            "Sherman County, OR", "Skamania County, WA"), 
+                           other_level = "Other Counties"),
+         Wasco = factor(Wasco, levels = c("Other Counties", "Hood River County, OR", 
+                                          "Klickitat County, WA", "Jefferson County, OR", 
+                                          "Sherman County, OR", "Skamania County, WA",
+                                          "Wasco County, OR"))) %>%
+  select(-c("GEO.id" ,"GEO.display_label","State","State_Abbr","Poverty_Household","ALICE_Household"))
+
 # color palette from : https://coolors.co/232d4b-2c4f6b-0e879c-60999a-d1e0bf-d9e12b-e6ce3a-e6a01d-e57200-fdfdfd
 graypal = "#ADB5BD"
 ## Loading in LODES
@@ -254,7 +270,7 @@ menuItem(
                     width = "12",
                     selected = "Food Map",
                     tabPanel("Food Map",
-                             img(src="food_bkgrnd.png", width = "100%"),
+                             #img(src="food_bkgrnd.png", width = "100%"),
                              leafletOutput("mymap")
                     ),
                     tabPanel("Data",
@@ -271,8 +287,8 @@ menuItem(
                     height = "250px",
                     width = "12",
                     selected = "Food Insecurity",
-                    tabPanel("Food Insecurity",
-                             img(src="food_bkgrnd.png", width = "100%"),
+                    tabPanel("Food Insecurity", 
+                             #img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
                                          c("Overall", "Childhood")),
                              leafletOutput("foodinsecuritymap")
@@ -290,7 +306,7 @@ menuItem(
                     width = "12",
                     selected = "Crop Map",
                     tabPanel("Crop Map",
-                             img(src="food_bkgrnd.png", width = "100%"),
+                             #img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("crops", "Which crop?",
                                          c("Winter Wheat", "Barley",
                                            "Alfalfa", "Cherries")),
@@ -377,18 +393,19 @@ tabItem(tabName = "learn",
         fluidRow(
                 #conditionalPanel(
                   #condition = "input.learnearnselect == 'Education'",
-                  # How are we visualizing this? State and school district, line chart, maybe map?
-                  # Back will have data and indicator snippet/sources
+                  # Education heatmaps
+                  # Data tab will have data and indicator snippet/sources
                   tabBox(
                     id = 6,
                     side = "left",
-                    height = "250px",
+                    height = "500px",
                     width = "12",
                     selected = "Education",
                     tabPanel("Education",
-                             "Education tab content"
-                             #plotOutput("education1")
-                             #plotOutput("education2")
+                             splitLayout(
+                               plotOutput("education1", width = "75%", height = 800),
+                               plotOutput("education2", width = "75%", height = 800)
+                               )
                     ),
                     tabPanel("Data", "Data Tab Content")
         ))), # END OF EDUCATION
@@ -418,6 +435,9 @@ conditionalPanel(
     width = "12",
     selected = "Employment Ratio",
     tabPanel("Employment Ratio",
+             h4("The Employment Ratio is defined as 
+                the civilian noninstitutional population who are employed,
+                divided by the total civilian noninstitutional pouplation"),
              leafletOutput("percempmap"),
              plotlyOutput("empratioplot")),
   tabPanel("Data", "Data Tab Content")
@@ -432,6 +452,9 @@ conditionalPanel(
                     width = "12",
                     selected = "Labor Force Rate",
                     tabPanel("Labor Force Rate",
+                             h4("The Labor force includes all people classified in the 
+                                civilian labor force in addition to members of the U.S. Armed Forces. 
+                                Civilian labor force consists of employed or unemployed people."),
                              leafletOutput("laborforcemap"),
                              plotlyOutput("laborforceplot")),
                     tabPanel("Data", "Data Tab Content")
@@ -447,6 +470,10 @@ conditionalPanel(
                             width = "12",
                             selected = "Job Flows",
                             tabPanel("Job Flows",
+                                     h4("Job inflows are the number of employees from 
+                                        outside counties traveling into the region for work. 
+                                        Job outflows are the number of workers from the region 
+                                        traveling to other counties for work"),
                             selectInput("flows", "Inflows or Outflows?",
                                         c("Inflows", "Outflows")),
                             plotlyOutput("flowsplot")
@@ -499,6 +526,7 @@ tabItem(tabName = "financial",
                       list(" " = " ",
                         "What is the median income in South Wasco?" = "MedIncome",
                         "What is the poverty rate in South Wasco?" = "Poverty",
+                        "What is the ALICE poverty rate in Wasco county?" = "ALICE",
                         "What is the income distribution in South Wasco" = "DisIncome"),
                       width = "300px", selected = NULL
                     )),
@@ -533,6 +561,25 @@ tabItem(tabName = "financial",
                     tabPanel("Data", "Data Tab Content")
                   )
                 ),
+## UI: PANEL - ALICE Threshold rate ------
+
+      conditionalPanel(
+        condition = "input.financialselect == 'ALICE'",
+          tabBox(
+            id = 12,
+            side = "left",
+            height = "250px",
+            width = "12",
+            selected = "ALICE Poverty Rate",
+            h4("ALICE is an acronym for Asset Limited Income Constrained, Employed. 
+               These are households that earn above the Federal Poverty Level, 
+               but not enough to afford a 'bare-bones' household budget."),
+            tabPanel("ALICE Poverty Rate",
+              plotlyOutput(outputId = "aliceplot")),
+            tabPanel("Data", "Data Tab Content")
+        )
+      ),
+
 ## UI: PANEL - Income Distribution  ------
                 conditionalPanel(
                   condition = "input.financialselect == 'DisIncome'",
@@ -574,6 +621,9 @@ tabItem(tabName = "housing",
                       height = "250px",
                       width = "12",
                       selected = "Affordable Housing",
+                      h4("The ratio of affordable housing is defined as the number housing units 
+                         where monthly costs are less than or equal to 30% of a household's income 
+                         divided by thhe total number of occupied houses."),
                       tabPanel("Affordable Housing",
                       # Overall and ownership/rental (both lines and maps?)
                       # Full back with table and indicator snippet
@@ -693,11 +743,32 @@ tabItem(tabName = "methods",
             # Subheadings for clusters
             # Dropdown menu to select cluster
             # Description with cluster visual
-            p("Boosting Upward Mobility from Urban Institute. Multidimensional approach to economic mobility. Includes ideas for relevant metrics at the local level."),
             # Just add more info/basics about these
-            p("Weaving in Good Rural Data from Urban Institute"),
+            p("Our project weaves in principles and recommendations of Good Rural Data from the Urban Institute. 
+              Collecting data and performing analysis on a rural area like South Wasco poses unique challenges.
+              Some of these challenges identified by Good Rural Data are small sample sizes and 
+              large margins of error. Federal agencies such as the American Community Survey 
+              sample a subset of an already small population in rural areas. Therefore, the resulting samples 
+              are too small to be representative of all sub groups in a rural population. 
+              This in turn results in large margins of error, particularly for 
+              minority and underrepresented groups in the population. With these issues in mind, we are reporting 
+              all margins of error to bring awareness to the possible inaccuracies in the data and 
+              caution users from extrapolating interpretations from certain estimates. "),
+            p("Boosting Upward Mobility from the Urban Institute provides a multidimensional approach 
+              to economic mobility. The Urban Institute outlines three key drivers that propel 
+              individuals and families out of poverty over their lifetime. 
+              Our project adopts two of the drivers in the form of ‘Opportunities to Learn and Earn’ and  
+              ‘Quality Standard of Living’. The key predictors from these drivers can guide 
+              community leaders to make decision and take action to increase 
+              economic mobility of their community. This framework is used in conjunction with 
+              the Rural Clusters of Innovation Framework. "),
             # More info/basics
-            p("Rural Clusters of Innovation from Berkshires Strategy Project. Visualizes community agencies and organizations that contribute to economic mobility increasing sectors. Tailored to specific communities, narrows focus on areas of sponsor interest."),
+            p("The Rural Clusters of Innovation framework visualizes the community agencies and organizations 
+              that contribute to economic mobility increasing sectors. This framework can be tailored to 
+              specific communities and can serve as a guide towards the economic development of 
+              the entire rural area. As a result of close collaboration with community stakeholders, 
+              we have chosen three main clusters of Food Systems, Broadband and Infrastructure. 
+              You can explore these clusters with the dropdown menu below. "),
             selectInput("cluster", "Which cluster?",
                         c("Food Systems", "Infrastructure", "Maupin Broadband"))
             # Full indicators table
@@ -1456,6 +1527,67 @@ server <- function(input, output, session) {
 
 ## SERVER: TAB - Learn and earn driver ----
 ## SERVER: PANEL - Education composite ----
+## plotOutput("education1") -----
+  output$education1 <- renderPlot({
+    #Benefits
+    ed.melt.increase = melt(ed.increase, id.vars = c("year", "District.Name"),
+                            measure.vars = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
+                                             "Percent.ELA.Proficient.Change")) %>%
+      mutate(variable = factor(variable, levels = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
+                                                    "Percent.ELA.Proficient.Change"))) %>%
+      mutate(variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
+                               "Teacher.Experience.Pct" = "Teacher Experience",
+                               "Percent.ELA.Proficient.Change" = "ELA Proficiency Change"))
+    
+    ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
+      geom_tile(color = "#ADB5BD") + #gray
+      geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
+      coord_equal() + 
+      #facet_grid(rows = vars(variable)) +
+      facet_wrap(~variable, ncol=1) +
+      #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+      scale_fill_continuous_divergingx(palette = "PRGn", mid = 0, 
+                                       breaks= c(-75, -50, -25, 0, 25, 50, 75, 100), 
+                                       limits = c(-75, 100)) +
+      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+            strip.background = element_rect(
+              color="black", fill="#ADB5BD", size=1, linetype="solid"),
+            strip.text.y = element_text(size = 5, color = "black", face = "bold"),
+            legend.key.size = unit(1.5, "cm")) +
+      labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent")
+    #plot
+    #benefits
+  })
+  output$education2 <- renderPlot({
+    #Barriers
+    ed.melt.decrease = melt(ed.decrease, id.vars = c("year", "District.Name"),
+                            measure.vars = c("Percent.Economically.Disadvantaged", "Percent.Chronically.Absent",
+                                             "Dropout.Rate")) %>%
+      mutate(variable = recode(variable, "Percent.Economically.Disadvantaged" = "Economic Disadvantage",
+                               "Percent.Chronically.Absent" = "Chronic Absenteeism",
+                               "Dropout.Rate"="Dropout Rate"))
+    
+    #barriers<- 
+    
+    ggplot(ed.melt.decrease, aes(y = District.Name, x = year, fill = value)) +
+      geom_tile(color = "#ADB5BD") + #gray
+      geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
+      coord_equal() + 
+      #facet_grid(rows = vars(variable)) +
+      facet_wrap(~variable, ncol=1) +
+      #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+      scale_fill_continuous_sequential(palette = "Purples 3") +
+      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+            strip.background = element_rect(
+              color="black", fill="#ADB5BD", size=1, linetype="solid"),
+            strip.text.y = element_text(size = 4, color = "black", face = "bold"),
+            legend.key.size = unit(1.5, "cm")) +
+      labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
+    
+  })
+  
+  
+  
 ## SERVER: PANEL - Employment ratio ----
 ## plotlyOutput("empratioplot") -----
 ## leafletOutput("percempmap") -----
@@ -1564,7 +1696,7 @@ server <- function(input, output, session) {
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D"))) +
                theme_minimal() + ggtitle("Employment Ratio for Adults 20 to 64: 2015-2018") +
-               ylab("Employment Ratio (%)") + xlab("Year"), tooltip = "text") %>%
+               ylab("Percent Employed (%)") + xlab("Year"), tooltip = "text") %>%
       config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
@@ -1691,15 +1823,20 @@ server <- function(input, output, session) {
     if (input$flows == "Inflows"){
       top_12_in_melt <- melt(data = top_12_in, id.vars = c("year"),
                              measure.vars = colnames(top_12_in)[-length(top_12_in)]) %>%
-        rename(c("county" = "variable", "jobs" = "value"))
+        rename(c("county" = "variable", "jobs" = "value")) %>%
+        mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
+                                                      "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
+                                     other_level = "Other Counties"),
+               neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
+                                                        "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
 
-      ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = county,
+      ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = neighbors,
                                           text = paste0("County: ", county,
                                                         "<br>Year: ", year,
                                                         "<br>Number of Jobs: ", jobs))) +
                  geom_line(size = 1) +
                  geom_point(size = 1.5) +
-                 scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+                 scale_colour_manual(name = "County", values = c(graypal, viridis(5, option = "D"))) +
                  scale_x_continuous(breaks = 0:2100) +
                  theme_minimal() + ggtitle("Number of jobs flowing into Wasco County (2015-2017)") +
                  ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>%
@@ -1711,15 +1848,22 @@ server <- function(input, output, session) {
     else if (input$flows == "Outflows"){
       top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"),
                               measure.vars = colnames(top_12_out)[-length(top_12_out)]) %>%
-        rename(c("county" = "variable", "jobs" = "value"))
+        rename(c("county" = "variable", "jobs" = "value"))%>%
+        mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
+                                                      "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
+                                     other_level = "Other Counties"),
+               neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
+                                                        "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
+      
+      
 
-      ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = county,
+      ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = neighbors,
                                            text = paste0("County: ", county,
                                                          "<br>Year: ", year,
                                                          "<br>Number of Jobs: ", jobs))) +
                  geom_line(size = 1) +
                  geom_point(size = 1.5) +
-                 scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+                 scale_colour_manual(name = "County", values = c(graypal, viridis(5, option = "D"))) +
                  scale_x_continuous(breaks = 0:2100) +
                  theme_minimal() + ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") +
                  ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>%
@@ -2118,6 +2262,24 @@ server <- function(input, output, session) {
       config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
+  })
+  
+## SERVER: PANEL - ALICE Poverty rate -----
+## plotlyOutput("aliceplot") -----
+  output$aliceplot <- renderPlotly({
+    ggplotly(ggplot(alice_counties, 
+                    aes(x=Year, y=Percent_ALICE_Households, group = County, color = Wasco,
+                        text = paste0("County: ", County,
+                                      "<br>Year: ", Year,
+                                      "<br>Below ALICE Threshold: ", Percent_ALICE_Households, "%"))) +
+               geom_line(size = 1) + 
+               geom_point(size = 1.5) +
+               scale_color_manual(name = "County", values = c(graypal, viridis(6, option = "D"))) +
+               theme_minimal() + ggtitle("Households Below ALICE Threshold 2010-2018") + 
+               ylab("Below ALICE Threshold (%)") + xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
+             modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                         "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Poverty rate -----

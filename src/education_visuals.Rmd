@@ -31,40 +31,11 @@ ed <- ed %>% filter(District.Name == "South Wasco County SD 1" |
            District.Name == "Dufur SD 29" |
            District.Name == "Hood River County SD") %>% 
   select(-c("District.ID" ,"Student.Group","Fall.Membership", "Free.Reduced.Priced.Lunch","Percent.Regular.Attenders" )) 
+fwrite(ed,here::here("src/dashboard/Data/education_dash.csv"))
 
+#ed <- fread(here::here("src/dashboard/Data/education_dash.csv"))
 ed.increase <- ed %>% select("year" ,"District.Name","On.Time.Grad.Rate", "Teacher.Experience.Pct","Percent.ELA.Proficient.Change")
 ed.decrease <- ed %>% select("year" ,"District.Name","Percent.Economically.Disadvantaged", "Percent.Chronically.Absent","Dropout.Rate")
-
-#scaling the data within each measure to standardize the values.
-#con: suppresses the minor differences in variables that have a smaller range
-ed.scaled <- ed %>% mutate(Percent.ELA.Proficient.Change = scale(Percent.ELA.Proficient.Change),
-                                  Percent.Chronically.Absent = scale(Percent.Chronically.Absent),
-                                  Percent.Economically.Disadvantaged = scale(Percent.Economically.Disadvantaged),
-                                  Teacher.Experience.Pct = scale(Teacher.Experience.Pct),
-                                  Dropout.Rate = scale(Dropout.Rate),
-                                  On.Time.Grad.Rate = scale(On.Time.Grad.Rate))
-ed.scaled <- ed.scaled %>% filter(District.Name == "South Wasco County SD 1" |
-                      District.Name == "Jefferson County SD 509J" |
-                      District.Name == "North Wasco County SD 21" |
-                      District.Name == "Sherman County SD" |
-                      District.Name == "Dufur SD 29" |
-                      District.Name == "Hood River County SD")
-```
-
-
-prepare table to make a heatmap
-```{r}
-## for all the education data with original values
-ed.melt = melt(ed, id.vars = c("year", "District.Name"),
-             measure.vars = c("On.Time.Grad.Rate", "Dropout.Rate" , 
-                              "Percent.ELA.Proficient.Change", "Teacher.Experience.Pct", "Percent.Chronically.Absent",
-                              "Percent.Economically.Disadvantaged"))
-
-## for the education data with scaled values
-ed.melt.scaled = melt(ed.scaled, id.vars = c("year", "District.Name"),
-               measure.vars = c("On.Time.Grad.Rate", "Dropout.Rate" , 
-                                "Percent.ELA.Proficient.Change", "Teacher.Experience.Pct", "Percent.Chronically.Absent",
-                                "Percent.Economically.Disadvantaged")) 
 
 ### increaseing variables
 ed.melt.increase = melt(ed.increase, id.vars = c("year", "District.Name"),
@@ -79,9 +50,70 @@ ed.melt.increase = melt(ed.increase, id.vars = c("year", "District.Name"),
 ed.melt.decrease = melt(ed.decrease, id.vars = c("year", "District.Name"),
                measure.vars = c("Percent.Economically.Disadvantaged", "Percent.Chronically.Absent",
                                 "Dropout.Rate")) %>%
-  mutate(variable = recode(variable, "Percent.Economically.Disadvantaged" = "Economically Disadvantaged",
+  mutate(variable = recode(variable, "Percent.Economically.Disadvantaged" = "Economic Disadvantage",
                            "Percent.Chronically.Absent" = "Chronic Absenteeism",
                            "Dropout.Rate"="Dropout Rate"))
+```
+
+
+### Benefits to Student Success
+```{r}
+benefits <- ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
+  coord_equal() + 
+  #facet_grid(rows = vars(variable)) +
+  facet_wrap(~variable, ncol=1) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0, breaks= c(-75, -50, -25, 0, 25, 50, 75, 100), limits = c(-75, 100)) +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+        strip.background = element_rect(
+     color="black", fill="#ADB5BD", size=1, linetype="solid"),
+      strip.text.y = element_text(size = 5, color = "black", face = "bold")) +
+  labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent")
+benefits
+```
+
+
+### Barriers to Student Success
+```{r}
+barriers<- ggplot(ed.melt.decrease, aes(y = District.Name, x = year, fill = value)) +
+  geom_tile(color = "#ADB5BD") + #gray
+  geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
+  coord_equal() + 
+  #facet_grid(rows = vars(variable)) +
+  facet_wrap(~variable, ncol=1) +
+  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+  scale_fill_continuous_sequential(palette = "Purples 3") +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+        strip.background = element_rect(
+     color="black", fill="#ADB5BD", size=1, linetype="solid"),
+      strip.text.y = element_text(size = 4, color = "black", face = "bold")) +
+  labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
+barriers
+```
+
+
+
+```{r}
+plot_grid(
+  benefits, barriers,
+  labels = NULL, ncol = 2
+)
+```
+
+
+### Heatmap drafts
+
+prepare table to make a heatmap
+```{r}
+## for all the education data with original values
+ed.melt = melt(ed, id.vars = c("year", "District.Name"),
+             measure.vars = c("On.Time.Grad.Rate", "Dropout.Rate" , 
+                              "Percent.ELA.Proficient.Change", "Teacher.Experience.Pct", "Percent.Chronically.Absent",
+                              "Percent.Economically.Disadvantaged"))
+
+
 ```
 
 
@@ -240,22 +272,8 @@ plot_grid(
 )
 ```
 
-try facet by question.... 
-```{r}
-ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
-  geom_tile(color = "#ADB5BD") + #gray
-  geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
-  coord_equal() + 
-  #facet_grid(rows = vars(variable)) +
-  facet_wrap(~variable, ncol=1) +
-  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
-  scale_fill_continuous_divergingx(palette = "PRGn", mid = 0, breaks= c(-50, -25, 0, 25, 50, 75, 100), limits = c(-70, 100)) +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
-        strip.background = element_rect(
-     color="black", fill="#ADB5BD", size=1, linetype="solid"),
-      strip.text.y = element_text(size = 5, color = "black", face = "bold")) +
-  labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent <br> Range: -60% to 100%")
-```
+
+
 
 
 
@@ -300,24 +318,8 @@ ggplot(ed.melt.decrease2, aes(y = indicator, x = year, fill = value)) +
   xlab("School Year")
 ```
 
+ 
 
-
-try facet by question  
-```{r}
-ggplot(ed.melt.decrease, aes(y = District.Name, x = year, fill = value)) +
-  geom_tile(color = "#ADB5BD") + #gray
-  geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
-  coord_equal() + 
-  #facet_grid(rows = vars(variable)) +
-  facet_wrap(~variable, ncol=1) +
-  #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
-  scale_fill_continuous_sequential(palette = "Purples 3") +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
-        strip.background = element_rect(
-     color="black", fill="#ADB5BD", size=1, linetype="solid"),
-      strip.text.y = element_text(size = 5, color = "black", face = "bold")) +
-  labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
-```
 
 
 

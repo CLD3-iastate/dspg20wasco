@@ -7,9 +7,9 @@ library(ggplot2)
 library(plotly)
 
 
-top_12_in <- read_csv("~/git/dspg20wasco/data/app_12_inflows_wasco.csv")
-top_12_out <- read_csv("~/git/dspg20wasco/data/app_12_outflows_wasco.csv")
-
+top_12_in <- data.table(read_csv("~/git/dspg20wasco/data/app_12_inflows_wasco.csv"))
+top_12_out <- data.table(read_csv("~/git/dspg20wasco/data/app_12_outflows_wasco.csv"))
+graypal = "#ADB5BD"
 
 #have some toggle to switch between inflows and outflows
 ggplotly(ggplot(top_12_in, aes(x = year)) +
@@ -50,15 +50,20 @@ ggplotly(ggplot(top_12_out, aes(x = year)) +
 ### Mary's edits for consistency with dashboard
 top_12_in_melt <- melt(data = data.frame(top_12_in), id.vars = c("year"), 
                        measure.vars = colnames(top_12_in)[-length(top_12_in)]) %>%
-  rename(c("county" = "variable", "jobs" = "value"))
+  rename(c("county" = "variable", "jobs" = "value")) %>%
+  mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
+                                              "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
+                               other_level = "Other Counties"),
+         neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
+                                                  "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
 
-ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = county,
+ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = neighbors,
                                     text = paste0("County: ", county,
                                                   "<br>Year: ", year,
                                                   "<br>Number of Jobs: ", jobs))) +
            geom_line(size = 1) + 
            geom_point(size = 1.5) +
-           scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+           scale_colour_manual(name = "County", values = c(graypal, viridis(5, option = "D"))) +
            scale_x_continuous(breaks = 0:2100) +
            theme_minimal() + ggtitle("Number of jobs flowing into Wasco County (2015-2017)") + 
            ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 
@@ -68,15 +73,21 @@ ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = coun
 
 top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"), 
                        measure.vars = colnames(top_12_out)[-length(top_12_out)]) %>%
-  rename(c("county" = "variable", "jobs" = "value"))
+  rename(c("county" = "variable", "jobs" = "value"))%>%
+  mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
+                                                "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
+                               other_level = "Other Counties"),
+         neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
+                                                  "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
 
-ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = county,
+
+ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = neighbors,
                                     text = paste0("County: ", county,
                                                   "<br>Year: ", year,
                                                   "<br>Number of Jobs: ", jobs))) +
            geom_line(size = 1) + 
            geom_point(size = 1.5) +
-           scale_colour_manual(name = "County", values = viridis(12, option = "D")) +
+           scale_colour_manual(name = "County", values = c(graypal, viridis(5, option = "D"))) +
            scale_x_continuous(breaks = 0:2100) +
            theme_minimal() + ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") + 
            ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>% 

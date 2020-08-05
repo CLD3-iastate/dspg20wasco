@@ -33,7 +33,7 @@ options(tigris_use_cache = TRUE)
 #read in combined dataset
 acs_data <- fread(("Data/combined_acs.csv"))
 acs_data$GEOID <- as.character(acs_data$GEOID)
-acs_counties <- readRDS(here("/data/acs_counties.Rds"))
+acs_counties <- readRDS(("Data/acs_counties.Rds"))
 acs_counties <- acs_counties %>% mutate(south_wasco = fct_other(NAME, keep = c("South Wasco County School District 1, OR",
                                                                                "Wasco County, OR", "Oregon"),
                                                                 other_level = "Neighboring Counties"),
@@ -49,7 +49,7 @@ acs_counties_neighbors <- filter(acs_counties, NAME == "South Wasco County Schoo
                                    NAME == "Skamania County, WA" | NAME == "Klickitat County, WA" |
                                    NAME == "Oregon")
 #get tract level geography
-acs_tracts <- readRDS(here("/data/acs_tracts.Rds"))
+acs_tracts <- readRDS(("Data/acs_tracts.Rds"))
 acs_tracts$NAME.x <- NULL
 
 or_county_lines <- counties(state = "OR")
@@ -102,6 +102,7 @@ agg_15 <- readRDS("Data/app_lodes_od_agg_2015.Rds")
 #wasco_points <- blocks("OR", county = "Wasco")
 #wasco_lines <- data.frame(wasco_points)
 south_wasco_points <- st_read("Data/shps/swsd")
+wasco_geo_points <- st_read("Data/shps/county")
 water_use_by_sector_t <- data.table(readRDS("Data/app_usgs_water_use.Rds"))
 acres_17 <- readRDS("Data/app_acres_17.Rds")
 acres_16 <- readRDS("Data/app_acres_16.Rds")
@@ -196,7 +197,7 @@ menuItem(
   text = "Team",
   icon = icon("users")
 )
-)),
+)), # END OF SIDEBAR
 
 ## UI: Dashboard body -------
   dashboardBody(
@@ -237,91 +238,68 @@ menuItem(
                       "How accessible is healthy and affordable food in South Wasco?" = "Foodmap",
                       "What is the food insecurity rate in South Wasco?" = "Insecurity",
                       "What local crops are grown in South Wasco?" = "Crops"),
-                    width = "300px", selected = NULL
-                  )),
+                    width = "500px", selected = "Foodmap"
+                  ),
 ## UI: PANEL - Food systems map  ------
                 conditionalPanel(
                   condition = "input.foodselect == 'Foodmap'",
-                  # Add selection for domain, theme questions
-                  # Leaflet map for food insecurity data or line chart
-                  # Free and reduced price lunch data (?)
-                  # Crop maps in here, major agricultural crops
-                  flipBox(
+                  h2("Interactive food systems map"),
+                  tabBox(
+                    #tags$head(
+                    #  tags$style(HTML(" #tabBox { height:90vh !important; } "))
+                    #),
                     id = 1,
-                    main_img = "https://image.flaticon.com/icons/svg/1445/1445611.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/3175/3175193.svg",
-                    front_title = "How accessible is healthy and affordable food in South Wasco?",
-                    back_title = "Data",
-                    h2("Interactive food systems map"),
-#                    "Explore the different types of stores available for people #living in South Wasco to purchase food. The legend indicates whether stores #accept payment from federal food assistance programs and WIC. Use the Show #driving time tool to show 30 minute and 1 hour driving time areas from stores.",
-                    # Fix the symbology (Aaron),
-                    # Fix the driving time legend
-                    # See why some points don't have names
-                    leafletOutput("mymap"),
-                    selectInput("iso", "Show driving time for...",
-                                choices = isochrones$name,
-                                selectize = TRUE,
-                                multiple = TRUE,
-                                width = "300px"),
-                    "Explore the data...",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center",
-                        h2("Methods: Clusters of Innovation"),
-                        #img(src="FoodSystems.png", align = "center", width = 60),
-                       # "Data for this map is from here",
-                        # Remove the cluster
-                        # Add indicator table snippet
-                        # Add the data table for this
-                        DTOutput("foodDT"))))),
+                    side = "left",
+                    #height = "250px",
+                    width = "12",
+                    selected = "Food Map",
+                    tabPanel("Food Map",
+                             img(src="food_bkgrnd.png", width = "100%"),
+                             leafletOutput("mymap")
+                    ),
+                    tabPanel("Data",
+                             DTOutput("foodDT"))
+                  )
+
+                  ),
 ## UI: PANEL - Food insecurity  ----
                 conditionalPanel(
                   condition = "input.foodselect == 'Insecurity'",
-                  flipBox(
+                  tabBox(
                     id = 2,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the food insecurity rate in South Wasco?",
-                    selectInput("ratetype", "Which Food Insecurity Rate?",
-                                c("Overall", "Childhood")),
-                    leafletOutput("foodinsecuritymap"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Indicator table snippet,
-                      #DTOutput("insecurityDT")
-                    ))
-                  )),
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Food Insecurity",
+                    tabPanel("Food Insecurity",
+                             img(src="food_bkgrnd.png", width = "100%"),
+                             selectInput("ratetype", "Which Food Insecurity Rate?",
+                                         c("Overall", "Childhood")),
+                             leafletOutput("foodinsecuritymap")
+                    ),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                  ),
 ## UI: PANEL - Local crops panel -----
                 conditionalPanel(
                   condition = "input.foodselect == 'Crops'",
-                  flipBox(
+                  tabBox(
                     id = 4,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What local crops are grown in South Wasco?",
-                    h1("What crops?"),
-                    h2("hi"),
-                    p("hey"),
-                    selectInput("crops", "Which crop?",
-                                c("Winter Wheat", "Barley",
-                                  "Alfalfa", "Cherries")),
-                    leafletOutput("cropmap"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Indicator table snippet,
-                      #DTOutput("cropDT")
-                    ))
-                  ))
-        ), # END OF FOOD SYSTEMS CLUSTER
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Crop Map",
+                    tabPanel("Crop Map",
+                             img(src="food_bkgrnd.png", width = "100%"),
+                             selectInput("crops", "Which crop?",
+                                         c("Winter Wheat", "Barley",
+                                           "Alfalfa", "Cherries")),
+                             leafletOutput("cropmap")
+                    ),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                  )
+        )), # END OF FOOD SYSTEMS CLUSTER
 
 ## UI: TAB - Infrastructure cluster -----------------------------
         tabItem(tabName = "infrastructure",
@@ -339,7 +317,7 @@ menuItem(
                     "What is access to broadband like and why is it important?" = "Broadband",
                     "What is water use like in Wasco?" = "Water",
                     "What is the transit system like in South Wasco?" = "Transit"),
-                  width = "300px", selected = NULL
+                  width = "500px", selected = "WindSolar"
                 )),
 ## UI: PANEL - Wind and solar -------
                 conditionalPanel(
@@ -361,22 +339,18 @@ menuItem(
 ## UI: PANEL - Water -------
                 conditionalPanel(
                   condition = "input.infrastructureselect == 'Water'",
-                  flipBox(
+                  tabBox(
                     id = 5,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is water use like in Wasco?",
-                    back_title = "Data",
-                    "",
-                    plotlyOutput("waterplot"),
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Indicator table snippet,
-                      #DTOutput("infrastructureDT")
-                    ))
-                    )),
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Water Use",
+                    tabPanel("Water Use",
+                             #img =
+                             plotlyOutput("waterplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 ## UI: PANEL - Transit -------
                conditionalPanel(
                  condition = "input.infrastructureselect == 'Transit'",
@@ -405,24 +379,19 @@ tabItem(tabName = "learn",
                   #condition = "input.learnearnselect == 'Education'",
                   # How are we visualizing this? State and school district, line chart, maybe map?
                   # Back will have data and indicator snippet/sources
-                  flipBox(
+                  tabBox(
                     id = 6,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    #Education line chart
-                    #Education map
-                    front_title = "Education",
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Education indicator snippet
-                      #DTOutput("educationDT")
-                    ))
-                  )
-                )), # END OF EDUCATION
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Education",
+                    tabPanel("Education",
+                             "Education tab content"
+                             #plotOutput("education1")
+                             #plotOutput("education2")
+                    ),
+                    tabPanel("Data", "Data Tab Content")
+        ))), # END OF EDUCATION
 # Employment select panel
 tabItem(tabName = "earn",
                 #conditionalPanel(
@@ -442,87 +411,67 @@ tabItem(tabName = "earn",
 # UI: PANEL - Employment ratio  -------
 conditionalPanel(
   condition = "input.employmentselect == 'EmpRatio'",
-  flipBox(
+  tabBox(
     id = 7,
-    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-    front_title = "What is the employment ratio in South Wasco?",
-    leafletOutput("percempmap"),
-    plotlyOutput("empratioplot"),
-    back_title = "Data",
-    # Full back with table and indicator snippet
-    "",
-    back_content = tagList(
-      column(
-        width = 12,
-        align = "center"
-        #Indicator table snippet
-        #DTOutput("acs_counties")
-        )))),
+    side = "left",
+    height = "250px",
+    width = "12",
+    selected = "Employment Ratio",
+    tabPanel("Employment Ratio",
+             leafletOutput("percempmap"),
+             plotlyOutput("empratioplot")),
+  tabPanel("Data", "Data Tab Content")
+  )),
 # UI: PANEL - Label force participation rate -------
                 conditionalPanel(
                   condition = "input.employmentselect == 'LaborForce'",
-                  flipBox(
+                  tabBox(
                     id = 8,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the labor force participation rate in South Wasco?",
-                    plotlyOutput("laborforceplot"),
-                    back_title = "Data",
-                    # Full back with table and indicator snippet
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                        #Indicator table snippet
-                        #DTOutput("acs_counties")
-                        )
-                        ))),
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Labor Force Rate",
+                    tabPanel("Labor Force Rate",
+                             leafletOutput("laborforcemap"),
+                             plotlyOutput("laborforceplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 # UI: PANEL - Job flows  -------
                         conditionalPanel(
                           condition = "input.employmentselect == 'Flows'",
-                          flipBox(
+                          tabBox(
                             id = 9,
-                            main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                            header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                            front_title = "How do workers flow in and out of South Wasco?",
+                            side = "left",
+                            height = "250px",
+                            width = "12",
+                            selected = "Job Flows",
+                            tabPanel("Job Flows",
                             selectInput("flows", "Inflows or Outflows?",
                                         c("Inflows", "Outflows")),
-                            plotlyOutput("flowsplot"),
-                            back_title = "Flows Data",
-                            # Full back with table and indicator snippet
-                            "",
-                            back_content = tagList(
-                              column(
-                                width = 12,
-                                align = "center",
-                                "Flows data comes from LODES xyz"
-                                #DTOutput("flowsDT")
-                                )
-                                ))),
+                            plotlyOutput("flowsplot")
+                            ),
+                            tabPanel("Data", "Data Tab Content")
+                          )
+                        ),
 ## UI: PANEL - Industry Sectors  ------
                 conditionalPanel(
                   condition = "input.employmentselect == 'Sectors'",
-                  flipBox(
+                  tabBox(
                     id = 10,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What types of jobs are in South Wasco?",
-                    selectInput("sect", "What sectors?",
-                                c("All" = "All", "Goods Producing" = "Goods", "Trade, Transportation, and Utilities" = "Trade", "All Other Services" = "AllOther")),
-                    leafletOutput("odleaf"),
-                    back_title = "Sectors Data",
-                    # Full back with table and indicator snippet
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center",
-                        "Sectors data comes from LODES xyz"
-                        #DTOutput("sectorsDT")
-                      )))
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Job Sectors",
+                    tabPanel("Food Insecurity",
+                             selectInput("sect", "What sectors?",
+                                         c("All" = "All", "Goods Producing" = "Goods", "Trade,
+                                           Transportation, and Utilities" = "Trade", "All Other
+                                           Services" = "AllOther")),
+                             leafletOutput("odleaf")),
+                    tabPanel("Data", "Data Tab Content")
                   )
+                )
         ), ## END OF EMPLOYMENT
 
 ## UI: TAB - Quality standard of living driver -----------
@@ -543,7 +492,7 @@ conditionalPanel(
       #          conditionalPanel(
       #            condition = "input.livingdomainselect == 'Financial'",
 tabItem(tabName = "financial",
-fluidRow(
+        fluidRow(
                     selectInput(
                       inputId = "financialselect",
                       label = "I'm wondering...",
@@ -556,66 +505,52 @@ fluidRow(
 ## UI: PANEL - Median income  ------
                     conditionalPanel(
                       condition = "input.financialselect == 'MedIncome'",
-                      flipBox(
+                      tabBox(
                         id = 11,
-                        main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                        header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                        front_title = "What is the median income in South Wasco?",
+                        side = "left",
+                        height = "250px",
+                        width = "12",
+                        selected = "Median Income",
+                        tabPanel("Median Income",
                         # Median income only here, poverty, income brackets are the questions
-                        plotlyOutput("medincomeplot"),
-                        back_title = "Data",
-                        "",
-                        back_content = tagList(
-                          column(
-                            width = 12,
-                            align = "center"
-                          # Indicator table snippet
-                          # DTOutput("acs_counties")
-                        ))
-                      )),
+                        leafletOutput("medincomemap"),
+                        plotlyOutput("medincomeplot")),
+                        tabPanel("Data", "Data Tab Content")
+                      )
+                    ),
 ## UI: PANEL - Poverty rate ------
                 conditionalPanel(
                   condition = "input.financialselect == 'Poverty'",
-                  flipBox(
+                  tabBox(
                     id = 12,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the poverty rate in South Wasco?",
-                    leafletOutput("povertymap"),
-                    plotlyOutput(outputId = "povertyplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
-                  )),
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Poverty Rate",
+                    tabPanel("Poverty Rate",
+                             leafletOutput("povertymap"),
+                             plotlyOutput(outputId = "povertyplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 ## UI: PANEL - Income Distribution  ------
                 conditionalPanel(
                   condition = "input.financialselect == 'DisIncome'",
-                  flipBox(
+                  tabBox(
                     id = 13,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the income distribution in South Wasco?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Income Distribution",
                     # Median income only here, poverty, income brackets are the questions
-                    selectInput("incomedisyear", "Which year?",
+                    tabPanel("Income Distribution",
+                           selectInput("incomedisyear", "Which year?",
                                 c("2018", "2017", "2016", "2015")),
-                    leafletOutput("incomedismap"),
-                    plotlyOutput("incomedisplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
-                  ))
+                           leafletOutput("incomedismap"),
+                           plotlyOutput("incomedisplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                )
 ), # END FINANCIAL
 # Housing select question
 tabItem(tabName = "housing",
@@ -633,45 +568,33 @@ tabItem(tabName = "housing",
 ## UI: PANEL - Affordable housing -----
                   conditionalPanel(
                     condition = "input.housingselect == 'Housing'",
-                    flipBox(
+                    tabBox(
                       id = 14,
-                      main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                      header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                      front_title = "How much affordable housing is in South Wasco?",
+                      side = "left",
+                      height = "250px",
+                      width = "12",
+                      selected = "Affordable Housing",
+                      tabPanel("Affordable Housing",
                       # Overall and ownership/rental (both lines and maps?)
                       # Full back with table and indicator snippet
-                      plotlyOutput("housingplot"),
-                      back_title = "Data",
-                      "",
-                      back_content = tagList(
-                        column(
-                          width = 12,
-                          align = "center"
-                        # Indicator table snippet
-                        # DTOutput("acs_counties")
-                      ))
+                      plotlyOutput("housingplot")),
+                      tabPanel("Data", "Data Tab Content")
                     )
-                ),
+                  ),
 ## UI: PANEL - Rent vs own -------
                 conditionalPanel(
                   condition = "input.housingselect == 'RentOwn'",
-                  flipBox(
+                  tabBox(
                     id = 15,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the home ownership rate in South Wasco?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Home Ownership",
+                    tabPanel("Home Ownership",
                     # Overall and ownership/rental (both lines and maps?)
                     # Full back with table and indicator snippet
-                    plotlyOutput("rentownplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
+                    plotlyOutput("rentownplot")),
+                    tabPanel("Data", "Data Tab Content")
                   )
                 )
 ), # END HOUSING
@@ -696,25 +619,20 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
-                  flipBox(
+                  tabBox(
                     id = 16,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the racial diversity of South Wasco?",
-                    selectInput("raceyears", "What year?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Race",
+                    tabPanel("Race",
+                             selectInput("raceyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
-                    leafletOutput("racemap"),
-                    plotlyOutput("raceplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
-                  )),
+                             leafletOutput("racemap"),
+                             plotlyOutput("raceplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 # UI: PANEL - Family ------
                 conditionalPanel(
                   condition = "input.socialselect == 'Family'",
@@ -722,24 +640,18 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
-                  flipBox(
+                  tabBox(
                     id = 17,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What types of familiy structures are in South Wasco?",
-                    selectInput("familyyears", "What year?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Family",
+                    tabPanel("Family",
+                             selectInput("familyyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
-                    leafletOutput("familymap"),
-                    plotlyOutput("familyplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
+                             leafletOutput("familymap"),
+                             plotlyOutput("familyplot")),
+                    tabPanel("Data", "Data Tab Content")
                   )
                 ),
 # UI: PANEL - Education attainment -------
@@ -749,24 +661,18 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
-                  flipBox(
+                  tabBox(
                     id = 18,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the educational background of people in South Wasco?",
-                    selectInput("degreeyears", "What year?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Education Degrees",
+                    tabPanel("Education Degree",
+                             selectInput("degreeyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
-                    leafletOutput("degreemap"),
-                    plotlyOutput("degreeplot"),
-                    back_title = "",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
+                             leafletOutput("degreemap"),
+                             plotlyOutput("degreeplot")),
+                    tabPanel("Data", "Data Tab Content")
                   )
                 )), # END SOCIAL TAB
 
@@ -1664,6 +1570,101 @@ server <- function(input, output, session) {
   })
 
 ## SERVER: PANEL - Labor force participation ----
+## leafletOutput("laborforcemap")------
+  output$laborforcemap <- renderLeaflet({
+    lfpr_pal <- colorQuantile(viridis_pal(option = "D")(3), domain = acs_tracts$labor_force_20_to_64)
+    lfpr_leaf <- leaflet() %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2018),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2018",
+        fillColor = ~lfpr_pal(labor_force_20_to_64),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: ",
+                              round(labor_force_20_to_64_moe, 1), "%<br/>",
+                              "<strong> Labor Force Participation Rate: <strong>",
+                              round(labor_force_20_to_64, 1), "<strong>%"),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2017),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2017",
+        fillColor = ~lfpr_pal(labor_force_20_to_64),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: ",
+                              round(labor_force_20_to_64_moe, 1), "%<br/>",
+                              "<strong> Labor Force Participation Rate: <strong>",
+                              round(labor_force_20_to_64, 1), "<strong>%"),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2016),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2016",
+        fillColor = ~lfpr_pal(labor_force_20_to_64),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: ",
+                              round(labor_force_20_to_64_moe, 1), "%<br/>",
+                              "<strong> Labor Force Participation Rate: <strong>",
+                              round(labor_force_20_to_64, 1), "<strong>%"),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2015),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2015",
+        fillColor = ~lfpr_pal(labor_force_20_to_64),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: ",
+                              round(labor_force_20_to_64_moe, 1), "%<br/>",
+                              "<strong> Labor Force Participation Rate: <strong>",
+                              round(labor_force_20_to_64, 1), "<strong>%"),
+                        htmltools::HTML)) %>%
+      addPolylines(
+        data = south_wasco_points,
+        color = "#5e4b6b",
+        weight = 2,
+        opacity = 1,
+        fillOpacity= 0,
+        group = "Basemap",
+        label = "South Wasco County Region") %>%
+      addPolylines(
+        data = county_lines,
+        color = "#8d9fcc",
+        weight = 2,
+        opacity = 1,
+        fillOpacity= 0,
+        group = "Basemap") %>%
+      addLegend(
+        data = acs_tracts,
+        "bottomright",
+        pal = lfpr_pal,
+        values = ~ labor_force_20_to_64,
+        labFormat = function(type, cuts, p) {
+          n = length(cuts)
+          p = paste0(round(p * 100), '%')
+          cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+        title = "Labor Force Participation Rate for<br>ages 20 to 64 by Census Tract",
+        na.label = "NA") %>%
+      addLayersControl(
+        baseGroups = c("2018", "2017", "2016", "2015"),
+        options = layersControlOptions(collapsed = FALSE))
+  })
 ## plotlyOutput("laborforceplot") ------
 
   output$laborforceplot <- renderPlotly({
@@ -1733,15 +1734,11 @@ server <- function(input, output, session) {
   od_S000leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
-      data = south_wasco_points,
-      color = "purple",
-      weight = 2,
-      opacity = 1,
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
       group = "Basemap",
-      label = "South Wasco Region")
-
-  od_SI01leaf <-leaflet() %>%
-    addProviderTiles(providers$CartoDB.Positron) %>%
+      label = "Wasco County") %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
@@ -1750,8 +1747,30 @@ server <- function(input, output, session) {
       group = "Basemap",
       label = "South Wasco Region")
 
-  od_SI02leaf <-leaflet() %>%
+  od_SI01leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolylines(
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
+      group = "Basemap",
+      label = "Wasco County") %>%
+    addPolylines(
+      data = south_wasco_points,
+      color = "purple",
+      weight = 2,
+      opacity = 1,
+      group = "Basemap",
+      label = "South Wasco Region")
+
+  od_SI02leaf <- leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addPolylines(
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
+      group = "Basemap",
+      label = "Wasco County") %>%
     addPolylines(
       data = south_wasco_points,
       color = "purple",
@@ -1763,6 +1782,12 @@ server <- function(input, output, session) {
   od_SI03leaf <- leaflet() %>%
     addProviderTiles(providers$CartoDB.Positron) %>%
     addPolylines(
+      data = wasco_geo_points,
+      color = "black",
+      weight = 1,
+      group = "Basemap",
+      label = "Wasco County") %>%
+    addPolylines(
       data = south_wasco_points,
       color = "purple",
       weight = 2,
@@ -1773,7 +1798,7 @@ server <- function(input, output, session) {
   output$odleaf <- renderLeaflet({
     if (input$sect == "All"){
       #S000 (all jobs) by year -------
-      od_S000leaf %>%
+      od_S000leaf  %>%
         addPolygons(
           data = st_as_sf(agg_17),
           weight = 1,
@@ -1781,7 +1806,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_17$S000)(agg_17$S000),
-          label = agg_17$S000) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of All Jobs: <strong>",
+                                agg_17$S000), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1791,7 +1818,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of All Jobs<br>in Wasco County",
+          title = "Number of All Jobs<br>by Census Tract<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1800,7 +1827,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_16$S000)(agg_16$S000),
-          label = agg_16$S000) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of All Jobs: <strong>",
+                                agg_16$S000), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1808,11 +1837,14 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colorQuantile(viridis_pal(option = "D")(5), domain = agg_15$S000)(agg_15$S000),
-          label = agg_15$S000) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of All Jobs: <strong>",
+                                agg_15$S000), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
     #SI01 (Goods Producing industry sectors) by year -------
     else if (input$sect == "Goods"){
       colors_SI01 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI01))
@@ -1825,7 +1857,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colors_SI01((agg_17$SI01)),
-          label = agg_17$SI01) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Goods Producing Jobs: <strong>",
+                                agg_17$SI01), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1835,7 +1869,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of Goods Producing<br>Sector Jobs in Wasco County",
+          title = "Number of Goods Producing<br> Jobs by Census Tract<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1844,7 +1878,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colors_SI01((agg_16$SI01)),
-          label = agg_16$SI01) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Goods Producing Jobs: <strong>",
+                                agg_16$SI01), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1852,11 +1888,14 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colors_SI01((agg_15$SI01)),
-          label = agg_15$SI01) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Goods Producing Jobs: <strong>",
+                                agg_15$SI01), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
     #SI02 (Trade, Transportation, and Utilities industry sectors) by year --------
     else if (input$sect == "Trade"){
       colors_SI02 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI02))
@@ -1869,7 +1908,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colors_SI02((agg_17$SI02)),
-          label = agg_17$SI02) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Utility Jobs: <strong>",
+                                agg_17$SI02), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1879,7 +1920,8 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of Trade, Transportation,<br>and Utilities Sector Jobs<br>in Wasco County",
+          title = "Number of Trade, Transportation,<br>and Utilities Jobs<br>by Census Tract in<br>
+          Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1888,7 +1930,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colors_SI02((agg_16$SI02)),
-          label = agg_16$SI02) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Utility Jobs: <strong>",
+                                agg_16$SI02), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1896,11 +1940,14 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colors_SI02((agg_15$SI02)),
-          label = agg_15$SI02) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Utility Jobs: <strong>",
+                                agg_15$SI02), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
     #SI03 (All Other Services industry sectors) by year ----------
     else if (input$sect == "AllOther"){
       colors_SI03 <- colorQuantile(viridis_pal(option = "D")(3), domain = unique(rbind(agg_17, agg_16, agg_15)$SI03))
@@ -1913,7 +1960,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2017",
           fillColor = ~colors_SI03((agg_17$SI03)),
-          label = agg_17$SI03) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Other Service Jobs: <strong>",
+                                agg_17$SI03), htmltools::HTML)) %>%
         addLegend(
           data = rbind(agg_17, agg_16, agg_15),
           "bottomright",
@@ -1923,7 +1972,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of All Other Services<br>Sector Jobs in Wasco County",
+          title = "Number of All Other Services<br>Sector Jobs by Census Tract<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -1932,7 +1981,9 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2016",
           fillColor = ~colors_SI03((agg_16$SI03)),
-          label = agg_16$SI03) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Other Service Jobs: <strong>",
+                                agg_16$SI03), htmltools::HTML)) %>%
         addPolygons(
           data = st_as_sf(agg_15),
           weight = 1,
@@ -1940,16 +1991,115 @@ server <- function(input, output, session) {
           fillOpacity = .7,
           group = "2015",
           fillColor = ~colors_SI03((agg_15$SI03)),
-          label = agg_15$SI03) %>%
+          label = ~lapply(paste(sep = "",
+                                "<strong> Number of Other Service Jobs: <strong>",
+                                agg_15$SI03), htmltools::HTML)) %>%
         addLayersControl(
           baseGroups = c("2017", "2016", "2015"),
           options = layersControlOptions(collapsed = FALSE)) %>%
-        hideGroup(c("2016", "2015"))}
+        hideGroup(c("2016", "2015"))
+      }
   })
 
 
 ## SERVER: TAB - Quality standard of living driver ----
 ## SERVER: PANEL - Median income -----
+## leafletOutput("medincomemap") -----
+  output$medincomemap <- renderLeaflet({
+    med_inc_pal <- colorQuantile(viridis_pal(option = "D")(3),
+                                 domain = acs_tracts$median_household_income)
+    med_inc_leaf <- leaflet() %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2018),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2018",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2017),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2017",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2016),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2016",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolygons(
+        data = filter(acs_tracts, year == 2015),
+        weight = 1,
+        opacity = 0,
+        fillOpacity = .7,
+        group = "2015",
+        fillColor = ~med_inc_pal(median_household_income),
+        label = ~lapply(paste(sep = "",
+                              substr(NAME, 20, 60), "<br/>",
+                              substr(NAME, 1, 17),
+                              "<br/>Margins of error: $",
+                              round(median_household_income_moe, 1), "<br/>",
+                              "<strong> Median Household Income: $<strong>",
+                              round(median_household_income, 1)),
+                        htmltools::HTML)) %>%
+      addPolylines(
+        data = south_wasco_points,
+        color = "#5e4b6b",
+        weight = 2,
+        opacity = 1,
+        fillOpacity= 0,
+        group = "Basemap",
+        label = "South Wasco County Region") %>%
+      addPolylines(
+        data = county_lines,
+        color = "#8d9fcc",
+        weight = 2,
+        opacity = 1,
+        fillOpacity= 0,
+        group = "Basemap") %>%
+      addLegend(
+        data = acs_tracts,
+        "bottomright",
+        pal = med_inc_pal,
+        values = ~ median_household_income,
+        labFormat = function(type, cuts, p) {
+          n = length(cuts)
+          p = paste0(round(p * 100), '%')
+          cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
+        title = "Median Household Income by Census Tract",
+        na.label = "NA") %>%
+      addLayersControl(
+        baseGroups = c("2018", "2017", "2016", "2015"),
+        options = layersControlOptions(collapsed = FALSE))
+  })
 ## plotlyOutput("medincomeplot") ----
 
   output$medincomeplot <- renderPlotly({
@@ -2278,6 +2428,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2018)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),
@@ -2458,6 +2609,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2017)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),
@@ -2638,6 +2790,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2016)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),
@@ -2819,6 +2972,7 @@ server <- function(input, output, session) {
           title = "% of Population in selected<br>Income Bracket by Census Tract (2015)",
           na.label = "NA") %>%
         addLayersControl(
+          position = "topleft",
           baseGroups = c("< $10K", "$15K - $24999", "$25K - $34999", "$35K - $49999",
                          "$50K - $74999", "$75K - $99999","$100K - $149999", "$150K - $199999",
                          "> $200K"),
@@ -3900,7 +4054,7 @@ server <- function(input, output, session) {
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
-    if (input$familyyears == "2017") {
+    else if (input$familyyears == "2017") {
       leaflet(fam_stab_2017) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(
@@ -3992,7 +4146,7 @@ server <- function(input, output, session) {
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
-    if (input$familyyears == "2016") {
+    else if (input$familyyears == "2016") {
       leaflet(fam_stab_2016) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(
@@ -4084,7 +4238,7 @@ server <- function(input, output, session) {
                          "% of Children in Nonfamily Household"),
           options = layersControlOptions(collapsed = F))
     }
-    if (input$familyyears == "2015") {
+    else if (input$familyyears == "2015") {
       leaflet(fam_stab_2015) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(

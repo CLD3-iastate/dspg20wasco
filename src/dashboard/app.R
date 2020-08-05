@@ -197,7 +197,7 @@ menuItem(
   text = "Team",
   icon = icon("users")
 )
-)),
+)), # END OF SIDEBAR
 
 ## UI: Dashboard body -------
   dashboardBody(
@@ -207,7 +207,6 @@ menuItem(
 ## UI: TAB - Overview --------
         tabItem(tabName = "overview",
                 fluidRow(
-                  
                   boxPlus(
                     title = "Project overview",
                     closable = FALSE,
@@ -246,16 +245,19 @@ menuItem(
                   condition = "input.foodselect == 'Foodmap'",
                   h2("Interactive food systems map"),
                   tabBox(
+                    #tags$head(
+                    #  tags$style(HTML(" #tabBox { height:90vh !important; } "))
+                    #),
                     id = 1,
-                    side = "left", 
-                    height = "250px",
+                    side = "left",
+                    #height = "250px",
                     width = "12",
                     selected = "Food Map",
-                    tabPanel("Food Map", 
+                    tabPanel("Food Map",
                              img(src="food_bkgrnd.png", width = "100%"),
                              leafletOutput("mymap")
                     ),
-                    tabPanel("Data", 
+                    tabPanel("Data",
                              DTOutput("foodDT"))
                   )
 
@@ -265,11 +267,11 @@ menuItem(
                   condition = "input.foodselect == 'Insecurity'",
                   tabBox(
                     id = 2,
-                    side = "left", 
+                    side = "left",
                     height = "250px",
                     width = "12",
                     selected = "Food Insecurity",
-                    tabPanel("Food Insecurity", 
+                    tabPanel("Food Insecurity",
                              img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
                                          c("Overall", "Childhood")),
@@ -283,11 +285,11 @@ menuItem(
                   condition = "input.foodselect == 'Crops'",
                   tabBox(
                     id = 4,
-                    side = "left", 
+                    side = "left",
                     height = "250px",
                     width = "12",
                     selected = "Crop Map",
-                    tabPanel("Crop Map", 
+                    tabPanel("Crop Map",
                              img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("crops", "Which crop?",
                                          c("Winter Wheat", "Barley",
@@ -337,22 +339,18 @@ menuItem(
 ## UI: PANEL - Water -------
                 conditionalPanel(
                   condition = "input.infrastructureselect == 'Water'",
-                  flipBox(
+                  tabBox(
                     id = 5,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is water use like in Wasco?",
-                    back_title = "Data",
-                    "",
-                    plotlyOutput("waterplot"),
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Indicator table snippet,
-                      #DTOutput("infrastructureDT")
-                    ))
-                    )),
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Water Use",
+                    tabPanel("Water Use",
+                             #img =
+                             plotlyOutput("waterplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 ## UI: PANEL - Transit -------
                conditionalPanel(
                  condition = "input.infrastructureselect == 'Transit'",
@@ -381,24 +379,19 @@ tabItem(tabName = "learn",
                   #condition = "input.learnearnselect == 'Education'",
                   # How are we visualizing this? State and school district, line chart, maybe map?
                   # Back will have data and indicator snippet/sources
-                  flipBox(
+                  tabBox(
                     id = 6,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    #Education line chart
-                    #Education map
-                    front_title = "Education",
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      #Education indicator snippet
-                      #DTOutput("educationDT")
-                    ))
-                  )
-                )), # END OF EDUCATION
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Education",
+                    tabPanel("Education",
+                             "Education tab content"
+                             #plotOutput("education1")
+                             #plotOutput("education2")
+                    ),
+                    tabPanel("Data", "Data Tab Content")
+        ))), # END OF EDUCATION
 # Employment select panel
 tabItem(tabName = "earn",
                 #conditionalPanel(
@@ -418,88 +411,67 @@ tabItem(tabName = "earn",
 # UI: PANEL - Employment ratio  -------
 conditionalPanel(
   condition = "input.employmentselect == 'EmpRatio'",
-  flipBox(
+  tabBox(
     id = 7,
-    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-    front_title = "What is the employment ratio in South Wasco?",
-    leafletOutput("percempmap"),
-    plotlyOutput("empratioplot"),
-    back_title = "Data",
-    # Full back with table and indicator snippet
-    "",
-    back_content = tagList(
-      column(
-        width = 12,
-        align = "center"
-        #Indicator table snippet
-        #DTOutput("acs_counties")
-        )))),
+    side = "left",
+    height = "250px",
+    width = "12",
+    selected = "Employment Ratio",
+    tabPanel("Employment Ratio",
+             leafletOutput("percempmap"),
+             plotlyOutput("empratioplot")),
+  tabPanel("Data", "Data Tab Content")
+  )),
 # UI: PANEL - Label force participation rate -------
                 conditionalPanel(
                   condition = "input.employmentselect == 'LaborForce'",
-                  flipBox(
+                  tabBox(
                     id = 8,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the labor force participation rate in South Wasco?",
-                    leafletOutput("laborforcemap"),
-                    plotlyOutput("laborforceplot"),
-                    back_title = "Data",
-                    # Full back with table and indicator snippet
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                        #Indicator table snippet
-                        #DTOutput("acs_counties")
-                        )
-                        ))),
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Labor Force Rate",
+                    tabPanel("Labor Force Rate",
+                             leafletOutput("laborforcemap"),
+                             plotlyOutput("laborforceplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 # UI: PANEL - Job flows  -------
                         conditionalPanel(
                           condition = "input.employmentselect == 'Flows'",
-                          flipBox(
+                          tabBox(
                             id = 9,
-                            main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                            header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                            front_title = "How do workers flow in and out of South Wasco?",
+                            side = "left",
+                            height = "250px",
+                            width = "12",
+                            selected = "Job Flows",
+                            tabPanel("Job Flows",
                             selectInput("flows", "Inflows or Outflows?",
                                         c("Inflows", "Outflows")),
-                            plotlyOutput("flowsplot"),
-                            back_title = "Flows Data",
-                            # Full back with table and indicator snippet
-                            "",
-                            back_content = tagList(
-                              column(
-                                width = 12,
-                                align = "center",
-                                "Flows data comes from LODES xyz"
-                                #DTOutput("flowsDT")
-                                )
-                                ))),
+                            plotlyOutput("flowsplot")
+                            ),
+                            tabPanel("Data", "Data Tab Content")
+                          )
+                        ),
 ## UI: PANEL - Industry Sectors  ------
                 conditionalPanel(
                   condition = "input.employmentselect == 'Sectors'",
-                  flipBox(
+                  tabBox(
                     id = 10,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What types of jobs are in South Wasco?",
-                    selectInput("sect", "What sectors?",
-                                c("All" = "All", "Goods Producing" = "Goods", "Trade, Transportation, and Utilities" = "Trade", "All Other Services" = "AllOther")),
-                    leafletOutput("odleaf"),
-                    back_title = "Sectors Data",
-                    # Full back with table and indicator snippet
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center",
-                        "Sectors data comes from LODES xyz"
-                        #DTOutput("sectorsDT")
-                      )))
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Job Sectors",
+                    tabPanel("Food Insecurity",
+                             selectInput("sect", "What sectors?",
+                                         c("All" = "All", "Goods Producing" = "Goods", "Trade,
+                                           Transportation, and Utilities" = "Trade", "All Other
+                                           Services" = "AllOther")),
+                             leafletOutput("odleaf")),
+                    tabPanel("Data", "Data Tab Content")
                   )
+                )
         ), ## END OF EMPLOYMENT
 
 ## UI: TAB - Quality standard of living driver -----------
@@ -520,7 +492,7 @@ conditionalPanel(
       #          conditionalPanel(
       #            condition = "input.livingdomainselect == 'Financial'",
 tabItem(tabName = "financial",
-fluidRow(
+        fluidRow(
                     selectInput(
                       inputId = "financialselect",
                       label = "I'm wondering...",
@@ -533,67 +505,52 @@ fluidRow(
 ## UI: PANEL - Median income  ------
                     conditionalPanel(
                       condition = "input.financialselect == 'MedIncome'",
-                      flipBox(
+                      tabBox(
                         id = 11,
-                        main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                        header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                        front_title = "What is the median income in South Wasco?",
+                        side = "left",
+                        height = "250px",
+                        width = "12",
+                        selected = "Median Income",
+                        tabPanel("Median Income",
                         # Median income only here, poverty, income brackets are the questions
                         leafletOutput("medincomemap"),
-                        plotlyOutput("medincomeplot"),
-                        back_title = "Data",
-                        "",
-                        back_content = tagList(
-                          column(
-                            width = 12,
-                            align = "center"
-                          # Indicator table snippet
-                          # DTOutput("acs_counties")
-                        ))
-                      )),
+                        plotlyOutput("medincomeplot")),
+                        tabPanel("Data", "Data Tab Content")
+                      )
+                    ),
 ## UI: PANEL - Poverty rate ------
                 conditionalPanel(
                   condition = "input.financialselect == 'Poverty'",
-                  flipBox(
+                  tabBox(
                     id = 12,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the poverty rate in South Wasco?",
-                    leafletOutput("povertymap"),
-                    plotlyOutput(outputId = "povertyplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
-                  )),
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Poverty Rate",
+                    tabPanel("Poverty Rate",
+                             leafletOutput("povertymap"),
+                             plotlyOutput(outputId = "povertyplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 ## UI: PANEL - Income Distribution  ------
                 conditionalPanel(
                   condition = "input.financialselect == 'DisIncome'",
-                  flipBox(
+                  tabBox(
                     id = 13,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the income distribution in South Wasco?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Income Distribution",
                     # Median income only here, poverty, income brackets are the questions
-                    selectInput("incomedisyear", "Which year?",
+                    tabPanel("Income Distribution",
+                           selectInput("incomedisyear", "Which year?",
                                 c("2018", "2017", "2016", "2015")),
-                    leafletOutput("incomedismap"),
-                    plotlyOutput("incomedisplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
-                  ))
+                           leafletOutput("incomedismap"),
+                           plotlyOutput("incomedisplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                )
 ), # END FINANCIAL
 # Housing select question
 tabItem(tabName = "housing",
@@ -611,45 +568,33 @@ tabItem(tabName = "housing",
 ## UI: PANEL - Affordable housing -----
                   conditionalPanel(
                     condition = "input.housingselect == 'Housing'",
-                    flipBox(
+                    tabBox(
                       id = 14,
-                      main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                      header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                      front_title = "How much affordable housing is in South Wasco?",
+                      side = "left",
+                      height = "250px",
+                      width = "12",
+                      selected = "Affordable Housing",
+                      tabPanel("Affordable Housing",
                       # Overall and ownership/rental (both lines and maps?)
                       # Full back with table and indicator snippet
-                      plotlyOutput("housingplot"),
-                      back_title = "Data",
-                      "",
-                      back_content = tagList(
-                        column(
-                          width = 12,
-                          align = "center"
-                        # Indicator table snippet
-                        # DTOutput("acs_counties")
-                      ))
+                      plotlyOutput("housingplot")),
+                      tabPanel("Data", "Data Tab Content")
                     )
-                ),
+                  ),
 ## UI: PANEL - Rent vs own -------
                 conditionalPanel(
                   condition = "input.housingselect == 'RentOwn'",
-                  flipBox(
+                  tabBox(
                     id = 15,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the home ownership rate in South Wasco?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Home Ownership",
+                    tabPanel("Home Ownership",
                     # Overall and ownership/rental (both lines and maps?)
                     # Full back with table and indicator snippet
-                    plotlyOutput("rentownplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
+                    plotlyOutput("rentownplot")),
+                    tabPanel("Data", "Data Tab Content")
                   )
                 )
 ), # END HOUSING
@@ -674,25 +619,20 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
-                  flipBox(
+                  tabBox(
                     id = 16,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the racial diversity of South Wasco?",
-                    selectInput("raceyears", "What year?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Race",
+                    tabPanel("Race",
+                             selectInput("raceyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
-                    leafletOutput("racemap"),
-                    plotlyOutput("raceplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
-                  )),
+                             leafletOutput("racemap"),
+                             plotlyOutput("raceplot")),
+                    tabPanel("Data", "Data Tab Content")
+                  )
+                ),
 # UI: PANEL - Family ------
                 conditionalPanel(
                   condition = "input.socialselect == 'Family'",
@@ -700,24 +640,18 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
-                  flipBox(
+                  tabBox(
                     id = 17,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What types of familiy structures are in South Wasco?",
-                    selectInput("familyyears", "What year?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Family",
+                    tabPanel("Family",
+                             selectInput("familyyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
-                    leafletOutput("familymap"),
-                    plotlyOutput("familyplot"),
-                    back_title = "Data",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
+                             leafletOutput("familymap"),
+                             plotlyOutput("familyplot")),
+                    tabPanel("Data", "Data Tab Content")
                   )
                 ),
 # UI: PANEL - Education attainment -------
@@ -727,24 +661,18 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
-                  flipBox(
+                  tabBox(
                     id = 18,
-                    main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
-                    header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
-                    front_title = "What is the educational background of people in South Wasco?",
-                    selectInput("degreeyears", "What year?",
+                    side = "left",
+                    height = "250px",
+                    width = "12",
+                    selected = "Education Degrees",
+                    tabPanel("Education Degree",
+                             selectInput("degreeyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
-                    leafletOutput("degreemap"),
-                    plotlyOutput("degreeplot"),
-                    back_title = "",
-                    "",
-                    back_content = tagList(
-                      column(
-                        width = 12,
-                        align = "center"
-                      # Indicator table snippet
-                      # DTOutput("acs_counties")
-                    ))
+                             leafletOutput("degreemap"),
+                             plotlyOutput("degreeplot")),
+                    tabPanel("Data", "Data Tab Content")
                   )
                 )), # END SOCIAL TAB
 
@@ -861,7 +789,7 @@ tabItem(tabName = "methods",
               ))
       ) # end of TAB ITEMS (global dashboard body)
     ) # end of FLUID PAGE (global dashboard body)
-  )# end of DASHBOARD BODY
+  ) # end of DASHBOARD BODY
 ) # end of DASHBOARD UI
 
 

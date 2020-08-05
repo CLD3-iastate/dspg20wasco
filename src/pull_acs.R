@@ -52,16 +52,16 @@ acsvars <- c(
   "S1701_C03_001",
 
   #Total Population Estimate
-  "DP05_0001",
+  "B02001_001",
   #Racial Diversity Percentages: Race alone
-  "DP05_0037P", # % Whte
-  "DP05_0038P", # % Black or African American
-  "DP05_0039P", # % American Indian or Alaskan Native
-  "DP05_0044P", # % Asian
-  "DP05_0052P", # % Native Hawaiian or Other Pacific Islander
-  "DP05_0057P", # % Some other race
-  "DP05_0071P", # % Hispanic or Latino of any race
-  "DP05_0035P", # % two or more races
+  "B02001_002", # % Whte
+  "B02001_003", # % Black or African American
+  "B02001_004", # % American Indian or Alaskan Native
+  "B02001_005", # % Asian
+  "B02001_006", # % Native Hawaiian or Other Pacific Islander
+  "B02001_007", # % Some other race
+  "B03003_003", # % Hispanic or Latino of any race
+  "B02001_008", # % two or more races
 
   # Total children under 18 in households
   "B09005_001",
@@ -298,11 +298,15 @@ combined_acs <- combined_acs %>%
           income_150K_199999 = S1901_C01_010E, income_150K_199999_moe = S1901_C01_010M,
           income_200K_more = S1901_C01_011E, income_200K_more_moe = S1901_C01_011M,
           # Population demographics: race and family
-          total_pop = DP05_0001E, total_pop_moe = DP05_0001M, race_white = DP05_0037PE, race_white_moe=DP05_0037PM,
-          race_black = DP05_0038PE, race_black_moe = DP05_0038PM, race_american_indian = DP05_0039PE, race_american_indian_moe = DP05_0039PM,
-          race_asian = DP05_0044PE, race_asian_moe =DP05_0044PM, race_native_hawaiian = DP05_0052PE, race_native_hawaiian_moe = DP05_0052PM,
-          race_hispanic = DP05_0071PE, race_hispanic_moe = DP05_0071PM, race_other = DP05_0057PE, race_other_moe = DP05_0057PM,
-          race_two_more = DP05_0035PE, race_two_more_moe = DP05_0035PM,
+          total_pop = B02001_001E, total_pop_moe = B02001_001M, 
+          race_white = B02001_002E/B02001_001E * 100, race_white_moe=B02001_002M/B02001_001E *100,
+          race_black = B02001_003E/B02001_001E * 100, race_black_moe = B02001_003M/B02001_001E *100, 
+          race_american_indian = B02001_004E/B02001_001E * 100, race_american_indian_moe =B02001_004M/B02001_001E *100,
+          race_asian = B02001_005E/B02001_001E * 100, race_asian_moe =B02001_005M/B02001_001E *100, 
+          race_native_hawaiian = B02001_006E/B02001_001E * 100, race_native_hawaiian_moe = B02001_006M/B02001_001E *100,
+          race_hispanic = B03003_003E/B02001_001E * 100, race_hispanic_moe = B03003_003M/B02001_001E * 100, 
+          race_other = B02001_007E/B02001_001E * 100, race_other_moe = B02001_007M/B02001_001E *100,
+          race_two_more = B02001_008E/B02001_001E * 100, race_two_more_moe = B02001_008M/B02001_001E *100,
 
           family_children_total = B09005_001E, family_children_total_moe = B09005_001M,
           family_married_parent_perc = B09005_003E/B09005_001E*100, family_married_parent_perc_moe = B09005_003M/B09005_001E*100,
@@ -349,11 +353,14 @@ combined_acs <- combined_acs %>%
           affordable_housing_all_perc = (affordable_housing_own_total + affordable_housing_rent_total) / B25003_001E *100,
           affordable_housing_all_perc_moe = (affordable_housing_own_total_moe + affordable_housing_rent_total_moe) / B25003_001E *100,
           
-          affordable_housing_less_20k = (B25106_004E + B25106_005E + B25106_026E + B25106_027E) / (B25106_003E + B25106_025E) * 100,
-          affordable_housing_20k_34k = (B25106_008E + B25106_009E + B25106_030E + B25106_031E)/ (B25106_007E + B25106_029E) * 100,
-          affordable_housing_35k_49k = (B25106_012E + B25106_013E + B25106_034E + B25106_035E)/ (B25106_011E + B25106_033E)* 100,
-          affordable_housing_50k_74k = (B25106_016E + B25106_017E + B25106_038E + B25106_039E)/ (B25106_015E + B25106_037E) * 100,
-          affordable_housing_more_75k = (B25106_020E + B25106_021E + B25106_042E + B25106_043E)/ (B25106_019E + B25106_041E) * 100
+          affordable_housing_less_50k = (B25106_004E + B25106_005E + B25106_026E + B25106_027E + B25106_008E + 
+                                           B25106_009E + B25106_030E + B25106_031E + B25106_034E + B25106_035E +
+                                           B25106_012E + B25106_013E) / (B25106_003E + B25106_025E + B25106_007E + 
+                                                                           B25106_029E + B25106_033E +B25106_011E) * 100,
+          affordable_housing_less_50k_moe = (B25106_004M + B25106_005M + B25106_026M + B25106_027M + B25106_008M + 
+                                           B25106_009M + B25106_030M + B25106_031M + B25106_034M + B25106_035M +
+                                             B25106_012M + B25106_013M) / (B25106_003E + B25106_025E + B25106_007E + 
+                                                                             B25106_029E + B25106_033E +B25106_011E) * 100
           
   )
 combined_acs$NAME <- gsub("County, Washington", "County, WA", 

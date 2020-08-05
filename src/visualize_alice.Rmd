@@ -19,16 +19,24 @@ read in the data
 ```{r}
 alice_counties <- fread(here("/data/alice/alice_counties.csv")) %>%
   mutate(County = paste0(County, " County, " ,State_Abbr),
-         Wasco = fct_other(County, keep = c("Wasco County, OR"), other_level = "Neighboring Counties")) %>%
+         Wasco = fct_other(County, keep = c("Wasco County, OR"), other_level = "Neighboring Counties"),
+         Wasco = factor(Wasco, levels = c("Neighboring Counties", "Wasco County, OR"))) %>%
   select(-c("GEO.id" ,"GEO.display_label","State","State_Abbr","Poverty_Household","ALICE_Household"))
 ```
 
 
 Visualize with the grouped line chart
 ```{r}
-ggplot(alice_counties, aes(x = Year, y=Percent_ALICE_Households, ,group = County, color = Wasco)) +
-  geom_line() + 
-  scale_color_manual(values = viridis(2, option = "D"), name = "Region") +
-  theme_minimal()
+ggplotly(ggplot(alice_counties, 
+            aes(x=Year, y=Percent_ALICE_Households, group = County, color = Wasco,
+                  text = paste0("County: ", County,
+                                "<br>Year: ", Year,
+                                "<br>Below ALICE Threshold: ", Percent_ALICE_Households, "%"))) +
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_color_manual(name = "County", values = c("#ADB5BD", "#FDE725FF")) +
+  theme_minimal() + ggtitle("Households Below ALICE Threshold 2010-2018") + ylab("Below ALICE Threshold (%)") + xlab("Year"), tooltip = "text") %>% config(displayModeBar = "static", displaylogo = FALSE, 
+                                         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 ```
 

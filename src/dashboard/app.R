@@ -24,6 +24,7 @@ library(DT)
 library(viridis)
 library(colorspace)
 
+
 # DATA: Sourcing theme, shp files ------
 source("theme.R")
 source("loadbaselayers.R")
@@ -97,12 +98,12 @@ ed.decrease <- ed %>% select("year" ,"District.Name","Percent.Economically.Disad
 
 alice_counties <- fread("Data/alice_counties.csv") %>%
   mutate(County = paste0(County, " County, " ,State_Abbr),
-         Wasco = fct_other(County, keep = c("Wasco County, OR", "Hood River County, OR", 
-                                            "Klickitat County, WA", "Jefferson County, OR", 
-                                            "Sherman County, OR", "Skamania County, WA"), 
+         Wasco = fct_other(County, keep = c("Wasco County, OR", "Hood River County, OR",
+                                            "Klickitat County, WA", "Jefferson County, OR",
+                                            "Sherman County, OR", "Skamania County, WA"),
                            other_level = "Other Counties"),
-         Wasco = factor(Wasco, levels = c("Other Counties", "Hood River County, OR", 
-                                          "Klickitat County, WA", "Jefferson County, OR", 
+         Wasco = factor(Wasco, levels = c("Other Counties", "Hood River County, OR",
+                                          "Klickitat County, WA", "Jefferson County, OR",
                                           "Sherman County, OR", "Skamania County, WA",
                                           "Wasco County, OR"))) %>%
   select(-c("GEO.id" ,"GEO.display_label","State","State_Abbr","Poverty_Household","ALICE_Household"))
@@ -266,7 +267,7 @@ menuItem(
                     #),
                     id = 1,
                     side = "left",
-                    #height = "250px",
+                    height = "250px",
                     width = "12",
                     selected = "Food Map",
                     tabPanel("Food Map",
@@ -287,7 +288,7 @@ menuItem(
                     height = "250px",
                     width = "12",
                     selected = "Food Insecurity",
-                    tabPanel("Food Insecurity", 
+                    tabPanel("Food Insecurity",
                              #img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
                                          c("Overall", "Childhood")),
@@ -435,7 +436,7 @@ conditionalPanel(
     width = "12",
     selected = "Employment Ratio",
     tabPanel("Employment Ratio",
-             h4("The Employment Ratio is defined as 
+             h4("The Employment Ratio is defined as
                 the civilian noninstitutional population who are employed,
                 divided by the total civilian noninstitutional pouplation"),
              leafletOutput("percempmap"),
@@ -452,8 +453,8 @@ conditionalPanel(
                     width = "12",
                     selected = "Labor Force Rate",
                     tabPanel("Labor Force Rate",
-                             h4("The Labor force includes all people classified in the 
-                                civilian labor force in addition to members of the U.S. Armed Forces. 
+                             h4("The Labor force includes all people classified in the
+                                civilian labor force in addition to members of the U.S. Armed Forces.
                                 Civilian labor force consists of employed or unemployed people."),
                              leafletOutput("laborforcemap"),
                              plotlyOutput("laborforceplot")),
@@ -470,9 +471,9 @@ conditionalPanel(
                             width = "12",
                             selected = "Job Flows",
                             tabPanel("Job Flows",
-                                     h4("Job inflows are the number of employees from 
-                                        outside counties traveling into the region for work. 
-                                        Job outflows are the number of workers from the region 
+                                     h4("Job inflows are the number of employees from
+                                        outside counties traveling into the region for work.
+                                        Job outflows are the number of workers from the region
                                         traveling to other counties for work"),
                             selectInput("flows", "Inflows or Outflows?",
                                         c("Inflows", "Outflows")),
@@ -490,7 +491,7 @@ conditionalPanel(
                     height = "250px",
                     width = "12",
                     selected = "Job Sectors",
-                    tabPanel("Food Insecurity",
+                    tabPanel("Job Sectors",
                              selectInput("sect", "What sectors?",
                                          c("All" = "All", "Goods Producing" = "Goods", "Trade,
                                            Transportation, and Utilities" = "Trade", "All Other
@@ -571,8 +572,8 @@ tabItem(tabName = "financial",
             height = "250px",
             width = "12",
             selected = "ALICE Poverty Rate",
-            h4("ALICE is an acronym for Asset Limited Income Constrained, Employed. 
-               These are households that earn above the Federal Poverty Level, 
+            h4("ALICE is an acronym for Asset Limited Income Constrained, Employed.
+               These are households that earn above the Federal Poverty Level,
                but not enough to afford a 'bare-bones' household budget."),
             tabPanel("ALICE Poverty Rate",
               plotlyOutput(outputId = "aliceplot")),
@@ -621,8 +622,8 @@ tabItem(tabName = "housing",
                       height = "250px",
                       width = "12",
                       selected = "Affordable Housing",
-                      h4("The ratio of affordable housing is defined as the number housing units 
-                         where monthly costs are less than or equal to 30% of a household's income 
+                      h4("The ratio of affordable housing is defined as the number housing units
+                         where monthly costs are less than or equal to 30% of a household's income
                          divided by thhe total number of occupied houses."),
                       tabPanel("Affordable Housing",
                       # Overall and ownership/rental (both lines and maps?)
@@ -744,33 +745,34 @@ tabItem(tabName = "methods",
             # Dropdown menu to select cluster
             # Description with cluster visual
             # Just add more info/basics about these
-            p("Our project weaves in principles and recommendations of Good Rural Data from the Urban Institute. 
+            p("Our project weaves in principles and recommendations of Good Rural Data from the Urban Institute.
               Collecting data and performing analysis on a rural area like South Wasco poses unique challenges.
-              Some of these challenges identified by Good Rural Data are small sample sizes and 
-              large margins of error. Federal agencies such as the American Community Survey 
-              sample a subset of an already small population in rural areas. Therefore, the resulting samples 
-              are too small to be representative of all sub groups in a rural population. 
-              This in turn results in large margins of error, particularly for 
-              minority and underrepresented groups in the population. With these issues in mind, we are reporting 
-              all margins of error to bring awareness to the possible inaccuracies in the data and 
+              Some of these challenges identified by Good Rural Data are small sample sizes and
+              large margins of error. Federal agencies such as the American Community Survey
+              sample a subset of an already small population in rural areas. Therefore, the resulting samples
+              are too small to be representative of all sub groups in a rural population.
+              This in turn results in large margins of error, particularly for
+              minority and underrepresented groups in the population. With these issues in mind, we are reporting
+              all margins of error to bring awareness to the possible inaccuracies in the data and
               caution users from extrapolating interpretations from certain estimates. "),
-            p("Boosting Upward Mobility from the Urban Institute provides a multidimensional approach 
-              to economic mobility. The Urban Institute outlines three key drivers that propel 
-              individuals and families out of poverty over their lifetime. 
-              Our project adopts two of the drivers in the form of ‘Opportunities to Learn and Earn’ and  
-              ‘Quality Standard of Living’. The key predictors from these drivers can guide 
-              community leaders to make decision and take action to increase 
-              economic mobility of their community. This framework is used in conjunction with 
+            p("Boosting Upward Mobility from the Urban Institute provides a multidimensional approach
+              to economic mobility. The Urban Institute outlines three key drivers that propel
+              individuals and families out of poverty over their lifetime.
+              Our project adopts two of the drivers in the form of ‘Opportunities to Learn and Earn’ and
+              ‘Quality Standard of Living’. The key predictors from these drivers can guide
+              community leaders to make decision and take action to increase
+              economic mobility of their community. This framework is used in conjunction with
               the Rural Clusters of Innovation Framework. "),
             # More info/basics
-            p("The Rural Clusters of Innovation framework visualizes the community agencies and organizations 
-              that contribute to economic mobility increasing sectors. This framework can be tailored to 
-              specific communities and can serve as a guide towards the economic development of 
-              the entire rural area. As a result of close collaboration with community stakeholders, 
-              we have chosen three main clusters of Food Systems, Broadband and Infrastructure. 
+            p("The Rural Clusters of Innovation framework visualizes the community agencies and organizations
+              that contribute to economic mobility increasing sectors. This framework can be tailored to
+              specific communities and can serve as a guide towards the economic development of
+              the entire rural area. As a result of close collaboration with community stakeholders,
+              we have chosen three main clusters of Food Systems, Broadband and Infrastructure.
               You can explore these clusters with the dropdown menu below. "),
             selectInput("cluster", "Which cluster?",
-                        c("Food Systems", "Infrastructure", "Maupin Broadband"))
+                        c("Food Systems", "Infrastructure", "Maupin Broadband")),
+            imageOutput("clusters")
             # Full indicators table
             # Select input for the "sheet" of indicator cluster/driver
             # General overview table of data sources and what they're meant for, include every "major" data source (not table necessarily)
@@ -793,6 +795,7 @@ tabItem(tabName = "methods",
                   # Dropdown menu to select cluster
                   # Description with cluster visual
                   h2("Data Collection and Analysis"),
+                  HTML('<div class="canva-embed" data-design-id="DAED3TW1C8w" data-height-ratio="1.2941" style="padding:129.4118% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAED3TW1C8w&#x2F;view?utm_content=DAED3TW1C8w&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Data Collection &amp; Sources</a> by Owen Hart'),
                   selectInput("indicators", "Which indicator?",
                               c("Cluster: Food Systems", "Cluster: Infrastructure", "Driver: Opportunities to Learn and Earn", "Driver: Quality Standard of Living")),
                   DTOutput("indicators_all_DT")
@@ -869,6 +872,23 @@ tabItem(tabName = "methods",
 server <- function(input, output, session) {
 
   graypal = "#ADB5BD"
+
+
+## SERVER: CLUSTER IMAGES -------
+## imageOutput("clusters")
+  output$clusters <- renderImage({
+    if (input$cluster == "Food Systems"){
+      list(src = "www/FoodSystemsFinal.png", width = "100%")
+    }
+    else if (input$cluster == "Infrastructure"){
+      list(src = "www/InfrastructureFinal.png", width = "100%")
+    }
+    else if (input$cluster == "Maupin Broadband"){
+      list(src = "www/MaupinBroadbandFinal.png", width = "100%")
+    }
+  })
+
+
 
 ## SERVER: INDICATOR TABLES -------
 ## DTOutput("indicators_all_DT") -----
@@ -1537,18 +1557,18 @@ server <- function(input, output, session) {
       mutate(variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
                                "Teacher.Experience.Pct" = "Teacher Experience",
                                "Percent.ELA.Proficient.Change" = "ELA Proficiency Change"))
-    
+
     ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
       geom_tile(color = "#ADB5BD") + #gray
       geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
-      coord_equal() + 
+      coord_equal() +
       #facet_grid(rows = vars(variable)) +
       facet_wrap(~variable, ncol=1) +
       #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
-      scale_fill_continuous_divergingx(palette = "PRGn", mid = 0, 
-                                       breaks= c(-75, -50, -25, 0, 25, 50, 75, 100), 
+      scale_fill_continuous_divergingx(palette = "PRGn", mid = 0,
+                                       breaks= c(-75, -50, -25, 0, 25, 50, 75, 100),
                                        limits = c(-75, 100)) +
-      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1),
             strip.background = element_rect(
               color="black", fill="#ADB5BD", size=1, linetype="solid"),
             strip.text.y = element_text(size = 5, color = "black", face = "bold"),
@@ -1565,28 +1585,28 @@ server <- function(input, output, session) {
       mutate(variable = recode(variable, "Percent.Economically.Disadvantaged" = "Economic Disadvantage",
                                "Percent.Chronically.Absent" = "Chronic Absenteeism",
                                "Dropout.Rate"="Dropout Rate"))
-    
-    #barriers<- 
-    
+
+    #barriers<-
+
     ggplot(ed.melt.decrease, aes(y = District.Name, x = year, fill = value)) +
       geom_tile(color = "#ADB5BD") + #gray
       geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
-      coord_equal() + 
+      coord_equal() +
       #facet_grid(rows = vars(variable)) +
       facet_wrap(~variable, ncol=1) +
       #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
       scale_fill_continuous_sequential(palette = "Purples 3") +
-      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1), 
+      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1),
             strip.background = element_rect(
               color="black", fill="#ADB5BD", size=1, linetype="solid"),
             strip.text.y = element_text(size = 4, color = "black", face = "bold"),
             legend.key.size = unit(1.5, "cm")) +
       labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
-    
+
   })
-  
-  
-  
+
+
+
 ## SERVER: PANEL - Employment ratio ----
 ## plotlyOutput("empratioplot") -----
 ## leafletOutput("percempmap") -----
@@ -1853,8 +1873,8 @@ server <- function(input, output, session) {
                                      other_level = "Other Counties"),
                neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
                                                         "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
-      
-      
+
+
 
       ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = neighbors,
                                            text = paste0("County: ", county,
@@ -2262,21 +2282,21 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
   })
-  
+
 ## SERVER: PANEL - ALICE Poverty rate -----
 ## plotlyOutput("aliceplot") -----
   output$aliceplot <- renderPlotly({
-    ggplotly(ggplot(alice_counties, 
+    ggplotly(ggplot(alice_counties,
                     aes(x=Year, y=Percent_ALICE_Households, group = County, color = Wasco,
                         text = paste0("County: ", County,
                                       "<br>Year: ", Year,
                                       "<br>Below ALICE Threshold: ", Percent_ALICE_Households, "%"))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_color_manual(name = "County", values = c(graypal, viridis(6, option = "D"))) +
-               theme_minimal() + ggtitle("Households Below ALICE Threshold 2010-2018") + 
-               ylab("Below ALICE Threshold (%)") + xlab("Year"), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               theme_minimal() + ggtitle("Households Below ALICE Threshold 2010-2018") +
+               ylab("Below ALICE Threshold (%)") + xlab("Year"), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })

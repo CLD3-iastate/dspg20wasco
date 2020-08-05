@@ -304,6 +304,9 @@ menuItem(
                     main_img = "https://image.flaticon.com/icons/svg/149/149076.svg",
                     header_img = "https://image.flaticon.com/icons/svg/119/119595.svg",
                     front_title = "What local crops are grown in South Wasco?",
+                    h1("What crops?"),
+                    h2("hi"),
+                    p("hey"),
                     selectInput("crops", "Which crop?",
                                 c("Winter Wheat", "Barley",
                                   "Alfalfa", "Cherries")),
@@ -880,7 +883,7 @@ tabItem(tabName = "methods",
               ))
       ) # end of TAB ITEMS (global dashboard body)
     ) # end of FLUID PAGE (global dashboard body)
-  )# end of DASHBOARD BODY
+  ) # end of DASHBOARD BODY
 ) # end of DASHBOARD UI
 
 

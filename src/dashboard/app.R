@@ -23,7 +23,6 @@ library(readr)
 library(DT)
 library(viridis)
 library(colorspace)
-library(cowplot)
 
 # DATA: Sourcing theme, shp files ------
 source("theme.R")
@@ -403,7 +402,6 @@ tabItem(tabName = "learn",
                     width = "12",
                     selected = "Education",
                     tabPanel("Education",
-                             "Education tab content",
                              splitLayout(
                                plotOutput("education1", width = "75%", height = 800),
                                plotOutput("education2", width = "75%", height = 800)
@@ -745,11 +743,32 @@ tabItem(tabName = "methods",
             # Subheadings for clusters
             # Dropdown menu to select cluster
             # Description with cluster visual
-            p("Boosting Upward Mobility from Urban Institute. Multidimensional approach to economic mobility. Includes ideas for relevant metrics at the local level."),
             # Just add more info/basics about these
-            p("Weaving in Good Rural Data from Urban Institute"),
+            p("Our project weaves in principles and recommendations of Good Rural Data from the Urban Institute. 
+              Collecting data and performing analysis on a rural area like South Wasco poses unique challenges.
+              Some of these challenges identified by Good Rural Data are small sample sizes and 
+              large margins of error. Federal agencies such as the American Community Survey 
+              sample a subset of an already small population in rural areas. Therefore, the resulting samples 
+              are too small to be representative of all sub groups in a rural population. 
+              This in turn results in large margins of error, particularly for 
+              minority and underrepresented groups in the population. With these issues in mind, we are reporting 
+              all margins of error to bring awareness to the possible inaccuracies in the data and 
+              caution users from extrapolating interpretations from certain estimates. "),
+            p("Boosting Upward Mobility from the Urban Institute provides a multidimensional approach 
+              to economic mobility. The Urban Institute outlines three key drivers that propel 
+              individuals and families out of poverty over their lifetime. 
+              Our project adopts two of the drivers in the form of ‘Opportunities to Learn and Earn’ and  
+              ‘Quality Standard of Living’. The key predictors from these drivers can guide 
+              community leaders to make decision and take action to increase 
+              economic mobility of their community. This framework is used in conjunction with 
+              the Rural Clusters of Innovation Framework. "),
             # More info/basics
-            p("Rural Clusters of Innovation from Berkshires Strategy Project. Visualizes community agencies and organizations that contribute to economic mobility increasing sectors. Tailored to specific communities, narrows focus on areas of sponsor interest."),
+            p("The Rural Clusters of Innovation framework visualizes the community agencies and organizations 
+              that contribute to economic mobility increasing sectors. This framework can be tailored to 
+              specific communities and can serve as a guide towards the economic development of 
+              the entire rural area. As a result of close collaboration with community stakeholders, 
+              we have chosen three main clusters of Food Systems, Broadband and Infrastructure. 
+              You can explore these clusters with the dropdown menu below. "),
             selectInput("cluster", "Which cluster?",
                         c("Food Systems", "Infrastructure", "Maupin Broadband"))
             # Full indicators table
@@ -1533,7 +1552,7 @@ server <- function(input, output, session) {
             strip.background = element_rect(
               color="black", fill="#ADB5BD", size=1, linetype="solid"),
             strip.text.y = element_text(size = 5, color = "black", face = "bold"),
-            legend.key.size = unit(2, "cm")) +
+            legend.key.size = unit(1.5, "cm")) +
       labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent")
     #plot
     #benefits
@@ -1561,7 +1580,7 @@ server <- function(input, output, session) {
             strip.background = element_rect(
               color="black", fill="#ADB5BD", size=1, linetype="solid"),
             strip.text.y = element_text(size = 4, color = "black", face = "bold"),
-            legend.key.size = unit(2, "cm")) +
+            legend.key.size = unit(1.5, "cm")) +
       labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
     
   })

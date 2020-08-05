@@ -1,0 +1,66 @@
+Year,GEO.id,GEO.display_label,County,State,State_Abbr,Households,Poverty_Household,ALICE_Household,Above_ALICE_Household,ALICE_Threshold_HH_under_65,ALICE_Threshold_HH_65_and_over,Source_American_Community_Survey,Percent_ALICE_Households,Percent_Poverty_Households
+2010,41005,"Clackamas County, Oregon",Clackamas,Oregon,OR,143814,13140,39310,91364,45000,40000,1-Year,27.33,9.14
+2012,41005,"Clackamas County, Oregon",Clackamas,Oregon,OR,146422,12852,41715,91855,50000,45000,1-Year,28.49,8.78
+2014,41005,"Clackamas County, Oregon",Clackamas,Oregon,OR,149910,12934,50163,86813,60000,45000,1-Year,33.46,8.63
+2016,41005,"Clackamas County, Oregon",Clackamas,Oregon,OR,154070,12431,46302,95337,60000,50000,1-Year,30.05,8.07
+2018,41005,"Clackamas County, Oregon",Clackamas,Oregon,OR,158749,11399,57158,90192,75000,60000,1-Year,36.01,7.18
+2010,41017,"Deschutes County, Oregon",Deschutes,Oregon,OR,64120,8298,19579,36243,40000,35000,1-Year,30.53,12.94
+2012,41017,"Deschutes County, Oregon",Deschutes,Oregon,OR,66086,10174,16786,39126,40000,35000,1-Year,25.4,15.4
+2014,41017,"Deschutes County, Oregon",Deschutes,Oregon,OR,66218,7593,20607,38018,45000,40000,1-Year,31.12,11.47
+2016,41017,"Deschutes County, Oregon",Deschutes,Oregon,OR,71262,7936,15533,47793,45000,40000,1-Year,21.8,11.14
+2018,41017,"Deschutes County, Oregon",Deschutes,Oregon,OR,79950,7998,19653,52299,50000,45000,1-Year,24.58,10
+2010,41027,"Hood River County, Oregon",Hood River,Oregon,OR,8097,736,2040,5321,40000,35000,3-Year,25.19,9.09
+2012,41027,"Hood River County, Oregon",Hood River,Oregon,OR,7802,655,1786,5361,45000,30000,3-Year,22.89,8.4
+2014,41027,"Hood River County, Oregon",Hood River,Oregon,OR,8251,830,2330,5091,50000,40000,5-Year,28.24,10.06
+2016,41027,"Hood River County, Oregon",Hood River,Oregon,OR,8213,767,2487,4959,50000,40000,5-Year,30.28,9.34
+2018,41027,"Hood River County, Oregon",Hood River,Oregon,OR,8539,633,3248,4658,60000,50000,5-Year,38.04,7.41
+2010,41031,"Jefferson County, Oregon",Jefferson,Oregon,OR,7897,1124,2545,4228,40000,35000,3-Year,32.23,14.23
+2012,41031,"Jefferson County, Oregon",Jefferson,Oregon,OR,8032,1236,2040,4756,40000,35000,3-Year,25.4,15.39
+2014,41031,"Jefferson County, Oregon",Jefferson,Oregon,OR,7800,1351,2177,4272,45000,35000,5-Year,27.91,17.32
+2016,41031,"Jefferson County, Oregon",Jefferson,Oregon,OR,7577,1101,2708,3768,50000,40000,5-Year,35.74,14.53
+2018,41031,"Jefferson County, Oregon",Jefferson,Oregon,OR,7892,1187,2968,3737,60000,40000,5-Year,37.61,15.04
+2010,41039,"Lane County, Oregon",Lane,Oregon,OR,144923,25912,38280,80731,35000,35000,1-Year,26.41,17.88
+2012,41039,"Lane County, Oregon",Lane,Oregon,OR,146327,29614,40265,76448,40000,35000,1-Year,27.52,20.24
+2014,41039,"Lane County, Oregon",Lane,Oregon,OR,145732,26192,37297,82243,40000,35000,1-Year,25.59,17.97
+2016,41039,"Lane County, Oregon",Lane,Oregon,OR,147712,26904,41449,79359,45000,40000,1-Year,28.06,18.21
+2018,41039,"Lane County, Oregon",Lane,Oregon,OR,156072,26593,44053,85426,50000,45000,1-Year,28.23,17.04
+2010,41047,"Marion County, Oregon",Marion,Oregon,OR,114347,17868,31108,65371,40000,35000,1-Year,27.2,15.63
+2012,41047,"Marion County, Oregon",Marion,Oregon,OR,114388,21066,31875,61447,45000,35000,1-Year,27.87,18.42
+2014,41047,"Marion County, Oregon",Marion,Oregon,OR,114484,17060,37969,59455,50000,35000,1-Year,33.17,14.9
+2016,41047,"Marion County, Oregon",Marion,Oregon,OR,116787,12362,37048,67377,50000,40000,1-Year,31.72,10.59
+2018,41047,"Marion County, Oregon",Marion,Oregon,OR,119511,15532,41615,62364,60000,40000,1-Year,34.82,13
+2010,41051,"Multnomah County, Oregon",Multnomah,Oregon,OR,302060,49913,77536,174611,40000,40000,1-Year,25.67,16.52
+2012,41051,"Multnomah County, Oregon",Multnomah,Oregon,OR,305576,49143,86475,169958,45000,45000,1-Year,28.3,16.08
+2014,41051,"Multnomah County, Oregon",Multnomah,Oregon,OR,313812,53944,90979,168889,50000,45000,1-Year,28.99,17.19
+2016,41051,"Multnomah County, Oregon",Multnomah,Oregon,OR,320476,42713,86621,191142,50000,50000,1-Year,27.03,13.33
+2018,41051,"Multnomah County, Oregon",Multnomah,Oregon,OR,330223,37557,104064,188602,60000,60000,1-Year,31.51,11.37
+2010,41055,"Sherman County, Oregon",Sherman,Oregon,OR,813,133,198,482,35000,30000,5-Year,24.35,16.36
+2012,41055,"Sherman County, Oregon",Sherman,Oregon,OR,788,129,177,482,35000,30000,5-Year,22.46,16.37
+2014,41055,"Sherman County, Oregon",Sherman,Oregon,OR,791,154,216,421,40000,35000,5-Year,27.31,19.47
+2016,41055,"Sherman County, Oregon",Sherman,Oregon,OR,804,143,249,412,45000,35000,5-Year,30.97,17.79
+2018,41055,"Sherman County, Oregon",Sherman,Oregon,OR,736,97,238,401,45000,40000,5-Year,32.34,13.18
+2010,41059,"Umatilla County, Oregon",Umatilla,Oregon,OR,27295,3721,8298,15276,40000,30000,1-Year,30.4,13.63
+2012,41059,"Umatilla County, Oregon",Umatilla,Oregon,OR,26371,4031,5964,16376,40000,30000,1-Year,22.62,15.29
+2014,41059,"Umatilla County, Oregon",Umatilla,Oregon,OR,26895,4338,8660,13897,45000,35000,1-Year,32.2,16.13
+2016,41059,"Umatilla County, Oregon",Umatilla,Oregon,OR,25900,4422,7644,13834,50000,35000,1-Year,29.51,17.07
+2018,41059,"Umatilla County, Oregon",Umatilla,Oregon,OR,26886,4659,7568,14659,50000,40000,5-Year,28.15,17.33
+2010,41065,"Wasco County, Oregon",Wasco,Oregon,OR,9990,1420,3165,5405,40000,35000,3-Year,31.68,14.21
+2012,41065,"Wasco County, Oregon",Wasco,Oregon,OR,9693,1160,2965,5568,40000,35000,3-Year,30.59,11.97
+2014,41065,"Wasco County, Oregon",Wasco,Oregon,OR,9595,1237,3600,4758,45000,40000,5-Year,37.52,12.89
+2016,41065,"Wasco County, Oregon",Wasco,Oregon,OR,9883,1292,3241,5350,45000,40000,5-Year,32.79,13.07
+2018,41065,"Wasco County, Oregon",Wasco,Oregon,OR,10266,1307,3562,5397,50000,45000,5-Year,34.7,12.73
+2010,41067,"Washington County, Oregon",Washington,Oregon,OR,199027,16716,53480,128831,45000,40000,1-Year,26.87,8.4
+2012,41067,"Washington County, Oregon",Washington,Oregon,OR,203250,21238,54592,127420,50000,45000,1-Year,26.86,10.45
+2014,41067,"Washington County, Oregon",Washington,Oregon,OR,209426,22786,55672,130968,50000,50000,1-Year,26.58,10.88
+2016,41067,"Washington County, Oregon",Washington,Oregon,OR,213820,17512,63767,132541,60000,50000,1-Year,29.82,8.19
+2018,41067,"Washington County, Oregon",Washington,Oregon,OR,225955,17062,80818,128075,75000,60000,1-Year,35.77,7.55
+2010,53039,"Klickitat County, Washington",Klickitat,Washington,WA,8470,1467,1974,5029,30000,30000,3-Year,23.31,17.32
+2012,53039,"Klickitat County, Washington",Klickitat,Washington,WA,8209,1308,1941,4960,35000,30000,3-Year,23.64,15.93
+2014,53039,"Klickitat County, Washington",Klickitat,Washington,WA,7959,1006,2678,4275,45000,40000,5-Year,33.65,12.64
+2016,53039,"Klickitat County, Washington",Klickitat,Washington,WA,8069,1158,2769,4142,50000,45000,5-Year,34.32,14.35
+2018,53039,"Klickitat County, Washington",Klickitat,Washington,WA,8539,1102,2687,4750,50000,45000,5-Year,31.47,12.91
+2010,53059,"Skamania County, Washington",Skamania,Washington,WA,4514,503,1038,2973,35000,35000,5-Year,23,11.14
+2012,53059,"Skamania County, Washington",Skamania,Washington,WA,4378,634,840,2904,40000,35000,5-Year,19.19,14.48
+2014,53059,"Skamania County, Washington",Skamania,Washington,WA,4433,703,1072,2658,45000,35000,5-Year,24.18,15.86
+2016,53059,"Skamania County, Washington",Skamania,Washington,WA,4577,736,1252,2589,45000,40000,5-Year,27.35,16.08
+2018,53059,"Skamania County, Washington",Skamania,Washington,WA,4685,637,1308,2740,50000,45000,5-Year,27.92,13.6

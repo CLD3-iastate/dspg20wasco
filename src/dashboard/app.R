@@ -254,7 +254,7 @@ menuItem(
                     width = "12",
                     selected = "Food Map",
                     tabPanel("Food Map",
-                             img(src="food_bkgrnd.png", width = "100%"),
+                             #img(src="food_bkgrnd.png", width = "100%"),
                              leafletOutput("mymap")
                     ),
                     tabPanel("Data",
@@ -272,7 +272,7 @@ menuItem(
                     width = "12",
                     selected = "Food Insecurity",
                     tabPanel("Food Insecurity",
-                             img(src="food_bkgrnd.png", width = "100%"),
+                             #img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
                                          c("Overall", "Childhood")),
                              leafletOutput("foodinsecuritymap")
@@ -290,7 +290,7 @@ menuItem(
                     width = "12",
                     selected = "Crop Map",
                     tabPanel("Crop Map",
-                             img(src="food_bkgrnd.png", width = "100%"),
+                             #img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("crops", "Which crop?",
                                          c("Winter Wheat", "Barley",
                                            "Alfalfa", "Cherries")),

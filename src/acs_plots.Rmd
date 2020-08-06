@@ -331,8 +331,11 @@ ggplot() +
 ## Housing
 
 ### Affordable Housing
+
+Estimates are too inaccurate to report for south wasco. Margins of error are almost equal to the estimate.s
 ```{r warning=FALSE, message=FALSE}
-ggplotly(ggplot(acs_counties, aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
+ggplotly(ggplot(filter(acs_counties, NAME != "South Wasco County School District 1, OR")
+                , aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
                   text = paste0("Region: ", NAME,
                                 "<br>Year: ", year,
                                 "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
@@ -348,7 +351,30 @@ ggplotly(ggplot(acs_counties, aes(x=year, y=affordable_housing_all_perc, group =
 
 ```
 
-The line graph looks very busy, but an adjustment to the line type and transparency should help. Generally, we can see that in 2018, South Wasco has one of the highest percenteges of affordable housing amongst occupied housing units.
+For this metric, the margin of error for the South Wasco region was almost equal to that of the estimate. Therefore, the estimate of affordable housing was too unreliable to include in this chart. Overall, most of the regions have comparable housing affordability to the state level, ranging from 60-70%. Generally, we can observe that Wasco county increased from one of the lowest rates of affordable housing in 2015 to one of the highest in 2018. However, the margin of error is quite high for the Wasco county estimates which means there is a possiblity the true percentage of affordable housing could be at either the lower or higher range of the estimates.
+
+
+
+```{r warning=FALSE, message=FALSE}
+ggplotly(ggplot(filter(acs_counties, NAME != "South Wasco County School District 1, OR"),
+                aes(x=year, y=affordable_housing_less_50k, group = NAME, color = south_wasco,
+                  text = paste0("Region: ", NAME,
+                                "<br>Year: ", year,
+                                "<br>Affordable Housing: ", round(affordable_housing_less_50k, digits = 1), "%",
+                                "<br>Margin of Error: ", round(affordable_housing_less_50k_moe, digits = 1), "%"))) +
+  geom_line(size = 1) + 
+  geom_point(size = 1.5) +
+  scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
+  theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") + 
+  xlab("Year"), tooltip = "text") %>% 
+  config(displayModeBar = "static", displaylogo = FALSE, 
+         modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
+                                     "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
+
+```
+
+For households making less than $50,000 a year (Low income for average family of four in Oregon), there is a higher percentage of affordable housing available in Wasco county than at the state level. However, the Margin of error is quite high for the Wasco county estimates which means there is a possiblity the true percentage of affordable housing could be closer to that at the state level. 
+
 
 
 ```{r warning=FALSE, message=FALSE}
@@ -436,7 +462,7 @@ ggplotly(ggplot(acs_counties, aes(x=year, y=owner_occupied_housing_perc, group =
 
 ```
 
-
+The South Wasco region has some of the highest homeownership percentages accross the years compared to the rest of the regions, including the state and the rest of the county. However, it is important to note that there are strict land zoning laws in South Wasco which have prevented the development of rental units in the area.
 
 ## Social
 
@@ -518,9 +544,10 @@ ggplot() +
 customizable tool tip and legend not working
 ```{r warning=FALSE, message=FALSE}
 family <- select(filter(acs_counties_neighbors), NAME, year,contains("family"))
-family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_perc, 
-                                 family_children_nonfamily_perc)
-family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_perc_moe,
+family_perc <- family %>% select(NAME, year, family_married_parent_perc, family_single_parent_female_perc,
+                                 family_single_parent_male_perc, family_children_nonfamily_perc)
+family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_female_perc_moe,
+                                 family_single_parent_male_perc_moe,
                                family_children_nonfamily_perc_moe)
 family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
   rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
@@ -528,9 +555,12 @@ family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = coln
 family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year")) %>%
   mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents", 
                                   "family_single_parent_perc" = "Single Parent",
-                                  "family_children_nonfamily_perc" ="Living with Nonfamily"))
+                                  "family_single_parent_female_perc" = "Single Mother",
+                                  "family_single_parent_male_perc" = "Single Father",
+                                  "family_children_nonfamily_perc" = "Living with Nonfamily"))
 #grouped bar chart for family type
-ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fill = variable, 
+ggplotly(ggplot(filter(family_table, year == 2018, variable != "Living with Nonfamily",
+                       NAME != "South Wasco County School District 1, OR"), aes(x = NAME, y = value, fill = variable, 
                 text = paste0("Region: ", NAME,
                               "<br>Year: ", year,
                               "<br>Percent of Children: ", round(value, digits = 1), "%",
@@ -544,8 +574,7 @@ ggplotly(ggplot(filter(family_table, year == 2018), aes(x = NAME, y = value, fil
                                      "hoverCompareCartesian","resetScale2d")) 
 ```
 
-Compared to its immediate neighbors, South Wasco has the highest percentage of children who are in a household with no family members. South Wasco also has the highest percentage of people living alone or with non family members.
-
+South Wasco School District is removed because the margins of error for all categories were too high, therefore making the estimates unreliable and unreportable. Generally, Wasco's percentages of family types for Children under 18 are comparable to the state level. [need to have time comparisons too.]
 
 
 Stacked bar chart

@@ -292,7 +292,36 @@ menuItem(
                              #img(src="food_bkgrnd.png", width = "100%"),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
                                          c("Overall", "Childhood")),
-                             leafletOutput("foodinsecuritymap")
+                             leafletOutput("foodinsecuritymap"),
+                             box(
+                               width = 4,
+                               background = "light-blue",
+                               p(em("Citation for 2014: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard. 
+                                                Map the Meal Gap 2016: A Report on County and Congressional District Food Insecurity 
+                                                and County Food Cost in the United States in 2014. Feeding America, 2016." , style = "font-size:8px"))
+                             ),
+                             box(
+                               width = 4,
+                               background = "light-blue",
+                               p(em("Citation for 2015: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard. Map the Meal Gap 2017: 
+                                            A Report on County and Congressional District Food Insecurity and County Food Cost in the United States in 2015. 
+                                            Feeding America, 2017." , style = "font-size:8px"))
+                             ),
+                             box(
+                               width = 4,
+                               background = "light-blue",
+                               p(em("Citation for 2016: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard. Map the Meal Gap 2017: 
+                                            A Report on County and Congressional District Food Insecurity and County Food Cost in the United States in 2015. 
+                                            Feeding America, 2017." , style = "font-size:8px"))
+                             ),
+                             box(
+                               width = 4,
+                               background = "light-blue",
+                               p(em("Citation for 2017: Gundersen, C., A. Dewey, M. Kato, A. Crumbaugh & M. Strayer. Map the Meal Gap 2019: 
+                                            A Report on County and Congressional District Food Insecurity and County Food Cost in the United States 
+                                            in 2017. Feeding America, 2019." , style = "font-size:8px"))
+                             )
+
                     ),
                     tabPanel("Data", "Data Tab Content")
                   )
@@ -403,10 +432,31 @@ tabItem(tabName = "learn",
                     width = "12",
                     selected = "Education",
                     tabPanel("Education",
-                             splitLayout(
-                               plotOutput("education1", width = "75%", height = 800),
-                               plotOutput("education2", width = "75%", height = 800)
-                               )
+                             box(
+                               width = 6,
+                               p("Benefits to student success: The three metrics of on time graduation, teacher experience and 
+                                 english language arts proficiency changes between 3rd and 8th grade are 
+                                 indicators of well resourced education areas where students are succeeding. 
+                                 Teacher experience is defined as the percentage of teachers in the district 
+                                 who are certified and have taught for at least three years. Note that there are gray
+                                 cells under this variable because they were not collected by the department of education for those years.", 
+                                 style = "font-size:14px")
+                             ),
+                             box(
+                               width = 6,
+                               p("Barriers to student success: The three factors of economic disadvantage, chronic absenteeism and 
+                                 dropout rates are indicators that show if more resources are needed to aid students 
+                                 in overcome the barriers that may be inhibiting their success in school and beyond.", 
+                                 style = "font-size:14px")
+                             ),
+                             selectInput("ed", "Educational Benefits or Educational Barriers?",
+                                         c("Benefits", "Barriers")),
+                              plotOutput("edplot", width = "100%", height = 800),
+                             box(
+                               width = 6,
+                               p("Conclusion here", 
+                                 style = "font-size:14px")
+                             )
                     ),
                     tabPanel("Data", "Data Tab Content")
         ))), # END OF EDUCATION
@@ -436,9 +486,13 @@ conditionalPanel(
     width = "12",
     selected = "Employment Ratio",
     tabPanel("Employment Ratio",
-             h4("The Employment Ratio is defined as
-                the civilian noninstitutional population who are employed,
-                divided by the total civilian noninstitutional pouplation"),
+             box(
+               width = 12,
+               p("Over four years the employment ratio (number of employed / population) 
+        has decreased by 1% in South Wasco, while all of Wasco County experienced a ~4% increase.  
+        In 2018, South Wasco has about a 10% lower employment ratio than the state of Oregon.", 
+                 style = "font-size:18px")
+             ),
              leafletOutput("percempmap"),
              plotlyOutput("empratioplot")),
   tabPanel("Data", "Data Tab Content")
@@ -453,9 +507,15 @@ conditionalPanel(
                     width = "12",
                     selected = "Labor Force Rate",
                     tabPanel("Labor Force Rate",
-                             h4("The Labor force includes all people classified in the
+                             box(
+                               width = 12,
+                               p("The Labor force includes all people classified in the
                                 civilian labor force in addition to members of the U.S. Armed Forces.
-                                Civilian labor force consists of employed or unemployed people."),
+                                The civilian labor force consists of employed or unemployed people. 
+                                 Over 2015 to 2018 Wasco County hovered around 73% which is below the LFPR of all of Oregon at 77.9%.  
+                                 The south Wasco region hovered around 70, the most recently dropped to 67%, below all of Oregon as well.", 
+                                 style = "font-size:18px")
+                             ),
                              leafletOutput("laborforcemap"),
                              plotlyOutput("laborforceplot")),
                     tabPanel("Data", "Data Tab Content")
@@ -471,10 +531,18 @@ conditionalPanel(
                             width = "12",
                             selected = "Job Flows",
                             tabPanel("Job Flows",
-                                     h4("Job inflows are the number of employees from
-                                        outside counties traveling into the region for work.
-                                        Job outflows are the number of workers from the region
-                                        traveling to other counties for work"),
+                                     box(
+                                       width = 12,
+                                       p("Job inflows are the number of employees from
+                                        outside counties traveling into the South Wasco region for work.
+                                        Job outflows are the number of residents from the South Wasco region
+                                        traveling to other counties for work. To tie in the outward migration story 
+                                         and show rural job networks, we tracked the flows of jobs in and out of Wasco county. 
+                                         The main conclusion here is that more jobs are flowing out of Wasco than are 
+                                         flowing into Wasco on all levels. Of those outflows, around 460 jobs are 
+                                         going out of state to Washington.", 
+                                         style = "font-size:16px")
+                                     ),
                             selectInput("flows", "Inflows or Outflows?",
                                         c("Inflows", "Outflows")),
                             plotlyOutput("flowsplot")
@@ -492,6 +560,14 @@ conditionalPanel(
                     width = "12",
                     selected = "Job Sectors",
                     tabPanel("Job Sectors",
+                             box(
+                               width = 12,
+                               p("Using the LODES data, we were able to breakdown jobs for 
+                                 people who work in Wasco by census tracts. The first map shows all 
+                                 the jobs in Wasco and then number of each, and you can see just how 
+                                 sparse employment opportunities are for the South Wasco region.", 
+                                 style = "font-size:18px")
+                             ),
                              selectInput("sect", "What sectors?",
                                          c("All" = "All", "Goods Producing" = "Goods", "Trade,
                                            Transportation, and Utilities" = "Trade", "All Other
@@ -541,6 +617,14 @@ tabItem(tabName = "financial",
                         width = "12",
                         selected = "Median Income",
                         tabPanel("Median Income",
+                                 box(
+                                   width = 12,
+                                   p("The South Wasco region follows the trends of rising median income in all of Oregon, 
+                                  but from 2017 to 2018 their rate increased.  From 2015 to 2018 the median household income 
+                                  in South Wasco rose about $7,000.  This is compared to a similar increase in Wasco County generally, 
+                                  and a $9,000 increase in the state of Oregon.", 
+                                     style = "font-size:18px")
+                                 ),
                         # Median income only here, poverty, income brackets are the questions
                         leafletOutput("medincomemap"),
                         plotlyOutput("medincomeplot")),
@@ -557,6 +641,12 @@ tabItem(tabName = "financial",
                     width = "12",
                     selected = "Poverty Rate",
                     tabPanel("Poverty Rate",
+                             box(
+                               width = 12,
+                               p("The South Wasco region from 2015 to 2018 experienced a ~6% decline in poverty rates, 
+                                 while Wasco generally experienced a ~3% decline and the state of Oregon a ~3% as well.", 
+                                 style = "font-size:18px")
+                             ),
                              leafletOutput("povertymap"),
                              plotlyOutput(outputId = "povertyplot")),
                     tabPanel("Data", "Data Tab Content")
@@ -572,11 +662,17 @@ tabItem(tabName = "financial",
             height = "250px",
             width = "12",
             selected = "ALICE Poverty Rate",
-            h4("ALICE is an acronym for Asset Limited Income Constrained, Employed.
-               These are households that earn above the Federal Poverty Level,
-               but not enough to afford a 'bare-bones' household budget."),
             tabPanel("ALICE Poverty Rate",
-              plotlyOutput(outputId = "aliceplot")),
+               box(width = 12,
+                p("ALICE is an acronym for Asset Limited, Income Constrained, Employed. 
+                These are households that earn above the federal poverty level, but not enough to 
+                afford a 'bare-bones' household budget. The ALICE threshold provides more granularity 
+                that is more suited for a rural community than the federal poverty line.  
+                Looking at South Wasco, over time we see only about a 2% increase in those who 
+                follow below the threshold, however in 2014, South Wasco experienced a peak of 37.25% of residents 
+                falling below this threshold.", style = "font-size:16px")
+                ),
+            plotlyOutput(outputId = "aliceplot")),
             tabPanel("Data", "Data Tab Content")
         )
       ),
@@ -592,6 +688,15 @@ tabItem(tabName = "financial",
                     selected = "Income Distribution",
                     # Median income only here, poverty, income brackets are the questions
                     tabPanel("Income Distribution",
+                             box(
+                               width = 12,
+                               p("We’ve broken the population down by income bracket for South Wasco and surrounding counties. 
+                                 Using the plot below, we can see that specifically in South Wasco, the income bracket 
+                                 held by most residents is 50K-75K, which is right around the median national income. 
+                                 It is important to note that South Wasco has more people in this bracket than Wasco County generally, 
+                                 and also that South Wasco has more people in the lowest income bracket than Wasco County generally.", 
+                                 style = "font-size:16px")
+                             ),
                            selectInput("incomedisyear", "Which year?",
                                 c("2018", "2017", "2016", "2015")),
                            leafletOutput("incomedismap"),
@@ -622,13 +727,26 @@ tabItem(tabName = "housing",
                       height = "250px",
                       width = "12",
                       selected = "Affordable Housing",
-                      h4("The ratio of affordable housing is defined as the number housing units
-                         where monthly costs are less than or equal to 30% of a household's income
-                         divided by thhe total number of occupied houses."),
                       tabPanel("Affordable Housing",
+                               box(
+                                 width = 12,
+                                 p("The ratio of affordable housing is defined as the number housing units
+                         where monthly costs are less than or equal to 30% of a household's income
+                         divided by the total number of occupied houses. Overall, most of the regions have comparable housing affordability to the state level, 
+                         ranging from 60-70%. Generally, we can observe that Wasco county increased from one of 
+                         the lowest rates of affordable housing in 2015 to one of the highest in 2018. 
+                         However, the margin of error is quite high for the Wasco county estimates 
+                         which means there is a possibility the true percentage of affordable housing 
+                         could be at either the lower or higher range of the estimates.", 
+                                   style = "font-size:16px")
+                               ),
                       # Overall and ownership/rental (both lines and maps?)
                       # Full back with table and indicator snippet
-                      plotlyOutput("housingplot")),
+                      plotlyOutput("housingplot"),
+                      h4("For this metric, the margin of error for the South Wasco region was 
+                         almost equal to that of the estimate. Therefore, the estimate of 
+                         affordable housing was too unreliable to include in this chart. 
+                         ")),
                       tabPanel("Data", "Data Tab Content")
                     )
                   ),
@@ -642,6 +760,17 @@ tabItem(tabName = "housing",
                     width = "12",
                     selected = "Home Ownership",
                     tabPanel("Home Ownership",
+                             box(
+                               width = 12,
+                               p("A Housing unit is owner occupied if the owner or co-owner lives in the unit
+                             even if it is mortgaged or not fully paid for. The South Wasco region has some of 
+                                 the highest homeownership percentages accross the years compared to the rest 
+                                 of the regions, including the state and the rest of the county. 
+                                 However, it is important to note that there are strict land zoning laws in South Wasco 
+                                 which have restricted the development of rental properties in the area.", 
+                                 style = "font-size:16px")
+                             ),
+                             h4(""),
                     # Overall and ownership/rental (both lines and maps?)
                     # Full back with table and indicator snippet
                     plotlyOutput("rentownplot")),
@@ -677,6 +806,17 @@ tabItem(tabName = "social",
                     width = "12",
                     selected = "Race",
                     tabPanel("Race",
+                             box(
+                               width = 12,
+                               p("For all years and all counties, the 75% or more of the population identify as white. 
+                                 The only exception is Jefferson county where American Indian and Hispanic identities 
+                                 make up around 20% of the population each. The large American Indian pouplation is because 
+                                 the Warm Springs Reservation exists through parts of South Wasco and Northern Jefferson County. 
+                                 In South Wasco, Hispanic or Latino is identified as the second largest group. 
+                                 However, you will notice the margin of error is quite high for this estimate, 
+                                 which is shows that estimates from federal data sources tend to be unreliable for minority groups.", 
+                                 style = "font-size:16px")
+                             ),
                              selectInput("raceyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
                              leafletOutput("racemap"),
@@ -698,6 +838,16 @@ tabItem(tabName = "social",
                     width = "12",
                     selected = "Family",
                     tabPanel("Family",
+                             box(
+                               width = 12,
+                               p("South Wasco School District is removed because the margins of error for all categories were too high, 
+                                 therefore making the estimates too unreliable to report. 
+                                 Generally, Wasco's percentages of family types for Children under 18 are comparable to the state level. 
+                                 Like other counties, the majority of children are in married parent families (~70%) 
+                                 followed by single mothers (~20%) and then single fathers (>10%). 
+                                 The estimates for Wasco county are stable over time. ", 
+                                 style = "font-size:16px")
+                             ),
                              selectInput("familyyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
                              leafletOutput("familymap"),
@@ -719,6 +869,14 @@ tabItem(tabName = "social",
                     width = "12",
                     selected = "Education Degrees",
                     tabPanel("Education Degree",
+                             box(
+                               width = 12,
+                               p("The distribution of highest educational degree attained in South Wasco 
+                                 has stayed fairly consistent over the years. It has one of the lowest percentages 
+                                 of adults who have a bachelor's degree or higher. But the large majority 
+                                 of the population have at least a high school diploma or equivalent.", 
+                                 style = "font-size:16px")
+                             ),
                              selectInput("degreeyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
                              leafletOutput("degreemap"),
@@ -1166,7 +1324,6 @@ server <- function(input, output, session) {
   #  })
 
 ## SERVER: PANEL - Food insecurity ----
-## SERVER: PANEL - Free and reduced price lunch ----
 ## leafletOutput("foodinsecuritymap") ------
 
 
@@ -1547,62 +1704,62 @@ server <- function(input, output, session) {
 ## SERVER: TAB - Learn and earn driver ----
 ## SERVER: PANEL - Education composite ----
 ## plotOutput("education1") -----
-  output$education1 <- renderPlot({
-    #Benefits
-    ed.melt.increase = melt(ed.increase, id.vars = c("year", "District.Name"),
-                            measure.vars = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
-                                             "Percent.ELA.Proficient.Change")) %>%
-      mutate(variable = factor(variable, levels = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
-                                                    "Percent.ELA.Proficient.Change"))) %>%
-      mutate(variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
-                               "Teacher.Experience.Pct" = "Teacher Experience",
-                               "Percent.ELA.Proficient.Change" = "ELA Proficiency Change"))
-
-    ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
-      geom_tile(color = "#ADB5BD") + #gray
-      geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
-      coord_equal() +
-      #facet_grid(rows = vars(variable)) +
-      facet_wrap(~variable, ncol=1) +
-      #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
-      scale_fill_continuous_divergingx(palette = "PRGn", mid = 0,
-                                       breaks= c(-75, -50, -25, 0, 25, 50, 75, 100),
-                                       limits = c(-75, 100)) +
-      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1),
-            strip.background = element_rect(
-              color="black", fill="#ADB5BD", size=1, linetype="solid"),
-            strip.text.y = element_text(size = 5, color = "black", face = "bold"),
-            legend.key.size = unit(1.5, "cm")) +
-      labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent")
-    #plot
-    #benefits
-  })
-  output$education2 <- renderPlot({
-    #Barriers
-    ed.melt.decrease = melt(ed.decrease, id.vars = c("year", "District.Name"),
-                            measure.vars = c("Percent.Economically.Disadvantaged", "Percent.Chronically.Absent",
-                                             "Dropout.Rate")) %>%
-      mutate(variable = recode(variable, "Percent.Economically.Disadvantaged" = "Economic Disadvantage",
-                               "Percent.Chronically.Absent" = "Chronic Absenteeism",
-                               "Dropout.Rate"="Dropout Rate"))
-
-    #barriers<-
-
-    ggplot(ed.melt.decrease, aes(y = District.Name, x = year, fill = value)) +
-      geom_tile(color = "#ADB5BD") + #gray
-      geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
-      coord_equal() +
-      #facet_grid(rows = vars(variable)) +
-      facet_wrap(~variable, ncol=1) +
-      #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
-      scale_fill_continuous_sequential(palette = "Purples 3") +
-      theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1),
-            strip.background = element_rect(
-              color="black", fill="#ADB5BD", size=1, linetype="solid"),
-            strip.text.y = element_text(size = 4, color = "black", face = "bold"),
-            legend.key.size = unit(1.5, "cm")) +
-      labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
-
+  output$edplot <- renderPlot({
+    if (input$ed == "Benefits"){
+      #Benefits
+      ed.melt.increase = melt(ed.increase, id.vars = c("year", "District.Name"),
+                              measure.vars = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
+                                               "Percent.ELA.Proficient.Change")) %>%
+        mutate(variable = factor(variable, levels = c("On.Time.Grad.Rate", "Teacher.Experience.Pct",
+                                                      "Percent.ELA.Proficient.Change"))) %>%
+        mutate(variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
+                                 "Teacher.Experience.Pct" = "Teacher Experience",
+                                 "Percent.ELA.Proficient.Change" = "ELA Proficiency Change"))
+      
+      ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
+        geom_tile(color = "#ADB5BD") + #gray
+        geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
+        coord_equal() +
+        #facet_grid(rows = vars(variable)) +
+        facet_wrap(~variable, ncol=1) +
+        #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+        scale_fill_continuous_divergingx(palette = "PRGn", mid = 0,
+                                         breaks= c(-75, -50, -25, 0, 25, 50, 75, 100),
+                                         limits = c(-75, 100)) +
+        theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1),
+              strip.background = element_rect(
+                color="black", fill="#ADB5BD", size=1, linetype="solid"),
+              strip.text.y = element_text(size = 5, color = "black", face = "bold"),
+              legend.key.size = unit(1.5, "cm")) +
+        labs(title = "Benefits to Student Success", x ="School Year", y = "", fill="Percent")
+      #plot
+      #benefits
+    }
+    
+    else if (input$ed == "Barriers"){
+      #Barriers
+      ed.melt.decrease = melt(ed.decrease, id.vars = c("year", "District.Name"),
+                              measure.vars = c("Percent.Economically.Disadvantaged", "Percent.Chronically.Absent",
+                                               "Dropout.Rate")) %>%
+        mutate(variable = recode(variable, "Percent.Economically.Disadvantaged" = "Economic Disadvantage",
+                                 "Percent.Chronically.Absent" = "Chronic Absenteeism",
+                                 "Dropout.Rate"="Dropout Rate"))
+      ggplot(ed.melt.decrease, aes(y = District.Name, x = year, fill = value)) +
+        geom_tile(color = "#ADB5BD") + #gray
+        geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
+        coord_equal() +
+        #facet_grid(rows = vars(variable)) +
+        facet_wrap(~variable, ncol=1) +
+        #scale_fill_gradientn(colors = pgcol, values = c(-60, 0, 100)) +
+        scale_fill_continuous_sequential(palette = "Purples 3") +
+        theme(axis.text.x = element_text(angle = 35, vjust = 1, hjust=1),
+              strip.background = element_rect(
+                color="black", fill="#ADB5BD", size=1, linetype="solid"),
+              strip.text.y = element_text(size = 4, color = "black", face = "bold"),
+              legend.key.size = unit(1.5, "cm")) +
+        labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
+      
+    }
   })
 
 
@@ -3199,20 +3356,21 @@ server <- function(input, output, session) {
 ## plotlyOutput("housingplot") ------
 
   output$housingplot <- renderPlotly({
-    ggplotly(ggplot(acs_counties, aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
-                                      text = paste0("Region: ", NAME,
-                                                    "<br>Year: ", year,
-                                                    "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
-                                                    "<br>Margin of Error: ", round(affordable_housing_all_perc_moe, digits = 1), "%"))) +
-               geom_line(size = 1) +
+    ggplotly(ggplot(filter(acs_counties, NAME != "South Wasco County School District 1, OR"), 
+                    aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
+                          text = paste0("Region: ", NAME,
+                                        "<br>Year: ", year,
+                                        "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
+                                        "<br>Margin of Error: ", round(affordable_housing_all_perc_moe, digits = 1), "%"))) +
+               geom_line(size = 1) + 
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
-               theme_minimal() + ggtitle("Affordable Housing 2015-2018",subtitle = "Occupied households where monthly costs are less than 30% of houshold income") +
-               ylab("Affordable Housing") + xlab("Year"), tooltip = "text") %>%
-      config(displayModeBar = "static", displaylogo = FALSE,
+               theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") + 
+               xlab("Year"), tooltip = "text") %>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-
+    
   })
 
 ## SERVER: PANEL - Rent vs own -----
@@ -4194,22 +4352,22 @@ server <- function(input, output, session) {
                                 "<strong> Percent of Single Mothers: <strong>",
                                 round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
-        addPolygons(
-          weight = 1,
-          opacity = 0,
-          fillOpacity = .7,
-          group = "% of Children in Nonfamily Household",
-          fillColor = ~fam_stab_2018_pal(family_children_nonfamily_perc),
-          label = ~lapply(paste(sep = "",
-                                substr(fam_stab_2018$NAME, 20, 60), "<br/>",
-                                substr(fam_stab_2018$NAME, 1, 17),
-                                "<br/>Margins of error: ",
-                                round(filter(fam_stab_moe,
-                                             year == 2018)$family_children_nonfamily_perc_moe,
-                                      1), "%<br/>",
-                                "<strong> Percent Children in Nonfamily Household: <strong>",
-                                round(family_children_nonfamily_perc, 1), "<strong>%"),
-                          htmltools::HTML)) %>%
+        # addPolygons(
+        #   weight = 1,
+        #   opacity = 0,
+        #   fillOpacity = .7,
+        #   group = "% of Children in Nonfamily Household",
+        #   fillColor = ~fam_stab_2018_pal(family_children_nonfamily_perc),
+        #   label = ~lapply(paste(sep = "",
+        #                         substr(fam_stab_2018$NAME, 20, 60), "<br/>",
+        #                         substr(fam_stab_2018$NAME, 1, 17),
+        #                         "<br/>Margins of error: ",
+        #                         round(filter(fam_stab_moe,
+        #                                      year == 2018)$family_children_nonfamily_perc_moe,
+        #                               1), "%<br/>",
+        #                         "<strong> Percent Children in Nonfamily Household: <strong>",
+        #                         round(family_children_nonfamily_perc, 1), "<strong>%"),
+        #                   htmltools::HTML)) %>%
         addPolylines(
           data = south_wasco_points,
           color = "#ffce9e",
@@ -4232,8 +4390,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2018)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
-                         "% of Children in Nonfamily Household"),
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
           options = layersControlOptions(collapsed = F))
     }
     else if (input$familyyears == "2017") {
@@ -4286,22 +4443,22 @@ server <- function(input, output, session) {
                                 "<strong> Percent of Single Mothers: <strong>",
                                 round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
-        addPolygons(
-          weight = 1,
-          opacity = 0,
-          fillOpacity = .7,
-          group = "% of Children in Nonfamily Household",
-          fillColor = ~fam_stab_2017_pal(family_children_nonfamily_perc),
-          label = ~lapply(paste(sep = "",
-                                substr(fam_stab_2017$NAME, 20, 60), "<br/>",
-                                substr(fam_stab_2017$NAME, 1, 17),
-                                "<br/>Margins of error: ",
-                                round(filter(fam_stab_moe,
-                                             year == 2017)$family_children_nonfamily_perc_moe,
-                                      1), "%<br/>",
-                                "<strong> Percent Children in Nonfamily Household: <strong>",
-                                round(family_children_nonfamily_perc, 1), "<strong>%"),
-                          htmltools::HTML)) %>%
+        # addPolygons(
+        #   weight = 1,
+        #   opacity = 0,
+        #   fillOpacity = .7,
+        #   group = "% of Children in Nonfamily Household",
+        #   fillColor = ~fam_stab_2017_pal(family_children_nonfamily_perc),
+        #   label = ~lapply(paste(sep = "",
+        #                         substr(fam_stab_2017$NAME, 20, 60), "<br/>",
+        #                         substr(fam_stab_2017$NAME, 1, 17),
+        #                         "<br/>Margins of error: ",
+        #                         round(filter(fam_stab_moe,
+        #                                      year == 2017)$family_children_nonfamily_perc_moe,
+        #                               1), "%<br/>",
+        #                         "<strong> Percent Children in Nonfamily Household: <strong>",
+        #                         round(family_children_nonfamily_perc, 1), "<strong>%"),
+        #                   htmltools::HTML)) %>%
         addPolylines(
           data = south_wasco_points,
           color = "#ffce9e",
@@ -4324,8 +4481,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2017)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
-                         "% of Children in Nonfamily Household"),
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
           options = layersControlOptions(collapsed = F))
     }
     else if (input$familyyears == "2016") {
@@ -4378,22 +4534,22 @@ server <- function(input, output, session) {
                                 "<strong> Percent of Single Mothers: <strong>",
                                 round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
-        addPolygons(
-          weight = 1,
-          opacity = 0,
-          fillOpacity = .7,
-          group = "% of Children in Nonfamily Household",
-          fillColor = ~fam_stab_2016_pal(family_children_nonfamily_perc),
-          label = ~lapply(paste(sep = "",
-                                substr(fam_stab_2016$NAME, 20, 60), "<br/>",
-                                substr(fam_stab_2016$NAME, 1, 17),
-                                "<br/>Margins of error: ",
-                                round(filter(fam_stab_moe,
-                                             year == 2016)$family_children_nonfamily_perc_moe,
-                                      1), "%<br/>",
-                                "<strong> Percent Children in Nonfamily Household: <strong>",
-                                round(family_children_nonfamily_perc, 1), "<strong>%"),
-                          htmltools::HTML)) %>%
+        # addPolygons(
+        #   weight = 1,
+        #   opacity = 0,
+        #   fillOpacity = .7,
+        #   group = "% of Children in Nonfamily Household",
+        #   fillColor = ~fam_stab_2016_pal(family_children_nonfamily_perc),
+        #   label = ~lapply(paste(sep = "",
+        #                         substr(fam_stab_2016$NAME, 20, 60), "<br/>",
+        #                         substr(fam_stab_2016$NAME, 1, 17),
+        #                         "<br/>Margins of error: ",
+        #                         round(filter(fam_stab_moe,
+        #                                      year == 2016)$family_children_nonfamily_perc_moe,
+        #                               1), "%<br/>",
+        #                         "<strong> Percent Children in Nonfamily Household: <strong>",
+        #                         round(family_children_nonfamily_perc, 1), "<strong>%"),
+        #                   htmltools::HTML)) %>%
         addPolylines(
           data = south_wasco_points,
           color = "#ffce9e",
@@ -4416,8 +4572,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2016)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
-                         "% of Children in Nonfamily Household"),
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
           options = layersControlOptions(collapsed = F))
     }
     else if (input$familyyears == "2015") {
@@ -4470,22 +4625,22 @@ server <- function(input, output, session) {
                                 "<strong> Percent of Single Mothers: <strong>",
                                 round(family_single_parent_female_perc, 1), "<strong>%"),
                           htmltools::HTML)) %>%
-        addPolygons(
-          weight = 1,
-          opacity = 0,
-          fillOpacity = .7,
-          group = "% of Children in Nonfamily Household",
-          fillColor = ~fam_stab_2015_pal(family_children_nonfamily_perc),
-          label = ~lapply(paste(sep = "",
-                                substr(fam_stab_2015$NAME, 20, 60), "<br/>",
-                                substr(fam_stab_2015$NAME, 1, 17),
-                                "<br/>Margins of error: ",
-                                round(filter(fam_stab_moe,
-                                             year == 2015)$family_children_nonfamily_perc_moe,
-                                      1), "%<br/>",
-                                "<strong> Percent Children in Nonfamily Household: <strong>",
-                                round(family_children_nonfamily_perc, 1), "<strong>%"),
-                          htmltools::HTML)) %>%
+        # addPolygons(
+        #   weight = 1,
+        #   opacity = 0,
+        #   fillOpacity = .7,
+        #   group = "% of Children in Nonfamily Household",
+        #   fillColor = ~fam_stab_2015_pal(family_children_nonfamily_perc),
+        #   label = ~lapply(paste(sep = "",
+        #                         substr(fam_stab_2015$NAME, 20, 60), "<br/>",
+        #                         substr(fam_stab_2015$NAME, 1, 17),
+        #                         "<br/>Margins of error: ",
+        #                         round(filter(fam_stab_moe,
+        #                                      year == 2015)$family_children_nonfamily_perc_moe,
+        #                               1), "%<br/>",
+        #                         "<strong> Percent Children in Nonfamily Household: <strong>",
+        #                         round(family_children_nonfamily_perc, 1), "<strong>%"),
+        #                   htmltools::HTML)) %>%
         addPolylines(
           data = south_wasco_points,
           color = "#ffce9e",
@@ -4508,8 +4663,7 @@ server <- function(input, output, session) {
           title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2015)",
           na.label = "NA") %>%
         addLayersControl(
-          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers",
-                         "% of Children in Nonfamily Household"),
+          baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
           options = layersControlOptions(collapsed = F))
     }
   })
@@ -4521,28 +4675,29 @@ server <- function(input, output, session) {
     family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_female_perc_moe,
                                     family_single_parent_male_perc_moe,
                                     family_children_nonfamily_perc_moe)
-    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>%
+    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
       rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
     family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
     family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year")) %>%
-      mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents",
+      mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents", 
                                       "family_single_parent_perc" = "Single Parent",
                                       "family_single_parent_female_perc" = "Single Mother",
                                       "family_single_parent_male_perc" = "Single Father",
-                                      "family_children_nonfamily_perc" ="Living with Nonfamily"))
+                                      "family_children_nonfamily_perc" = "Living with Nonfamily"))
     #grouped bar chart for family type
-    ggplotly(ggplot(filter(family_table, year == input$familyyears), aes(x = NAME, y = value, fill = variable,
-                                                            text = paste0("Region: ", NAME,
-                                                                          "<br>Year: ", year,
-                                                                          "<br>Percent of Children: ", round(value, digits = 1), "%",
-                                                                          "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
-               geom_bar(position = position_stack(reverse = TRUE), stat="identity") +
+    ggplotly(ggplot(filter(family_table, year == input$familyyears, variable != "Living with Nonfamily",
+                           NAME != "South Wasco County School District 1, OR"), aes(x = NAME, y = value, fill = variable, 
+                                                                                    text = paste0("Region: ", NAME,
+                                                                                                  "<br>Year: ", year,
+                                                                                                  "<br>Percent of Children: ", round(value, digits = 1), "%",
+                                                                                                  "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
+               geom_col(position = "dodge") + 
                scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
                ylab("% of children")+xlab("") + coord_flip()+ theme_minimal() +
-               ggtitle(paste0("Family Structure for Children Under 18 <br>", input$familyyears)), tooltip = "text")%>%
-      config(displayModeBar = "static", displaylogo = FALSE,
+               ggtitle(paste0("Family Structure for Children Under 18 <br>", input$familyyears)), tooltip = "text")%>% 
+      config(displayModeBar = "static", displaylogo = FALSE, 
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                         "hoverCompareCartesian","resetScale2d"))
+                                         "hoverCompareCartesian","resetScale2d")) 
   })
 
 ## SERVER: PANEL - Education attainment -----
@@ -4656,7 +4811,7 @@ server <- function(input, output, session) {
                          "Associates or Some College", "Bachelors or Higher"),
           options = layersControlOptions(collapsed = T))
     }
-    else if (input$incomedisyear == "2017"){
+    else if (input$degreeyears == "2017"){
       leaflet(edu_attain_2017) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(
@@ -4745,7 +4900,7 @@ server <- function(input, output, session) {
                          "Associates or Some College", "Bachelors or Higher"),
           options = layersControlOptions(collapsed = T))
     }
-    else if (input$incomedisyear == "2016"){
+    else if (input$degreeyears == "2016"){
       leaflet(edu_attain_2016) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(
@@ -4834,7 +4989,7 @@ server <- function(input, output, session) {
                          "Associates or Some College", "Bachelors or Higher"),
           options = layersControlOptions(collapsed = T))
     }
-    else if (input$incomedisyear == "2015"){
+    else if (input$degreeyears == "2015"){
       leaflet(edu_attain_2015) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         addPolygons(

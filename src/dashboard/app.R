@@ -238,7 +238,8 @@ menuItem(
                     h2("Project Goals"),
                     p("The purpose of our project is to provide community decisionmakers with baseline datasets and comparative analyses to similar rural areas of the likely factors affecting economic mobility"),
                     h2("Project Scope"),
-                    p("The term South Wasco is defined by the South Wasco County School District, which encompasses the southernmost region of Wasco County, Oregon.")
+                    p("The term South Wasco is defined by the South Wasco County School District, which encompasses the southernmost region of Wasco County, Oregon."),
+                    leafletOutput("overviewmap")
                   )
                 )),
 
@@ -268,11 +269,11 @@ menuItem(
                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("Because of our particular focus on food systems, creating the interactive food systems map 
-                                 was a critical piece of this project. Food insecurity is a complex idea, as is 
-                                 geographic isolation from food. Here, we've mapped out this idea, with a special focus on 
-                                 quality and affordable food sources. Notably, there are many areas of South Wasco, 
-                                 particularly in the eastern townships, that experience low access to quality food sources.", 
+                               p("Because of our particular focus on food systems, creating the interactive food systems map
+                                 was a critical piece of this project. Food insecurity is a complex idea, as is
+                                 geographic isolation from food. Here, we've mapped out this idea, with a special focus on
+                                 quality and affordable food sources. Notably, there are many areas of South Wasco,
+                                 particularly in the eastern townships, that experience low access to quality food sources.",
                                  style = "font-size:18px")
                              ),
                              selectInput("iso", "Show driving time for...",
@@ -300,10 +301,10 @@ menuItem(
                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("Food insecurity is described as a household-level economic and social condition 
-                                 characterized by limited or uncertain access to food. To calculate food insecurity, 
-                                 we've used Feeding America's Map the Meal Gap research. Both the overall and childhood 
-                                 food insecurity rate for Wasco County has declined slightly from 2014-2017", 
+                               p("Food insecurity is described as a household-level economic and social condition
+                                 characterized by limited or uncertain access to food. To calculate food insecurity,
+                                 we've used Feeding America's Map the Meal Gap research. Both the overall and childhood
+                                 food insecurity rate for Wasco County has declined slightly from 2014-2017",
                                  style = "font-size:18px")
                              ),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
@@ -312,8 +313,8 @@ menuItem(
                              box(
                                width = 12,
                                p(em("Data Citation: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard.
-                                    Map the Meal Gap 2016-2019:  A Report on County and Congressional District 
-                                    Food Insecurity and County Food Cost in the United States in 2014-2017. 
+                                    Map the Meal Gap 2016-2019:  A Report on County and Congressional District
+                                    Food Insecurity and County Food Cost in the United States in 2014-2017.
                                     Feeding America, 2016-2019." , style = "font-size:8px"))
                              )
                     ),
@@ -333,10 +334,10 @@ menuItem(
                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("Local farming is an integral piece of a thriving food system. 
-                                 Here we've mapped the acreage dedicated to several crops throughout Wasco County. 
-                                 In the future, we would like to find data sources to measure consumption of 
-                                 local food to complement this measure.", 
+                               p("Local farming is an integral piece of a thriving food system.
+                                 Here we've mapped the acreage dedicated to several crops throughout Wasco County.
+                                 In the future, we would like to find data sources to measure consumption of
+                                 local food to complement this measure.",
                                  style = "font-size:18px")
                              ),
                              selectInput("crops", "Which crop?",
@@ -397,14 +398,14 @@ menuItem(
                               div(img(src="https://image.flaticon.com/icons/svg/3175/3175152.svg", width = "15%"), style="text-align: center;"),
                               box(
                                  width = 12,
-                                 p("Water use is an interesting infrastructure cluster to analyze because it can help 
-                                   describe the economic climate and importance of certain sectors through resource allocation.  
+                                 p("Water use is an interesting infrastructure cluster to analyze because it can help
+                                   describe the economic climate and importance of certain sectors through resource allocation.
                                    Over time we can see that Commercial water use is rising drastically, and then the
-                                   category stops being recorded.  At the same time, new categories like Aquaculture and Mining 
-                                   appear, which may mean that Commercial water use was split into two subcategories. 
+                                   category stops being recorded.  At the same time, new categories like Aquaculture and Mining
+                                   appear, which may mean that Commercial water use was split into two subcategories.
                                    Of these, aquaculture had peaked in 2010 to levels similar to Commercial in 1995
-                                   but is now falling.  These findings may point to decline in the profitability of the 
-                                   aquaculture sector in the recent years.", 
+                                   but is now falling.  These findings may point to decline in the profitability of the
+                                   aquaculture sector in the recent years.",
                                   style = "font-size:14px")
                               ),
                              plotlyOutput("waterplot")
@@ -450,19 +451,19 @@ tabItem(tabName = "learn",
                              div(img(src="https://image.flaticon.com/icons/svg/1089/1089128.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("K-12 education is a formative experience that can increase economic and social mobility. 
-                                 We present heat maps of educational indicators that can effect student mobility below. 
-                                 Darker green corresponds to an increase of benefits to success and darker purple corresponds 
-                                 to an increase in barriers to student success. South Wasco has high percentages for on time 
-                                 graduation and teacher experience, implying the district is well resourced in these areas. 
-                                 However, all of the students are economically disadvantaged and chronic absenteeism rates are higher 
-                                 than nearby districts. This shows a need for more resources to aid students in overcoming 
-                                 the barriers that may be inhibiting their success in school and beyond.", 
+                               p("K-12 education is a formative experience that can increase economic and social mobility.
+                                 We present heat maps of educational indicators that can effect student mobility below.
+                                 Darker green corresponds to an increase of benefits to success and darker purple corresponds
+                                 to an increase in barriers to student success. South Wasco has high percentages for on time
+                                 graduation and teacher experience, implying the district is well resourced in these areas.
+                                 However, all of the students are economically disadvantaged and chronic absenteeism rates are higher
+                                 than nearby districts. This shows a need for more resources to aid students in overcoming
+                                 the barriers that may be inhibiting their success in school and beyond.",
                                  style = "font-size:14px"),
                                br(),
-                               p(" Teacher experience is defined as the percentage of teachers in the district who are certified 
-                                 and have taught for at least three years (not collected for 2016 and 2017). 
-                                 ELA Proficient Change is the percent change between 3rd and 8th grade in English Language Arts Proficiency", 
+                               p(" Teacher experience is defined as the percentage of teachers in the district who are certified
+                                 and have taught for at least three years (not collected for 2016 and 2017).
+                                 ELA Proficient Change is the percent change between 3rd and 8th grade in English Language Arts Proficiency",
                                  style = "font-size:14px")
                                   ),
                              selectInput("ed", "Educational Benefits or Educational Barriers?",
@@ -500,9 +501,9 @@ conditionalPanel(
              div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
              box(
                width = 12,
-               p("Over four years the employment ratio (number of employed / population) 
-        has decreased by 1% in South Wasco, while all of Wasco County experienced a ~4% increase.  
-        In 2018, South Wasco has about a 10% lower employment ratio than the state of Oregon.", 
+               p("Over four years the employment ratio (number of employed / population)
+        has decreased by 1% in South Wasco, while all of Wasco County experienced a ~4% increase.
+        In 2018, South Wasco has about a 10% lower employment ratio than the state of Oregon.",
                  style = "font-size:18px")
              ),
             leafletOutput("percempmap"),
@@ -524,9 +525,9 @@ conditionalPanel(
                                width = 12,
                                p("The Labor force includes all people classified in the
                                 civilian labor force in addition to members of the U.S. Armed Forces.
-                                The civilian labor force consists of employed or unemployed people. 
-                                 Over 2015 to 2018 Wasco County hovered around 73% which is below the LFPR of all of Oregon at 77.9%.  
-                                 The south Wasco region hovered around 70, the most recently dropped to 67%, below all of Oregon as well.", 
+                                The civilian labor force consists of employed or unemployed people.
+                                 Over 2015 to 2018 Wasco County hovered around 73% which is below the LFPR of all of Oregon at 77.9%.
+                                 The south Wasco region hovered around 70, the most recently dropped to 67%, below all of Oregon as well.",
                                  style = "font-size:18px")
                              ),
                              leafletOutput("laborforcemap"),
@@ -550,11 +551,11 @@ conditionalPanel(
                                        p("Job inflows are the number of employees from
                                         outside counties traveling into the South Wasco region for work.
                                         Job outflows are the number of residents from the South Wasco region
-                                        traveling to other counties for work. To tie in the outward migration story 
-                                         and show rural job networks, we tracked the flows of jobs in and out of Wasco county. 
-                                         The main conclusion here is that more jobs are flowing out of Wasco than are 
-                                         flowing into Wasco on all levels. Of those outflows, around 460 jobs are 
-                                         going out of state to Washington.", 
+                                        traveling to other counties for work. To tie in the outward migration story
+                                         and show rural job networks, we tracked the flows of jobs in and out of Wasco county.
+                                         The main conclusion here is that more jobs are flowing out of Wasco than are
+                                         flowing into Wasco on all levels. Of those outflows, around 460 jobs are
+                                         going out of state to Washington.",
                                          style = "font-size:16px")
                                      ),
                             selectInput("flows", "Inflows or Outflows?",
@@ -577,10 +578,10 @@ conditionalPanel(
                              div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("Using the LODES data, we were able to breakdown jobs for 
-                                 people who work in Wasco by census tracts. The first map shows all 
-                                 the jobs in Wasco and then number of each, and you can see just how 
-                                 sparse employment opportunities are for the South Wasco region.", 
+                               p("Using the LODES data, we were able to breakdown jobs for
+                                 people who work in Wasco by census tracts. The first map shows all
+                                 the jobs in Wasco and then number of each, and you can see just how
+                                 sparse employment opportunities are for the South Wasco region.",
                                  style = "font-size:18px")
                              ),
                              selectInput("sect", "What sectors?",
@@ -635,10 +636,10 @@ tabItem(tabName = "financial",
                                  div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                                  box(
                                    width = 12,
-                                   p("The South Wasco region follows the trends of rising median income in all of Oregon, 
-                                  but from 2017 to 2018 their rate increased.  From 2015 to 2018 the median household income 
-                                  in South Wasco rose about $7,000.  This is compared to a similar increase in Wasco County generally, 
-                                  and a $9,000 increase in the state of Oregon.", 
+                                   p("The South Wasco region follows the trends of rising median income in all of Oregon,
+                                  but from 2017 to 2018 their rate increased.  From 2015 to 2018 the median household income
+                                  in South Wasco rose about $7,000.  This is compared to a similar increase in Wasco County generally,
+                                  and a $9,000 increase in the state of Oregon.",
                                      style = "font-size:18px")
                                  ),
                        # Median income only here, poverty, income brackets are the questions
@@ -660,8 +661,8 @@ tabItem(tabName = "financial",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("The South Wasco region from 2015 to 2018 experienced a ~6% decline in poverty rates, 
-                                 while Wasco generally experienced a ~3% decline and the state of Oregon a ~3% as well.", 
+                               p("The South Wasco region from 2015 to 2018 experienced a ~6% decline in poverty rates,
+                                 while Wasco generally experienced a ~3% decline and the state of Oregon a ~3% as well.",
                                  style = "font-size:18px")
                              ),
                              leafletOutput("povertymap"),
@@ -682,12 +683,12 @@ tabItem(tabName = "financial",
             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
             tabPanel("ALICE Poverty Rate",
                box(width = 12,
-                p("ALICE is an acronym for Asset Limited, Income Constrained, Employed. 
-                These are households that earn above the federal poverty level, but not enough to 
-                afford a 'bare-bones' household budget. The ALICE threshold provides more granularity 
-                that is more suited for a rural community than the federal poverty line.  
-                Looking at South Wasco, over time we see only about a 2% increase in those who 
-                follow below the threshold, however in 2014, South Wasco experienced a peak of 37.25% of residents 
+                p("ALICE is an acronym for Asset Limited, Income Constrained, Employed.
+                These are households that earn above the federal poverty level, but not enough to
+                afford a 'bare-bones' household budget. The ALICE threshold provides more granularity
+                that is more suited for a rural community than the federal poverty line.
+                Looking at South Wasco, over time we see only about a 2% increase in those who
+                follow below the threshold, however in 2014, South Wasco experienced a peak of 37.25% of residents
                 falling below this threshold.", style = "font-size:16px")
                 ),
             plotlyOutput(outputId = "aliceplot")),
@@ -709,11 +710,11 @@ tabItem(tabName = "financial",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("We’ve broken the population down by income bracket for South Wasco and surrounding counties. 
-                                 Using the plot below, we can see that specifically in South Wasco, the income bracket 
-                                 held by most residents is 50K-75K, which is right around the median national income. 
-                                 It is important to note that South Wasco has more people in this bracket than Wasco County generally, 
-                                 and also that South Wasco has more people in the lowest income bracket than Wasco County generally.", 
+                               p("We’ve broken the population down by income bracket for South Wasco and surrounding counties.
+                                 Using the plot below, we can see that specifically in South Wasco, the income bracket
+                                 held by most residents is 50K-75K, which is right around the median national income.
+                                 It is important to note that South Wasco has more people in this bracket than Wasco County generally,
+                                 and also that South Wasco has more people in the lowest income bracket than Wasco County generally.",
                                  style = "font-size:16px")
                              ),
                            selectInput("incomedisyear", "Which year?",
@@ -752,20 +753,20 @@ tabItem(tabName = "housing",
                                  width = 12,
                                  p("The ratio of affordable housing is defined as the number housing units
                          where monthly costs are less than or equal to 30% of a household's income
-                         divided by the total number of occupied houses. Overall, most of the regions have comparable housing affordability to the state level, 
-                         ranging from 60-70%. Generally, we can observe that Wasco county increased from one of 
-                         the lowest rates of affordable housing in 2015 to one of the highest in 2018. 
-                         However, the margin of error is quite high for the Wasco county estimates 
-                         which means there is a possibility the true percentage of affordable housing 
-                         could be at either the lower or higher range of the estimates.", 
+                         divided by the total number of occupied houses. Overall, most of the regions have comparable housing affordability to the state level,
+                         ranging from 60-70%. Generally, we can observe that Wasco county increased from one of
+                         the lowest rates of affordable housing in 2015 to one of the highest in 2018.
+                         However, the margin of error is quite high for the Wasco county estimates
+                         which means there is a possibility the true percentage of affordable housing
+                         could be at either the lower or higher range of the estimates.",
                                    style = "font-size:16px")
                                ),
                       # Overall and ownership/rental (both lines and maps?)
                       # Full back with table and indicator snippet
                       plotlyOutput("housingplot"),
-                      h4("For this metric, the margin of error for the South Wasco region was 
-                         almost equal to that of the estimate. Therefore, the estimate of 
-                         affordable housing was too unreliable to include in this chart. 
+                      h4("For this metric, the margin of error for the South Wasco region was
+                         almost equal to that of the estimate. Therefore, the estimate of
+                         affordable housing was too unreliable to include in this chart.
                          ")),
                       tabPanel("Data", "Data Tab Content")
                     ))
@@ -784,11 +785,11 @@ tabItem(tabName = "housing",
                              box(
                                width = 12,
                                p("A Housing unit is owner occupied if the owner or co-owner lives in the unit
-                             even if it is mortgaged or not fully paid for. The South Wasco region has some of 
-                                 the highest owner occupied housing percentages accross the years compared to the rest 
-                                 of the regions, including the state and the rest of the county. 
-                                 However, it is important to note that there are strict land zoning laws in South Wasco 
-                                 which have restricted the development of rental properties in the area.", 
+                             even if it is mortgaged or not fully paid for. The South Wasco region has some of
+                                 the highest owner occupied housing percentages accross the years compared to the rest
+                                 of the regions, including the state and the rest of the county.
+                                 However, it is important to note that there are strict land zoning laws in South Wasco
+                                 which have restricted the development of rental properties in the area.",
                                  style = "font-size:16px")
                              ),
                     # Overall and ownership/rental (both lines and maps?)
@@ -829,13 +830,13 @@ tabItem(tabName = "social",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("For all years and all counties, 75% or more of the population identify as white. 
-                                 The only exception is Jefferson county where American Indian and Hispanic identities 
-                                 make up around 20% of the population each. The large American Indian pouplation is because 
-                                 the Warm Springs Reservation exists through parts of South Wasco and Northern Jefferson County. 
-                                 In South Wasco, Hispanic or Latino is identified as the second largest group. 
-                                 However, you will notice the margin of error is quite high for this estimate, 
-                                 which is shows that estimates from federal data sources tend to be unreliable for minority groups.", 
+                               p("For all years and all counties, 75% or more of the population identify as white.
+                                 The only exception is Jefferson county where American Indian and Hispanic identities
+                                 make up around 20% of the population each. The large American Indian pouplation is because
+                                 the Warm Springs Reservation exists through parts of South Wasco and Northern Jefferson County.
+                                 In South Wasco, Hispanic or Latino is identified as the second largest group.
+                                 However, you will notice the margin of error is quite high for this estimate,
+                                 which is shows that estimates from federal data sources tend to be unreliable for minority groups.",
                                  style = "font-size:16px")
                              ),
                              selectInput("raceyears", "What year?",
@@ -862,12 +863,12 @@ tabItem(tabName = "social",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("South Wasco School District is removed because the margins of error for all categories were too high, 
-                                 therefore making the estimates too unreliable to report. 
-                                 Generally, Wasco's percentages of family types for Children under 18 are comparable to the state level. 
-                                 Like other counties, the majority of children are in married parent families (~70%) 
-                                 followed by single mothers (~20%) and then single fathers (>10%). 
-                                 The estimates for Wasco county are stable over time. ", 
+                               p("South Wasco School District is removed because the margins of error for all categories were too high,
+                                 therefore making the estimates too unreliable to report.
+                                 Generally, Wasco's percentages of family types for Children under 18 are comparable to the state level.
+                                 Like other counties, the majority of children are in married parent families (~70%)
+                                 followed by single mothers (~20%) and then single fathers (>10%).
+                                 The estimates for Wasco county are stable over time. ",
                                  style = "font-size:16px")
                              ),
                              selectInput("familyyears", "What year?",
@@ -894,10 +895,10 @@ tabItem(tabName = "social",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("The distribution of highest educational degree attained in South Wasco 
-                                 has stayed fairly consistent over the years. It has one of the lowest percentages 
-                                 of adults who have a bachelor's degree or higher. But the large majority 
-                                 of the population have at least a high school diploma or equivalent.", 
+                               p("The distribution of highest educational degree attained in South Wasco
+                                 has stayed fairly consistent over the years. It has one of the lowest percentages
+                                 of adults who have a bachelor's degree or higher. But the large majority
+                                 of the population have at least a high school diploma or equivalent.",
                                  style = "font-size:16px")
                              ),
                              selectInput("degreeyears", "What year?",
@@ -914,6 +915,7 @@ tabItem(tabName = "methods",
           boxPlus(
             title = "Methodology",
             closable = FALSE,
+            height = "1300px",
             width = NULL,
             enable_label = TRUE,
             solidHeader = TRUE,
@@ -1241,6 +1243,23 @@ server <- function(input, output, session) {
                           fixedColumns = list(
                             leftColumns = 3,
                             heightMatch = 'none'))))})
+## SERVER: TAB - Overview ------
+## leafletOutput("overviewmap") -------
+  output$overviewmap <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      setView(-121, 45.2, zoom = 9) %>%
+      addPolygons(data = filter(neighboring_counties, NAME != "Wasco"), color = "#696969", label = ~NAME, group = "Basemap") %>%
+      addPolygons(data = countyline, color = "#404788FF", label = "Wasco", opacity = 1, group = "Basemap") %>%
+      addPolygons(data = swsd, color = "#440154FF", opacity = 1, label = ~NAME, group = "Basemap") %>%
+      addPolygons(data = townships, color = "blue", opacity = .4, weight = 1, label = ~NAME, group = "Basemap") %>%
+      addPolygons(data = unincorporated, color = "blue", opacity = .4, weight = 1, label = ~NAME, group = "Basemap") %>%
+      addPolylines(data = roads,
+                   color = "gray", weight = .75, group = "Basemap") %>%
+      addLegend(colors = c("#404788FF", "#440154FF", "#696969", "blue"),
+                labels = c("Wasco County", "South Wasco County School District", "Neighboring Counties", "Townships and Unincorporated Areas"),
+                title = "Boundary Lines")
+  })
 ## SERVER: TAB - Food systems cluster ----
 ## SERVER: PANEL - Food systems map ----
   ## Here is a reactive function filter the isochrone data by the selected input. I think the issue could be here because this function is not reacting to deselection.
@@ -1728,7 +1747,7 @@ server <- function(input, output, session) {
         mutate(variable = recode(variable, "On.Time.Grad.Rate" = "On Time Graduation",
                                  "Teacher.Experience.Pct" = "Teacher Experience",
                                  "Percent.ELA.Proficient.Change" = "ELA Proficiency Change"))
-      
+
       ggplot(ed.melt.increase, aes(y = District.Name, x = year, fill = value)) +
         geom_tile(color = "#ADB5BD") + #gray
         geom_text(aes(label = round(value,0)), color = "black", size = 3.5) +
@@ -1748,7 +1767,7 @@ server <- function(input, output, session) {
       #plot
       #benefits
     }
-    
+
     else if (input$ed == "Barriers"){
       #Barriers
       ed.melt.decrease = melt(ed.decrease, id.vars = c("year", "District.Name"),
@@ -1771,7 +1790,7 @@ server <- function(input, output, session) {
               strip.text.y = element_text(size = 4, color = "black", face = "bold"),
               legend.key.size = unit(1.5, "cm")) +
         labs(title = "Barriers to Student Success", x ="School Year", y = "", fill="Percent")
-      
+
     }
   })
 
@@ -3369,21 +3388,21 @@ server <- function(input, output, session) {
 ## plotlyOutput("housingplot") ------
 
   output$housingplot <- renderPlotly({
-    ggplotly(ggplot(filter(acs_counties, NAME != "South Wasco County School District 1, OR"), 
+    ggplotly(ggplot(filter(acs_counties, NAME != "South Wasco County School District 1, OR"),
                     aes(x=year, y=affordable_housing_all_perc, group = NAME, color = south_wasco,
                           text = paste0("Region: ", NAME,
                                         "<br>Year: ", year,
                                         "<br>Affordable Housing: ", round(affordable_housing_all_perc, digits = 1), "%",
                                         "<br>Margin of Error: ", round(affordable_housing_all_perc_moe, digits = 1), "%"))) +
-               geom_line(size = 1) + 
+               geom_line(size = 1) +
                geom_point(size = 1.5) +
                scale_colour_manual(name = "Region", values = c(graypal, viridis(3, option = "D")))  +
-               theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") + 
-               xlab("Year"), tooltip = "text") %>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               theme_minimal() + ggtitle("Affordable Housing 2015-2018") + ylab("Affordable Housing") +
+               xlab("Year"), tooltip = "text") %>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
-    
+
   })
 
 ## SERVER: PANEL - Rent vs own -----
@@ -4688,29 +4707,29 @@ server <- function(input, output, session) {
     family_moe <- family %>% select(NAME, year, family_married_parent_perc_moe, family_single_parent_female_perc_moe,
                                     family_single_parent_male_perc_moe,
                                     family_children_nonfamily_perc_moe)
-    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>% 
+    family_moe <- melt(family_moe, id.vars = c("NAME","year"), measure.vars = colnames(family_moe)[-c(1,2)]) %>%
       rename("moe" ="value") %>% mutate(variable =gsub("_moe", "", variable))
     family_perc <- melt(family_perc, id.vars = c("NAME","year"), measure.vars = colnames(family_perc)[-c(1,2)])
     family_table <- merge(x = family_perc, y = family_moe, by=c("NAME", "variable", "year")) %>%
-      mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents", 
+      mutate(variable = recode_factor(variable, "family_married_parent_perc" ="Married Parents",
                                       "family_single_parent_perc" = "Single Parent",
                                       "family_single_parent_female_perc" = "Single Mother",
                                       "family_single_parent_male_perc" = "Single Father",
                                       "family_children_nonfamily_perc" = "Living with Nonfamily"))
     #grouped bar chart for family type
     ggplotly(ggplot(filter(family_table, year == input$familyyears, variable != "Living with Nonfamily",
-                           NAME != "South Wasco County School District 1, OR"), aes(x = NAME, y = value, fill = variable, 
+                           NAME != "South Wasco County School District 1, OR"), aes(x = NAME, y = value, fill = variable,
                                                                                     text = paste0("Region: ", NAME,
                                                                                                   "<br>Year: ", year,
                                                                                                   "<br>Percent of Children: ", round(value, digits = 1), "%",
                                                                                                   "<br>Margin of Error: ", round(moe, digits = 1), "%"))) +
-               geom_col(position = "dodge") + 
+               geom_col(position = "dodge") +
                scale_fill_manual(values = viridis(4, option="D"), name="Family Type")  +
                ylab("% of children")+xlab("") + coord_flip()+ theme_minimal() +
-               ggtitle(paste0("Family Structure for Children Under 18 <br>", input$familyyears)), tooltip = "text")%>% 
-      config(displayModeBar = "static", displaylogo = FALSE, 
+               ggtitle(paste0("Family Structure for Children Under 18 <br>", input$familyyears)), tooltip = "text")%>%
+      config(displayModeBar = "static", displaylogo = FALSE,
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
-                                         "hoverCompareCartesian","resetScale2d")) 
+                                         "hoverCompareCartesian","resetScale2d"))
   })
 
 ## SERVER: PANEL - Education attainment -----

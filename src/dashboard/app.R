@@ -2025,16 +2025,26 @@ server <- function(input, output, session) {
 ## plotlyOutput("flows") ------
 
   output$flowsplot <- renderPlotly({
-    if (input$flows == "Inflows"){
-      top_12_in_melt <- melt(data = top_12_in, id.vars = c("year"),
-                             measure.vars = colnames(top_12_in)[-length(top_12_in)]) %>%
-        rename(c("county" = "variable", "jobs" = "value")) %>%
-        mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
-                                                      "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
-                                     other_level = "Other Counties"),
-               neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
-                                                        "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
 
+    top_12_in_melt <- melt(data = top_12_in, id.vars = c("year"),
+                           measure.vars = colnames(top_12_in)[-length(top_12_in)]) %>%
+      rename(c("county" = "variable", "jobs" = "value")) %>%
+      mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
+                                                    "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
+                                   other_level = "Other Counties"),
+             neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
+                                                      "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
+
+    top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"),
+                            measure.vars = colnames(top_12_out)[-length(top_12_out)]) %>%
+      rename(c("county" = "variable", "jobs" = "value"))%>%
+      mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
+                                                    "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
+                                   other_level = "Other Counties"),
+             neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
+                                                      "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
+
+    if (input$flows == "Inflows"){
       ggplotly(ggplot(top_12_in_melt, aes(x=year, y=jobs, group = county, color = neighbors,
                                           text = paste0("County: ", county,
                                                         "<br>Year: ", year,
@@ -2043,6 +2053,7 @@ server <- function(input, output, session) {
                  geom_point(size = 1.5) +
                  scale_colour_manual(name = "County", values = c(graypal, viridis(5, option = "D"))) +
                  scale_x_continuous(breaks = 0:2100) +
+                 ylim(min(top_12_in_melt$jobs), max(top_12_out_melt$jobs)) +
                  theme_minimal() + ggtitle("Number of jobs flowing into Wasco County (2015-2017)") +
                  ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>%
         config(displayModeBar = "static", displaylogo = FALSE,
@@ -2051,17 +2062,6 @@ server <- function(input, output, session) {
 
     }
     else if (input$flows == "Outflows"){
-      top_12_out_melt <- melt(data = top_12_out, id.vars = c("year"),
-                              measure.vars = colnames(top_12_out)[-length(top_12_out)]) %>%
-        rename(c("county" = "variable", "jobs" = "value"))%>%
-        mutate(neighbors = fct_other(county, keep = c("Hood River County, OR", "Klickitat County, WA",
-                                                      "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA"),
-                                     other_level = "Other Counties"),
-               neighbors = factor(neighbors , levels= c("Other Counties","Hood River County, OR", "Klickitat County, WA",
-                                                        "Jefferson County, OR", "Sherman County, OR", "Skamania County, WA")))
-
-
-
       ggplotly(ggplot(top_12_out_melt, aes(x=year, y=jobs, group = county, color = neighbors,
                                            text = paste0("County: ", county,
                                                          "<br>Year: ", year,
@@ -2070,6 +2070,7 @@ server <- function(input, output, session) {
                  geom_point(size = 1.5) +
                  scale_colour_manual(name = "County", values = c(graypal, viridis(5, option = "D"))) +
                  scale_x_continuous(breaks = 0:2100) +
+                 ylim(min(top_12_in_melt$jobs), max(top_12_out_melt$jobs)) +
                  theme_minimal() + ggtitle("Number of jobs flowing out of Wasco County (2015-2017)") +
                  ylab("Number of Jobs") + xlab("Year"), tooltip = "text") %>%
         config(displayModeBar = "static", displaylogo = FALSE,

@@ -395,10 +395,9 @@ menuItem(
                     width = "12",
                     selected = "Water Use",
                     tabPanel("Water Use",
-                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175152.svg", width = "15%"), style="text-align: center;"),
-                              box(
-                                 width = 12,
-                                 p("Water use is an interesting infrastructure cluster to analyze because it can help
+                            div(img(src="https://image.flaticon.com/icons/svg/3175/3175152.svg", width = "15%"), style="text-align: center;"),
+                            hr(),
+                            p("Water use is an interesting infrastructure cluster to analyze because it can help
                                    describe the economic climate and importance of certain sectors through resource allocation.
                                    Over time we can see that Commercial water use is rising drastically, and then the
                                    category stops being recorded.  At the same time, new categories like Aquaculture and Mining
@@ -406,9 +405,9 @@ menuItem(
                                    Of these, aquaculture had peaked in 2010 to levels similar to Commercial in 1995
                                    but is now falling.  These findings may point to decline in the profitability of the
                                    aquaculture sector in the recent years.",
-                                  style = "font-size:14px")
-                              ),
-                             plotlyOutput("waterplot")
+                            style = "font-size:14px"),
+                            hr(),
+                            plotlyOutput("waterplot")
                     ),
                     tabPanel("Data", "Data Tab Content")
                   ))
@@ -682,15 +681,15 @@ tabItem(tabName = "financial",
             selected = "ALICE Poverty Rate",
             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
             tabPanel("ALICE Poverty Rate",
-               box(width = 12,
+                     hr(),
                 p("ALICE is an acronym for Asset Limited, Income Constrained, Employed.
                 These are households that earn above the federal poverty level, but not enough to
                 afford a 'bare-bones' household budget. The ALICE threshold provides more granularity
                 that is more suited for a rural community than the federal poverty line.
                 Looking at South Wasco, over time we see only about a 2% increase in those who
                 follow below the threshold, however in 2014, South Wasco experienced a peak of 37.25% of residents
-                falling below this threshold.", style = "font-size:16px")
-                ),
+                falling below this threshold.", style = "font-size:16px"),
+                hr(),
             plotlyOutput(outputId = "aliceplot")),
             tabPanel("Data", "Data Tab Content")
         ))
@@ -749,9 +748,8 @@ tabItem(tabName = "housing",
                       selected = "Affordable Housing",
                       div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                       tabPanel("Affordable Housing",
-                               box(
-                                 width = 12,
-                                 p("The ratio of affordable housing is defined as the number housing units
+                               hr(),
+                               p("The ratio of affordable housing is defined as the number housing units
                          where monthly costs are less than or equal to 30% of a household's income
                          divided by the total number of occupied houses. Overall, most of the regions have comparable housing affordability to the state level,
                          ranging from 60-70%. Generally, we can observe that Wasco county increased from one of
@@ -759,8 +757,8 @@ tabItem(tabName = "housing",
                          However, the margin of error is quite high for the Wasco county estimates
                          which means there is a possibility the true percentage of affordable housing
                          could be at either the lower or higher range of the estimates.",
-                                   style = "font-size:16px")
-                               ),
+                                   style = "font-size:16px"),
+                               hr(),
                       # Overall and ownership/rental (both lines and maps?)
                       # Full back with table and indicator snippet
                       plotlyOutput("housingplot"),
@@ -782,16 +780,15 @@ tabItem(tabName = "housing",
                     selected = "Home Ownership",
                     tabPanel("Home Ownership",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
-                             box(
-                               width = 12,
+                             hr(),
                                p("A Housing unit is owner occupied if the owner or co-owner lives in the unit
                              even if it is mortgaged or not fully paid for. The South Wasco region has some of
                                  the highest owner occupied housing percentages accross the years compared to the rest
                                  of the regions, including the state and the rest of the county.
                                  However, it is important to note that there are strict land zoning laws in South Wasco
                                  which have restricted the development of rental properties in the area.",
-                                 style = "font-size:16px")
-                             ),
+                                 style = "font-size:16px"),
+                             hr(),
                     # Overall and ownership/rental (both lines and maps?)
                     # Full back with table and indicator snippet
                     plotlyOutput("rentownplot")),

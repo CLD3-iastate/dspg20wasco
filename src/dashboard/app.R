@@ -266,6 +266,15 @@ menuItem(
                     selected = "Food Map",
                     tabPanel("Food Map",
                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
+                             box(
+                               width = 12,
+                               p("Because of our particular focus on food systems, creating the interactive food systems map 
+                                 was a critical piece of this project. Food insecurity is a complex idea, as is 
+                                 geographic isolation from food. Here, we've mapped out this idea, with a special focus on 
+                                 quality and affordable food sources. Notably, there are many areas of South Wasco, 
+                                 particularly in the eastern townships, that experience low access to quality food sources.", 
+                                 style = "font-size:18px")
+                             ),
                              selectInput("iso", "Show driving time for...",
                                          choices = isochrones$name,
                                          selectize = TRUE,
@@ -289,38 +298,24 @@ menuItem(
                     selected = "Food Insecurity",
                     tabPanel("Food Insecurity",
                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
+                             box(
+                               width = 12,
+                               p("Food insecurity is described as a household-level economic and social condition 
+                                 characterized by limited or uncertain access to food. To calculate food insecurity, 
+                                 we've used Feeding America's Map the Meal Gap research. Both the overall and childhood 
+                                 food insecurity rate for Wasco County has declined slightly from 2014-2017", 
+                                 style = "font-size:18px")
+                             ),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
                                          c("Overall", "Childhood")),
                              leafletOutput("foodinsecuritymap"),
                              box(
-                               width = 4,
-                               background = "light-blue",
-                               p(em("Citation for 2014: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard. 
-                                                Map the Meal Gap 2016: A Report on County and Congressional District Food Insecurity 
-                                                and County Food Cost in the United States in 2014. Feeding America, 2016." , style = "font-size:8px"))
-                             ),
-                             box(
-                               width = 4,
-                               background = "light-blue",
-                               p(em("Citation for 2015: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard. Map the Meal Gap 2017: 
-                                            A Report on County and Congressional District Food Insecurity and County Food Cost in the United States in 2015. 
-                                            Feeding America, 2017." , style = "font-size:8px"))
-                             ),
-                             box(
-                               width = 4,
-                               background = "light-blue",
-                               p(em("Citation for 2016: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard. Map the Meal Gap 2017: 
-                                            A Report on County and Congressional District Food Insecurity and County Food Cost in the United States in 2015. 
-                                            Feeding America, 2017." , style = "font-size:8px"))
-                             ),
-                             box(
-                               width = 4,
-                               background = "light-blue",
-                               p(em("Citation for 2017: Gundersen, C., A. Dewey, M. Kato, A. Crumbaugh & M. Strayer. Map the Meal Gap 2019: 
-                                            A Report on County and Congressional District Food Insecurity and County Food Cost in the United States 
-                                            in 2017. Feeding America, 2019." , style = "font-size:8px"))
+                               width = 12,
+                               p(em("Data Citation: Gundersen, C., A. Dewey, A. Crumbaugh, M. Kato & E. Engelhard.
+                                    Map the Meal Gap 2016-2019:  A Report on County and Congressional District 
+                                    Food Insecurity and County Food Cost in the United States in 2014-2017. 
+                                    Feeding America, 2016-2019." , style = "font-size:8px"))
                              )
-
                     ),
                     tabPanel("Data", "Data Tab Content")
                   ))
@@ -336,6 +331,14 @@ menuItem(
                     selected = "Crop Map",
                     tabPanel("Crop Map",
                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
+                             box(
+                               width = 12,
+                               p("Local farming is an integral piece of a thriving food system. 
+                                 Here we've mapped the acreage dedicated to several crops throughout Wasco County. 
+                                 In the future, we would like to find data sources to measure consumption of 
+                                 local food to complement this measure.", 
+                                 style = "font-size:18px")
+                             ),
                              selectInput("crops", "Which crop?",
                                          c("Winter Wheat", "Barley",
                                            "Alfalfa", "Cherries")),
@@ -391,8 +394,21 @@ menuItem(
                     width = "12",
                     selected = "Water Use",
                     tabPanel("Water Use",
-div(img(src="https://image.flaticon.com/icons/svg/3175/3175152.svg", width = "15%"), style="text-align: center;"),
-                             plotlyOutput("waterplot")),
+                              div(img(src="https://image.flaticon.com/icons/svg/3175/3175152.svg", width = "15%"), style="text-align: center;"),
+                              box(
+                                 width = 12,
+                                 p("Water use is an interesting infrastructure cluster to analyze because it can help 
+                                   describe the economic climate and importance of certain sectors through resource allocation.  
+                                   Over time we can see that Commercial water use is rising drastically, and then the
+                                   category stops being recorded.  At the same time, new categories like Aquaculture and Mining 
+                                   appear, which may mean that Commercial water use was split into two subcategories. 
+                                   Of these, aquaculture had peaked in 2010 to levels similar to Commercial in 1995
+                                   but is now falling.  These findings may point to decline in the profitability of the 
+                                   aquaculture sector in the recent years.", 
+                                  style = "font-size:14px")
+                              ),
+                             plotlyOutput("waterplot")
+                    ),
                     tabPanel("Data", "Data Tab Content")
                   ))
                 ),
@@ -433,30 +449,25 @@ tabItem(tabName = "learn",
                     tabPanel("Education",
                              div(img(src="https://image.flaticon.com/icons/svg/1089/1089128.svg", width = "15%"), style="text-align: center;"),
                              box(
-                               width = 6,
-                               p("Benefits to student success: The three metrics of on time graduation, teacher experience and 
-                                 english language arts proficiency changes between 3rd and 8th grade are 
-                                 indicators of well resourced education areas where students are succeeding. 
-                                 Teacher experience is defined as the percentage of teachers in the district 
-                                 who are certified and have taught for at least three years. Note that there are gray
-                                 cells under this variable because they were not collected by the department of education for those years.", 
+                               width = 12,
+                               p("K-12 education is a formative experience that can increase economic and social mobility. 
+                                 We present heat maps of educational indicators that can effect student mobility below. 
+                                 Darker green corresponds to an increase of benefits to success and darker purple corresponds 
+                                 to an increase in barriers to student success. South Wasco has high percentages for on time 
+                                 graduation and teacher experience, implying the district is well resourced in these areas. 
+                                 However, all of the students are economically disadvantaged and chronic absenteeism rates are higher 
+                                 than nearby districts. This shows a need for more resources to aid students in overcoming 
+                                 the barriers that may be inhibiting their success in school and beyond.", 
+                                 style = "font-size:14px"),
+                               br(),
+                               p(" Teacher experience is defined as the percentage of teachers in the district who are certified 
+                                 and have taught for at least three years (not collected for 2016 and 2017). 
+                                 ELA Proficient Change is the percent change between 3rd and 8th grade in English Language Arts Proficiency", 
                                  style = "font-size:14px")
-                             ),
-                             box(
-                               width = 6,
-                               p("Barriers to student success: The three factors of economic disadvantage, chronic absenteeism and 
-                                 dropout rates are indicators that show if more resources are needed to aid students 
-                                 in overcome the barriers that may be inhibiting their success in school and beyond.", 
-                                 style = "font-size:14px")
-                             ),
+                                  ),
                              selectInput("ed", "Educational Benefits or Educational Barriers?",
                                          c("Benefits", "Barriers")),
-                              plotOutput("edplot", width = "100%", height = 800),
-                             box(
-                               width = 6,
-                               p("Conclusion here", 
-                                 style = "font-size:14px")
-                             )
+                              plotOutput("edplot", width = "100%", height = 800)
                     ),
                     tabPanel("Data", "Data Tab Content"))
         ))), # END OF EDUCATION
@@ -508,7 +519,7 @@ conditionalPanel(
                     width = "12",
                     selected = "Labor Force Rate",
                     tabPanel("Labor Force Rate",
-div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
+                             div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("The Labor force includes all people classified in the
@@ -774,7 +785,7 @@ tabItem(tabName = "housing",
                                width = 12,
                                p("A Housing unit is owner occupied if the owner or co-owner lives in the unit
                              even if it is mortgaged or not fully paid for. The South Wasco region has some of 
-                                 the highest homeownership percentages accross the years compared to the rest 
+                                 the highest owner occupied housing percentages accross the years compared to the rest 
                                  of the regions, including the state and the rest of the county. 
                                  However, it is important to note that there are strict land zoning laws in South Wasco 
                                  which have restricted the development of rental properties in the area.", 
@@ -818,7 +829,7 @@ tabItem(tabName = "social",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("For all years and all counties, the 75% or more of the population identify as white. 
+                               p("For all years and all counties, 75% or more of the population identify as white. 
                                  The only exception is Jefferson county where American Indian and Hispanic identities 
                                  make up around 20% of the population each. The large American Indian pouplation is because 
                                  the Warm Springs Reservation exists through parts of South Wasco and Northern Jefferson County. 

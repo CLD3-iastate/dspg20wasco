@@ -22,28 +22,3 @@ acs_tracts <- ("Data/shps/acs_tracts/acs_tracts.shp") %>% st_read
 
 
 
-### OSM data DO NOT USE ----
-## roads
-# big
-#q <- getbb("Wasco County United States")%>%
-  #opq()%>%
-  #add_osm_feature(key = "highway",
-                  #value = c("motorway", "primary", "motorway_link", "primary_link"))
-#doc <- osmdata_xml(q, "~/git/dspg20wasco/data/shps/big_streets.osm")
-#big_streets <- osmdata_sf(q, doc)
-# medium
-#q <- getbb("Wasco County United States")%>%
-  #opq()%>%
-  #add_osm_feature(key = "highway",
-                  #value = c("secondary", "tertiary", "secondary_link", "tertiary_link"))
-#doc <- osmdata_xml(q, "~/git/dspg20wasco/data/shps/med_streets.osm")
-#med_streets <- osmdata_sf(q, doc)
-#q <- getbb("Wasco County United States")%>%
-  #opq()%>%
-  #add_osm_feature(key = "highway",
-                  #value = c("residential", "living_street",
-                            #"unclassified",
-                            #"service", "footway"
-                 # ))
-#doc <- osmdata_xml(q, "~/git/dspg20wasco/data/shps/small_streets.osm")
-#small_streets <- osmdata_sf(q, doc)

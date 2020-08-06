@@ -2168,7 +2168,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of All Jobs<br>by Census Tract<br>in Wasco County",
+          title = "Number of All Jobs<br>by Census Block<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -2219,7 +2219,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of Goods Producing<br> Jobs by Census Tract<br>in Wasco County",
+          title = "Number of Goods Producing<br> Jobs by Census Block<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),
@@ -2270,7 +2270,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of Trade, Transportation,<br>and Utilities Jobs<br>by Census Tract in<br>
+          title = "Number of Trade, Transportation,<br>and Utilities Jobs<br>by Census Block in<br>
           Wasco County",
           na.label = "NA") %>%
         addPolygons(
@@ -2322,7 +2322,7 @@ server <- function(input, output, session) {
             n = length(cuts)
             p = paste0(round(p * 100), '%')
             cuts = paste0(formatC(cuts[-n]), " - ", formatC(cuts[-1]))},
-          title = "Number of All Other Services<br>Sector Jobs by Census Tract<br>in Wasco County",
+          title = "Number of All Other Services<br>Sector Jobs by Census Block<br>in Wasco County",
           na.label = "NA") %>%
         addPolygons(
           data = st_as_sf(agg_16),

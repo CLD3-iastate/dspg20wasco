@@ -158,13 +158,13 @@ ui <- dashboardPagePlus(
         icon = icon("database"),
         menuSubItem(
           tabName = "methods",
-          text = "Methods",
-          icon = icon("database")
+          text = "Methods & Frameworks",
+          icon = icon("project-diagram")
         ),
         menuSubItem(
           tabName = "data",
-          text = "Data",
-          icon = icon("database")
+          text = "Data Collection",
+          icon = icon("search")
         )
       ),
 
@@ -229,9 +229,6 @@ menuItem(
                     closable = FALSE,
                     width = NULL,
                     enable_label = TRUE,
-                    label_text = 1,
-                    label_status = "danger",
-                    status = "warning",
                     solidHeader = TRUE,
                     collapsible = TRUE,
                     h1("2020 South Wasco Region Project"),
@@ -261,35 +258,37 @@ menuItem(
                 conditionalPanel(
                   condition = "input.foodselect == 'Foodmap'",
                   h2("Interactive food systems map"),
+                  fluidRow(
                   tabBox(
-                    #tags$head(
-                    #  tags$style(HTML(" #tabBox { height:90vh !important; } "))
-                    #),
                     id = 1,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Food Map",
                     tabPanel("Food Map",
-                             #img(src="food_bkgrnd.png", width = "100%"),
+                             div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
+                             selectInput("iso", "Show driving time for...",
+                                         choices = isochrones$name,
+                                         selectize = TRUE,
+                                         multiple = TRUE,
+                                         width = "500px"),
                              leafletOutput("mymap")
                     ),
                     tabPanel("Data",
                              DTOutput("foodDT"))
-                  )
+                  ))
 
                   ),
 ## UI: PANEL - Food insecurity  ----
                 conditionalPanel(
                   condition = "input.foodselect == 'Insecurity'",
+                  fluidRow(
                   tabBox(
                     id = 2,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Food Insecurity",
                     tabPanel("Food Insecurity",
-                             #img(src="food_bkgrnd.png", width = "100%"),
+                             div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
                              selectInput("ratetype", "Which Food Insecurity Rate?",
                                          c("Overall", "Childhood")),
                              leafletOutput("foodinsecuritymap"),
@@ -324,26 +323,26 @@ menuItem(
 
                     ),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                   ),
 ## UI: PANEL - Local crops panel -----
                 conditionalPanel(
                   condition = "input.foodselect == 'Crops'",
+                  fluidRow(
                   tabBox(
                     id = 4,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Crop Map",
                     tabPanel("Crop Map",
-                             #img(src="food_bkgrnd.png", width = "100%"),
+                             div(img(src="https://image.flaticon.com/icons/svg/3175/3175153.svg", width = "15%"), style="text-align: center;"),
                              selectInput("crops", "Which crop?",
                                          c("Winter Wheat", "Barley",
                                            "Alfalfa", "Cherries")),
                              leafletOutput("cropmap")
                     ),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                   )
         )), # END OF FOOD SYSTEMS CLUSTER
 
@@ -385,17 +384,17 @@ menuItem(
 ## UI: PANEL - Water -------
                 conditionalPanel(
                   condition = "input.infrastructureselect == 'Water'",
+                  fluidRow(
                   tabBox(
                     id = 5,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Water Use",
                     tabPanel("Water Use",
-                             #img =
+div(img(src="https://image.flaticon.com/icons/svg/3175/3175152.svg", width = "15%"), style="text-align: center;"),
                              plotlyOutput("waterplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 ),
 ## UI: PANEL - Transit -------
                conditionalPanel(
@@ -425,13 +424,14 @@ tabItem(tabName = "learn",
                   #condition = "input.learnearnselect == 'Education'",
                   # Education heatmaps
                   # Data tab will have data and indicator snippet/sources
-                  tabBox(
+          fluidRow(
+          tabBox(
                     id = 6,
                     side = "left",
-                    height = "500px",
                     width = "12",
                     selected = "Education",
                     tabPanel("Education",
+                             div(img(src="https://image.flaticon.com/icons/svg/1089/1089128.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 6,
                                p("Benefits to student success: The three metrics of on time graduation, teacher experience and 
@@ -458,7 +458,7 @@ tabItem(tabName = "learn",
                                  style = "font-size:14px")
                              )
                     ),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", "Data Tab Content"))
         ))), # END OF EDUCATION
 # Employment select panel
 tabItem(tabName = "earn",
@@ -479,13 +479,14 @@ tabItem(tabName = "earn",
 # UI: PANEL - Employment ratio  -------
 conditionalPanel(
   condition = "input.employmentselect == 'EmpRatio'",
+  fluidRow(
   tabBox(
     id = 7,
     side = "left",
-    height = "250px",
     width = "12",
     selected = "Employment Ratio",
     tabPanel("Employment Ratio",
+             div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
              box(
                width = 12,
                p("Over four years the employment ratio (number of employed / population) 
@@ -493,20 +494,21 @@ conditionalPanel(
         In 2018, South Wasco has about a 10% lower employment ratio than the state of Oregon.", 
                  style = "font-size:18px")
              ),
-             leafletOutput("percempmap"),
+            leafletOutput("percempmap"),
              plotlyOutput("empratioplot")),
   tabPanel("Data", "Data Tab Content")
-  )),
+  ))),
 # UI: PANEL - Label force participation rate -------
                 conditionalPanel(
                   condition = "input.employmentselect == 'LaborForce'",
+                  fluidRow(
                   tabBox(
                     id = 8,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Labor Force Rate",
                     tabPanel("Labor Force Rate",
+div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("The Labor force includes all people classified in the
@@ -519,18 +521,19 @@ conditionalPanel(
                              leafletOutput("laborforcemap"),
                              plotlyOutput("laborforceplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 ),
 # UI: PANEL - Job flows  -------
                         conditionalPanel(
                           condition = "input.employmentselect == 'Flows'",
+                          fluidRow(
                           tabBox(
                             id = 9,
                             side = "left",
-                            height = "250px",
                             width = "12",
                             selected = "Job Flows",
                             tabPanel("Job Flows",
+                                     div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
                                      box(
                                        width = 12,
                                        p("Job inflows are the number of employees from
@@ -548,18 +551,19 @@ conditionalPanel(
                             plotlyOutput("flowsplot")
                             ),
                             tabPanel("Data", "Data Tab Content")
-                          )
+                          ))
                         ),
 ## UI: PANEL - Industry Sectors  ------
                 conditionalPanel(
                   condition = "input.employmentselect == 'Sectors'",
+                  fluidRow(
                   tabBox(
                     id = 10,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Job Sectors",
                     tabPanel("Job Sectors",
+                             div(img(src="https://image.flaticon.com/icons/svg/1724/1724966.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("Using the LODES data, we were able to breakdown jobs for 
@@ -574,7 +578,7 @@ conditionalPanel(
                                            Services" = "AllOther")),
                              leafletOutput("odleaf")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 )
         ), ## END OF EMPLOYMENT
 
@@ -610,13 +614,14 @@ tabItem(tabName = "financial",
 ## UI: PANEL - Median income  ------
                     conditionalPanel(
                       condition = "input.financialselect == 'MedIncome'",
+                      fluidRow(
                       tabBox(
                         id = 11,
                         side = "left",
-                        height = "250px",
                         width = "12",
                         selected = "Median Income",
                         tabPanel("Median Income",
+                                 div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                                  box(
                                    width = 12,
                                    p("The South Wasco region follows the trends of rising median income in all of Oregon, 
@@ -625,22 +630,23 @@ tabItem(tabName = "financial",
                                   and a $9,000 increase in the state of Oregon.", 
                                      style = "font-size:18px")
                                  ),
-                        # Median income only here, poverty, income brackets are the questions
+                       # Median income only here, poverty, income brackets are the questions
                         leafletOutput("medincomemap"),
                         plotlyOutput("medincomeplot")),
                         tabPanel("Data", "Data Tab Content")
-                      )
+                      ))
                     ),
 ## UI: PANEL - Poverty rate ------
                 conditionalPanel(
                   condition = "input.financialselect == 'Poverty'",
+                  fluidRow(
                   tabBox(
                     id = 12,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Poverty Rate",
                     tabPanel("Poverty Rate",
+                             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("The South Wasco region from 2015 to 2018 experienced a ~6% decline in poverty rates, 
@@ -650,18 +656,19 @@ tabItem(tabName = "financial",
                              leafletOutput("povertymap"),
                              plotlyOutput(outputId = "povertyplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 ),
 ## UI: PANEL - ALICE Threshold rate ------
 
       conditionalPanel(
         condition = "input.financialselect == 'ALICE'",
-          tabBox(
+        fluidRow(
+        tabBox(
             id = 12,
             side = "left",
-            height = "250px",
             width = "12",
             selected = "ALICE Poverty Rate",
+            div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
             tabPanel("ALICE Poverty Rate",
                box(width = 12,
                 p("ALICE is an acronym for Asset Limited, Income Constrained, Employed. 
@@ -674,20 +681,21 @@ tabItem(tabName = "financial",
                 ),
             plotlyOutput(outputId = "aliceplot")),
             tabPanel("Data", "Data Tab Content")
-        )
+        ))
       ),
 
 ## UI: PANEL - Income Distribution  ------
                 conditionalPanel(
                   condition = "input.financialselect == 'DisIncome'",
+                  fluidRow(
                   tabBox(
                     id = 13,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Income Distribution",
                     # Median income only here, poverty, income brackets are the questions
                     tabPanel("Income Distribution",
+                             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("We’ve broken the population down by income bracket for South Wasco and surrounding counties. 
@@ -702,7 +710,7 @@ tabItem(tabName = "financial",
                            leafletOutput("incomedismap"),
                            plotlyOutput("incomedisplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 )
 ), # END FINANCIAL
 # Housing select question
@@ -721,12 +729,13 @@ tabItem(tabName = "housing",
 ## UI: PANEL - Affordable housing -----
                   conditionalPanel(
                     condition = "input.housingselect == 'Housing'",
+                    fluidRow(
                     tabBox(
                       id = 14,
                       side = "left",
-                      height = "250px",
                       width = "12",
                       selected = "Affordable Housing",
+                      div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                       tabPanel("Affordable Housing",
                                box(
                                  width = 12,
@@ -748,18 +757,19 @@ tabItem(tabName = "housing",
                          affordable housing was too unreliable to include in this chart. 
                          ")),
                       tabPanel("Data", "Data Tab Content")
-                    )
+                    ))
                   ),
 ## UI: PANEL - Rent vs own -------
                 conditionalPanel(
                   condition = "input.housingselect == 'RentOwn'",
+                  fluidRow(
                   tabBox(
                     id = 15,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Home Ownership",
                     tabPanel("Home Ownership",
+                             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("A Housing unit is owner occupied if the owner or co-owner lives in the unit
@@ -770,12 +780,11 @@ tabItem(tabName = "housing",
                                  which have restricted the development of rental properties in the area.", 
                                  style = "font-size:16px")
                              ),
-                             h4(""),
                     # Overall and ownership/rental (both lines and maps?)
                     # Full back with table and indicator snippet
                     plotlyOutput("rentownplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 )
 ), # END HOUSING
 # Social select question
@@ -799,13 +808,14 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
+                  fluidRow(
                   tabBox(
                     id = 16,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Race",
                     tabPanel("Race",
+                             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("For all years and all counties, the 75% or more of the population identify as white. 
@@ -822,7 +832,7 @@ tabItem(tabName = "social",
                              leafletOutput("racemap"),
                              plotlyOutput("raceplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 ),
 # UI: PANEL - Family ------
                 conditionalPanel(
@@ -831,13 +841,14 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
+                  fluidRow(
                   tabBox(
                     id = 17,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Family",
                     tabPanel("Family",
+                             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("South Wasco School District is removed because the margins of error for all categories were too high, 
@@ -853,7 +864,7 @@ tabItem(tabName = "social",
                              leafletOutput("familymap"),
                              plotlyOutput("familyplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 ),
 # UI: PANEL - Education attainment -------
                 conditionalPanel(
@@ -862,13 +873,14 @@ tabItem(tabName = "social",
                   # We are unsure about mapping vs bar charts
                   # We might need a select for time
                   # Full back with table and indicator snippet
+                  fluidRow(
                   tabBox(
                     id = 18,
                     side = "left",
-                    height = "250px",
                     width = "12",
                     selected = "Education Degrees",
                     tabPanel("Education Degree",
+                             div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
                                p("The distribution of highest educational degree attained in South Wasco 
@@ -882,7 +894,7 @@ tabItem(tabName = "social",
                              leafletOutput("degreemap"),
                              plotlyOutput("degreeplot")),
                     tabPanel("Data", "Data Tab Content")
-                  )
+                  ))
                 )), # END SOCIAL TAB
 
 ## UI: TAB - Methods ----------
@@ -893,9 +905,6 @@ tabItem(tabName = "methods",
             closable = FALSE,
             width = NULL,
             enable_label = TRUE,
-            label_text = 1,
-            label_status = "danger",
-            status = "warning",
             solidHeader = TRUE,
             collapsible = TRUE,
             h2("Methods and Frameworks"),
@@ -944,9 +953,6 @@ tabItem(tabName = "methods",
                   closable = FALSE,
                   width = NULL,
                   enable_label = TRUE,
-                  label_text = 1,
-                  label_status = "danger",
-                  status = "warning",
                   solidHeader = TRUE,
                   collapsible = TRUE,
                   # Subheadings for clusters
@@ -971,9 +977,6 @@ tabItem(tabName = "methods",
                   closable = FALSE,
                   width = NULL,
                   enable_label = TRUE,
-                  label_text = 1,
-                  label_status = "danger",
-                  status = "warning",
                   solidHeader = TRUE,
                   collapsible = TRUE,
                   h2("General Overview of the Project"),
@@ -988,35 +991,34 @@ tabItem(tabName = "methods",
       tabItem(tabName = "team",
               fluidRow(
                 boxPlus(
-                  title = "Findings",
+                  title = "Team Members",
                   closable = FALSE,
                   width = NULL,
                   enable_label = TRUE,
-                  label_text = 1,
-                  label_status = "danger",
-                  status = "warning",
                   solidHeader = TRUE,
                   collapsible = TRUE,
                   h2("DSPG Team Members"),
                   # Add headshots
+                  img(src = "mary.jpg", width = "250px"),
                   p("Mary Solomon, DSPG Graduate Fellow (M.S. Applied Statistics), Bowling Green State University"),
-                  p("Joanna Schroeder, DSPG Intern, William & Mary"),
+                  img(src = "owen.png", width = "250px"),
                   p("Owen Hart, DSPG Intern, University of California Berkeley"),
+                  img(src = "joanna.jpg", width = "250px"),
+                  p("Joanna Schroeder, DSPG Intern, William & Mary"),
                   # Reach out an ask about headshots for them
                   h2("UVA SDAD Team Members"),
-                  p("Aaron Schroeder (PI), Research Associate Professor & Data Scientist (Ph.D. Public Policy)"),
-                  p("Eric Oh, Research Assistant Professor of Statistics (Ph.D Biostatistics)"),
-                  p("Alyssa Mikytuck, Postdoctoral Associate (Ph.D Human Development)"),
+                  p(tags$a(href="https://biocomplexity.virginia.edu/aaron-schroeder", "Aaron Schroeder (PI), Research Associate Professor & Data Scientist (Ph.D. Public Policy)")),
+                  p(tags$a(href="https://biocomplexity.virginia.edu/eric-oh", "Eric Oh, Research Assistant Professor of Statistics (Ph.D Biostatistics)")),
+                  p(tags$a(href="https://biocomplexity.virginia.edu/alyssa-mikytuck", "Alyssa Mikytuck, Postdoctoral Associate (Ph.D Human Development)")),
                   # Add logos for these people
                   h2("Project Sponsors"),
+                  img(src = "south_wasco_alliance_logo.png", width = "200px"),
                   p("Kathleen Willis, coordinating stakeholder, South Wasco Alliance"), p("Kathleen's team: Elle Christensen, Eva Kahn, Hannah Fuller"),
+                  h2("Acknowledgements"),
                   p("Carrie Pipinich, Senior Project Manager, Mid-Columbia Economic District"),
                   p("Shannon Caplan, Program Coordinator, Rural Communities Explorer"),
                   p("Kelly Howsley-Glover, Long Range/Special Projects Planner, Wasco County Planning Department"),
-                  h2("Acknowledgements"),
-                  p(
-                    "[Optional: You can also include external collaborators in this section or a separate section.]"
-                  )
+                  p("Nick Green, City Manager of John Day, Oregon")
                 )
               ))
       ) # end of TAB ITEMS (global dashboard body)

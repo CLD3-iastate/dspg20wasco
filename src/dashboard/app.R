@@ -24,6 +24,7 @@ library(DT)
 library(viridis)
 library(colorspace)
 
+
 # DATA: Sourcing theme, shp files ------
 source("theme.R")
 source("loadbaselayers.R")
@@ -780,7 +781,8 @@ tabItem(tabName = "methods",
               we have chosen three main clusters of Food Systems, Broadband and Infrastructure.
               You can explore these clusters with the dropdown menu below. "),
             selectInput("cluster", "Which cluster?",
-                        c("Food Systems", "Infrastructure", "Maupin Broadband"))
+                        c("Food Systems", "Infrastructure", "Maupin Broadband")),
+            imageOutput("clusters")
             # Full indicators table
             # Select input for the "sheet" of indicator cluster/driver
             # General overview table of data sources and what they're meant for, include every "major" data source (not table necessarily)
@@ -800,6 +802,7 @@ tabItem(tabName = "methods",
                   # Dropdown menu to select cluster
                   # Description with cluster visual
                   h2("Data Collection and Analysis"),
+                  HTML('<div class="canva-embed" data-design-id="DAED3TW1C8w" data-height-ratio="1.2941" style="padding:129.4118% 5px 5px 5px;background:rgba(0,0,0,0.03);border-radius:8px;"></div><script async src="https:&#x2F;&#x2F;sdk.canva.com&#x2F;v1&#x2F;embed.js"></script><a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAED3TW1C8w&#x2F;view?utm_content=DAED3TW1C8w&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Data Collection &amp; Sources</a> by Owen Hart'),
                   selectInput("indicators", "Which indicator?",
                               c("Cluster: Food Systems", "Cluster: Infrastructure", "Driver: Opportunities to Learn and Earn", "Driver: Quality Standard of Living")),
                   DTOutput("indicators_all_DT")
@@ -872,6 +875,23 @@ tabItem(tabName = "methods",
 server <- function(input, output, session) {
 
   graypal = "#ADB5BD"
+
+
+## SERVER: CLUSTER IMAGES -------
+## imageOutput("clusters")
+  output$clusters <- renderImage({
+    if (input$cluster == "Food Systems"){
+      list(src = "www/FoodSystemsFinal.png", width = "100%")
+    }
+    else if (input$cluster == "Infrastructure"){
+      list(src = "www/InfrastructureFinal.png", width = "100%")
+    }
+    else if (input$cluster == "Maupin Broadband"){
+      list(src = "www/MaupinBroadbandFinal.png", width = "100%")
+    }
+  })
+
+
 
 ## SERVER: INDICATOR TABLES -------
 ## DTOutput("indicators_all_DT") -----

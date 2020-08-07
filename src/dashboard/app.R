@@ -469,7 +469,7 @@ tabItem(tabName = "learn",
                                          c("Benefits", "Barriers")),
                               plotOutput("edplot", width = "100%", height = 800)
                     ),
-                    tabPanel("Data", "Data Tab Content"))
+                    tabPanel("Data", DTOutput("edDT")))
         ))), # END OF EDUCATION
 # Employment select panel
 tabItem(tabName = "earn",
@@ -507,9 +507,9 @@ conditionalPanel(
              ),
             leafletOutput("percempmap"),
              plotlyOutput("empratioplot")),
-  tabPanel("Data", "Data Tab Content")
+    tabPanel("Data", DTOutput("empDT"))
   ))),
-# UI: PANEL - Label force participation rate -------
+# UI: PANEL - Labor force participation rate -------
                 conditionalPanel(
                   condition = "input.employmentselect == 'LaborForce'",
                   fluidRow(
@@ -531,7 +531,7 @@ conditionalPanel(
                              ),
                              leafletOutput("laborforcemap"),
                              plotlyOutput("laborforceplot")),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", DTOutput("LaborForceDT"))
                   ))
                 ),
 # UI: PANEL - Job flows  -------
@@ -644,7 +644,7 @@ tabItem(tabName = "financial",
                        # Median income only here, poverty, income brackets are the questions
                         leafletOutput("medincomemap"),
                         plotlyOutput("medincomeplot")),
-                        tabPanel("Data", "Data Tab Content")
+                        tabPanel("Data", DTOutput("MedianIncomeDT"))
                       ))
                     ),
 ## UI: PANEL - Poverty rate ------
@@ -666,7 +666,7 @@ tabItem(tabName = "financial",
                              ),
                              leafletOutput("povertymap"),
                              plotlyOutput(outputId = "povertyplot")),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", DTOutput("povertyDT"))
                   ))
                 ),
 ## UI: PANEL - ALICE Threshold rate ------
@@ -720,7 +720,7 @@ tabItem(tabName = "financial",
                                 c("2018", "2017", "2016", "2015")),
                            leafletOutput("incomedismap"),
                            plotlyOutput("incomedisplot")),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", DTOutput("incomedistDT"))
                   ))
                 )
 ), # END FINANCIAL
@@ -766,7 +766,7 @@ tabItem(tabName = "housing",
                          almost equal to that of the estimate. Therefore, the estimate of
                          affordable housing was too unreliable to include in this chart.
                          ")),
-                      tabPanel("Data", "Data Tab Content")
+                      tabPanel("Data", DTOutput("AffordableHousingDT"))
                     ))
                   ),
 ## UI: PANEL - Rent vs own -------
@@ -792,10 +792,13 @@ tabItem(tabName = "housing",
                     # Overall and ownership/rental (both lines and maps?)
                     # Full back with table and indicator snippet
                     plotlyOutput("rentownplot")),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", DTOutput("homeownDT"))
                   ))
                 )
 ), # END HOUSING
+
+
+
 # Social select question
 tabItem(tabName = "social",
 #conditionalPanel(
@@ -840,7 +843,7 @@ tabItem(tabName = "social",
                                 c("2015", "2016", "2017", "2018")),
                              leafletOutput("racemap"),
                              plotlyOutput("raceplot")),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", DTOutput("raceDT"))
                   ))
                 ),
 # UI: PANEL - Family ------
@@ -860,19 +863,18 @@ tabItem(tabName = "social",
                              div(img(src="https://image.flaticon.com/icons/svg/2692/2692837.svg", width = "15%"), style="text-align: center;"),
                              box(
                                width = 12,
-                               p("South Wasco School District is removed because the margins of error for all categories were too high,
-                                 therefore making the estimates too unreliable to report.
-                                 Generally, Wasco's percentages of family types for Children under 18 are comparable to the state level.
+                               p("Generally, Wasco's percentages of family types for children under 18 are comparable to the state level.
                                  Like other counties, the majority of children are in married parent families (~70%)
                                  followed by single mothers (~20%) and then single fathers (>10%).
-                                 The estimates for Wasco county are stable over time. ",
+                                 The estimates for Wasco county are stable over time. South Wasco School District is removed because 
+                                 the margins of error for all categories were too high, therefore making the estimates too unreliable to report. ",
                                  style = "font-size:16px")
                              ),
                              selectInput("familyyears", "What year?",
                                 c("2015", "2016", "2017", "2018")),
                              leafletOutput("familymap"),
                              plotlyOutput("familyplot")),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", DTOutput("familyDT"))
                   ))
                 ),
 # UI: PANEL - Education attainment -------
@@ -902,7 +904,7 @@ tabItem(tabName = "social",
                                 c("2015", "2016", "2017", "2018")),
                              leafletOutput("degreemap"),
                              plotlyOutput("degreeplot")),
-                    tabPanel("Data", "Data Tab Content")
+                    tabPanel("Data", DTOutput("degreeDT"))
                   ))
                 )), # END SOCIAL TAB
 
@@ -1790,7 +1792,30 @@ server <- function(input, output, session) {
 
     }
   })
-
+  ## SERVER: DATA TABLE - Education Heatmaps -----
+  output$edDT <- renderDT({
+    datatable(ed,
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })
+  
+  
 
 
 ## SERVER: PANEL - Employment ratio ----
@@ -1906,7 +1931,34 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
-
+  ## SERVER: DATA TABLE - Employment -----
+  output$empDT <- renderDT({
+    datatable(select(acs_data,NAME, year, employment_20_to_64, employment_20_to_64_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })
+  
+  
+  
+  
+  
+  
 ## SERVER: PANEL - Labor force participation ----
 ## leafletOutput("laborforcemap")------
   output$laborforcemap <- renderLeaflet({
@@ -2020,7 +2072,33 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
-
+  ## SERVER: DATA TABLE - Labor Force -----
+  output$LaborForceDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, labor_force_20_to_64, labor_force_20_to_64_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })
+  
+  
+  
+  
+  
 ## SERVER: PANEL - Job flows ----
 ## plotlyOutput("flows") ------
 
@@ -2469,7 +2547,34 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d", "hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
   })
-
+  ## SERVER: DATA TABLE - Median Income -----
+  output$MedianIncomeDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, median_household_income, median_household_income_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })
+  
+  
+  
+  
+  
+  
 ## SERVER: PANEL - ALICE Poverty rate -----
 ## plotlyOutput("aliceplot") -----
   output$aliceplot <- renderPlotly({
@@ -2601,6 +2706,34 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d",
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
   })
+  
+## SERVER: DATA TABLE - Poverty Rate ----
+  output$povertyDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, below_poverty, below_poverty_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })  
+  
+  
+  
+  
+  
 
 ## SERVER: PANEL - Income distribution -----
 ## plotlyOutput("incomedisplot") -----
@@ -3381,6 +3514,36 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
   })
+## SERVER: DATA TABLE - Income Distribution ----
+  output$incomedistDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, income_10k_14999,income_10k_14999_moe,
+                     income_15k_24999, income_15k_24999_moe, income_25k_34999, income_25k_34999_moe,
+                     income_35K_49999, income_35K_49999_moe, income_50K_74999, income_50K_74999_moe,
+                     income_75K_99999, income_75K_99999_moe, income_100K_149999, income_100K_149999_moe,
+                     income_150K_199999, income_150K_199999_moe, income_200K_more, income_200K_more_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })    
+  
+  
+  
+  
 
 ## SERVER: PANEL - Affordable housing -----
 ## plotlyOutput("housingplot") ------
@@ -3402,6 +3565,31 @@ server <- function(input, output, session) {
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 
   })
+  ## SERVER: DATA TABLE - Affordable housing ----
+  output$AffordableHousingDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, affordable_housing_all_perc, affordable_housing_all_perc_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })    
+  
+  
+  
 
 ## SERVER: PANEL - Rent vs own -----
 ## plotlyOutput("rentownplot") -----
@@ -3422,6 +3610,31 @@ server <- function(input, output, session) {
                                          "hoverClosestCartesian", "hoverCompareCartesian","resetScale2d"))
 
   })
+## SERVER: DATA TABLE - rent vs own ----
+  output$homeownDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, owner_occupied_housing_perc, owner_occupied_housing_perc_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })  
+  
+  
+  
 
 ## SERVER: PANEL - Race -----
 ## plotlyOutput("raceplot") ----
@@ -4313,6 +4526,35 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
   })
+## SERVER: DATA TABLE - Race ----
+  output$raceDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, race_white, race_white_moe, race_black, race_black_moe, 	
+                     race_american_indian, race_american_indian_moe, race_asian, race_asian_moe, 
+                     race_native_hawaiian, race_native_hawaiian_moe, race_hispanic, race_hispanic_moe, 
+                     race_other, race_other_moe, race_two_more, race_two_more_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })    
+  
+  
+  
+  
 
 ## SERVER: PANEL - Family -----
 ## plotlyOutput("familyplot") ----
@@ -4417,7 +4659,7 @@ server <- function(input, output, session) {
           "bottomright",
           pal = fam_stab_2018_pal,
           values = ~ c(0, fam_stab_max_perc_2018),
-          title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2018)",
+          title = "% of Children under 18 with selected Family Stability<br>Indicator by Census Tract (2018)",
           na.label = "NA") %>%
         addLayersControl(
           baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
@@ -4508,7 +4750,7 @@ server <- function(input, output, session) {
           "bottomright",
           pal = fam_stab_2017_pal,
           values = ~ c(0, fam_stab_max_perc_2017),
-          title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2017)",
+          title = "% of Children under 18 with selected Family Stability<br>Indicator by Census Tract (2017)",
           na.label = "NA") %>%
         addLayersControl(
           baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
@@ -4599,7 +4841,7 @@ server <- function(input, output, session) {
           "bottomright",
           pal = fam_stab_2016_pal,
           values = ~ c(0, fam_stab_max_perc_2016),
-          title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2016)",
+          title = "% of Children under 18 with selected Family Stability<br>Indicator by Census Tract (2016)",
           na.label = "NA") %>%
         addLayersControl(
           baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
@@ -4690,7 +4932,7 @@ server <- function(input, output, session) {
           "bottomright",
           pal = fam_stab_2015_pal,
           values = ~ c(0, fam_stab_max_perc_2015),
-          title = "% of Parents with selected Family Stability<br>Indicator by Census Tract (2015)",
+          title = "% of Children under 18 with selected Family Stability<br>Indicator by Census Tract (2015)",
           na.label = "NA") %>%
         addLayersControl(
           baseGroups = c("% of Parents who are Married", "% of Single Fathers", "% of Single Mothers"),
@@ -4729,6 +4971,34 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
   })
+  ## SERVER: DATA TABLE - Family ----
+  output$familyDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, family_married_parent_perc, family_married_parent_perc_moe, 	
+                     family_single_parent_male_perc, family_single_parent_male_perc_moe, 	
+                     family_single_parent_female_perc, family_single_parent_female_perc_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })      
+  
+  
+  
+  
 
 ## SERVER: PANEL - Education attainment -----
 ## plotlyOutput("degreeplot") -----
@@ -5144,6 +5414,32 @@ server <- function(input, output, session) {
              modeBarButtonsToRemove=list("zoom2d","select2d","lasso2d","hoverClosestCartesian",
                                          "hoverCompareCartesian","resetScale2d"))
   })
+  
+  ## SERVER: DATA TABLE - Educational Attainment ----
+  output$degreeDT <- renderDT({ 
+    datatable(select(acs_data, NAME, year, education_less_hs, education_less_hs_moe, 	
+                     education_hs_grad, education_hs_grad_moe, 	
+                     education_assoc_some_college, education_assoc_some_college_moe,
+                     education_bachelors_or_higher, education_bachelors_or_higher_moe),
+              extensions = c("Buttons", "FixedColumns", "FixedHeader", "Scroller"),
+              options = list(
+                dom = 'Bfrtip',
+                searching = TRUE,
+                autoWidth = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                buttons =
+                  list("copy", list(
+                    extend = "collection"
+                    , buttons = c("csv", "excel", "pdf")
+                    , text = "Download"
+                  ))
+              ))
+  })      
 
 
 } # end of BUILDING SERVER

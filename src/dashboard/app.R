@@ -23,6 +23,12 @@ library(readr)
 library(DT)
 library(viridis)
 library(colorspace)
+library(osmdata)
+library(formattable)
+library(shinyjs)
+library(esri2sf)
+library(traveltime)
+library(rmapzen)
 
 
 # DATA: Sourcing theme, shp files ------
@@ -131,16 +137,30 @@ acres_15 <- readRDS("Data/app_acres_15.Rds")
 foodpal <- colorFactor("Set1", domain = food_points$shop)
 isochronepal <- colorFactor("Blues", domain = isochrones$value)
 
+
+jscode <- "var referer = document.referrer;
+           var n = referer.includes('economic');
+           var x = document.getElementsByClassName('logo');
+           if (n != true) {
+             x[0].innerHTML = '<a href=\"https://datascienceforthepublicgood.org/events/symposium2020/poster-sessions\">' +
+                              '<img src=\"DSPG_white-01.png\", alt=\"DSPG 2020 Symposium Proceedings\", style=\"height:42px;\">' +
+                             '</a>';
+           } else {
+             x[0].innerHTML = '<a href=\"https://datascienceforthepublicgood.org/economic-mobility/community-insights\">' +
+                              '<img src=\"AEMLogoGatesColors-11.png\", alt=\"Gates Economic Mobility Case Studies\", style=\"height:42px;\">' +
+                              '</a>';
+           }
+           "
+
+
 ## UI: Begins -------
 
 ui <- dashboardPagePlus(
 
 ## UI: Dashboard header -------
   dashboardHeaderPlus(
-    title = "DSPG 2020 Wasco EM",
-    enable_rightsidebar = TRUE,
-    rightSidebarIcon = "info"
-  ),
+  left_menu = tagList(div("Creating an Economic Mobility Baseline for the South Wasco County Area", style="height:35px; display:flex; align-items: center;"))
+),
 
 ## UI: Dashboard sidebar --------
   dashboardSidebar(
@@ -218,6 +238,7 @@ menuItem(
 
 ## UI: Dashboard body -------
   dashboardBody(
+    useShinyjs(),
     customTheme,
     fluidPage(
       tabItems(
@@ -225,13 +246,11 @@ menuItem(
         tabItem(tabName = "overview",
                 fluidRow(
                   boxPlus(
-                    title = "Project overview",
                     closable = FALSE,
                     width = NULL,
-                    enable_label = TRUE,
-                    solidHeader = TRUE,
-                    collapsible = TRUE,
-                    h1("2020 South Wasco Region Project"),
+                    enable_label = FALSE,
+                    solidHeader = FALSE,
+                    collapsible = FALSE,
                     h2("Project Description"),
                     p("The southern region of Wasco County, Oregon (South Wasco) experienced significant economic decline in the 1980s, causing closure of schools and consolidation of students into the South Wasco School District. This precipitated an eventual out-migration, disruption of social fabric, and a steady decline in overall economic stability, community health, standard of living, and quality of life."),
                     ## Here we will add a picture of SW for description
@@ -912,13 +931,12 @@ tabItem(tabName = "social",
 tabItem(tabName = "methods",
         fluidRow(
           boxPlus(
-            title = "Methodology",
             closable = FALSE,
             height = "1300px",
             width = NULL,
-            enable_label = TRUE,
-            solidHeader = TRUE,
-            collapsible = TRUE,
+            enable_label = FALSE,
+            solidHeader = FALSE,
+            collapsible = FALSE,
             h2("Methods and Frameworks"),
             # Subheadings for clusters
             # Dropdown menu to select cluster
@@ -961,12 +979,11 @@ tabItem(tabName = "methods",
       tabItem(tabName = "data",
               fluidRow(
                 boxPlus(
-                  title = "Data",
                   closable = FALSE,
                   width = NULL,
-                  enable_label = TRUE,
-                  solidHeader = TRUE,
-                  collapsible = TRUE,
+                  enable_label = FALSE,
+                  solidHeader = FALSE,
+                  collapsible = FALSE,
                   # Subheadings for clusters
                   # Dropdown menu to select cluster
                   # Description with cluster visual
@@ -1003,12 +1020,11 @@ tabItem(tabName = "methods",
       tabItem(tabName = "team",
               fluidRow(
                 boxPlus(
-                  title = "Team Members",
                   closable = FALSE,
                   width = NULL,
-                  enable_label = TRUE,
-                  solidHeader = TRUE,
-                  collapsible = TRUE,
+                  enable_label = FALSE,
+                  solidHeader = FALSE,
+                  collapsible = FALSE,
                   h2("DSPG Team Members"),
                   # Add headshots
                   img(src = "mary.jpg", width = "250px"),
@@ -1043,6 +1059,9 @@ tabItem(tabName = "methods",
 ## SERVER: Begins --------
 server <- function(input, output, session) {
 
+  # Run JavaScript Code
+  runjs(jscode)
+  
   graypal = "#ADB5BD"
 
 

@@ -251,6 +251,7 @@ menuItem(
                     enable_label = FALSE,
                     solidHeader = FALSE,
                     collapsible = FALSE,
+                    h1("Creating an Economic Mobility Baseline for the South Wasco County Area"),
                     h2("Project Description"),
                     p("The southern region of Wasco County, Oregon (South Wasco) experienced significant economic decline in the 1980s, causing closure of schools and consolidation of students into the South Wasco School District. This precipitated an eventual out-migration, disruption of social fabric, and a steady decline in overall economic stability, community health, standard of living, and quality of life."),
                     ## Here we will add a picture of SW for description

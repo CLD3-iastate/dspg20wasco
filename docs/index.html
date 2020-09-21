@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="0; url='https://dads2busy.shinyapps.io/southwasco2020/'" />
+    <title>Title of the document</title>
   </head>
   <body>
-    <p>Please follow <a href="https://dads2busy.shinyapps.io/southwasco2020/">this link</a>.</p>
+    <script>
+      function redirectFunc() {
+        window.location.assign("https://dads2busy.shinyapps.io/southwasco2020/");
+      }
+      redirectFunc();
+      // setTimeout("redirectFunc()", 2000);
+    </script>
   </body>
 </html>

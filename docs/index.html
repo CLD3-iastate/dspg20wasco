@@ -6,7 +6,8 @@
   <body>
     <script>
       function redirectFunc() {
-        window.location.assign("https://dspgtools.shinyapps.io/southwasco2020/");
+        uri = "https://dspgtools.shinyapps.io/southwasco2020/" + window.location.search;
+        window.location.assign(uri);
       }
       redirectFunc();
       // setTimeout("redirectFunc()", 2000);
